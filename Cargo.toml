@@ -1,0 +1,12 @@
+[package]
+publish = false
+name = "java-ext-wasm"
+version = "0.1.0"
+authors = ["Ivan Enderlin <ivan.enderlin@hoa-project.net>"]
+edition = "2018"
+
+[lib]
+crate-type = ["cdylib"]
+
+[dependencies]
+jni = "0.13.1"
