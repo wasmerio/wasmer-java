@@ -13,7 +13,7 @@ extern "C" {
  * Signature: (Ljava/lang/String;)Ljava/lang/String;
  */
 JNIEXPORT jstring JNICALL Java_org_wasmer_Instance_hello
-  (JNIEnv *, jclass, jstring);
+  (JNIEnv *, jobject, jstring);
 
 #ifdef __cplusplus
 }
