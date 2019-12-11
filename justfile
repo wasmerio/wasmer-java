@@ -1,5 +1,5 @@
 # Compile everything!
-build: build-rust build-java
+build: build-headers build-rust build-java
 
 # Compile the Rust part.
 build-rust:
@@ -11,17 +11,17 @@ build-java:
 
 # Generate the Java C headers.
 build-headers:
-	javac -h include java/org/wasmer/Instance.java
+	javac -h include java/src/main/java/org/wasmer/Instance.java
 
 # Run the tests.
-test: test-rust test-java
+test: build-headers test-rust test-java
 
 # Run the Rust tests.
 test-rust:
 	cargo test --release
 
 # Run the Java tests.
-test-java:
+test-java: build-rust
 	cd java && mvn test
 
 # Local Variables:
