@@ -8,7 +8,7 @@ use jni::{
     JNIEnv,
 };
 use std::{panic, rc::Rc};
-use wasmer_runtime::{imports, instantiate, Export, Value};
+use wasmer_runtime::{imports, instantiate, Value};
 use wasmer_runtime_core as core;
 
 pub struct Instance {
