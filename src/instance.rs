@@ -42,15 +42,12 @@ impl Instance {
         export_name: String,
         arguments: Vec<Value>,
     ) -> Result<Vec<Value>, Error> {
-        let function = match self.instance.dyn_func(&export_name) {
-            Ok(function) => function,
-            Err(_) => {
-                return Err(runtime_error(format!(
-                    "Exported function `{}` does not exist.",
-                    export_name
-                )))
-            }
-        };
+        let function = self.instance.dyn_func(&export_name).map_err(|_| {
+            runtime_error(format!(
+                "Exported function `{}` does not exist.",
+                export_name
+            ))
+        })?;
 
         function
             .call(arguments.as_slice())
