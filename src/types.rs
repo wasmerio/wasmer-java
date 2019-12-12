@@ -2,21 +2,21 @@ use jni::sys::jlong;
 use std::ops::Deref;
 
 #[allow(non_camel_case_types)]
-pub(crate) type jptr = jlong;
+pub type jptr = jlong;
 
 #[derive(Debug)]
-pub(crate) struct Pointer<Kind> {
+pub struct Pointer<Kind> {
     value: Box<Kind>,
 }
 
 impl<Kind> Pointer<Kind> {
-    pub(crate) fn new(value: Kind) -> Self {
+    pub fn new(value: Kind) -> Self {
         Pointer {
             value: Box::new(value),
         }
     }
 
-    pub(crate) fn borrow<'a>(self) -> &'a mut Kind {
+    pub fn borrow<'a>(self) -> &'a mut Kind {
         Box::leak(self.value)
     }
 }
