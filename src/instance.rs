@@ -56,7 +56,7 @@ impl Instance {
 }
 
 #[no_mangle]
-pub extern "system" fn Java_org_wasmer_Instance_instantiate(
+pub extern "system" fn Java_org_wasmer_Instance_nativeInstantiate(
     env: JNIEnv,
     _class: JClass,
     this: JObject,
@@ -75,7 +75,7 @@ pub extern "system" fn Java_org_wasmer_Instance_instantiate(
 }
 
 #[no_mangle]
-pub extern "system" fn Java_org_wasmer_Instance_drop(
+pub extern "system" fn Java_org_wasmer_Instance_nativeDrop(
     _env: JNIEnv,
     _class: JClass,
     instance_pointer: jptr,
@@ -84,7 +84,7 @@ pub extern "system" fn Java_org_wasmer_Instance_drop(
 }
 
 #[no_mangle]
-pub extern "system" fn Java_org_wasmer_Instance_dynCall(
+pub extern "system" fn Java_org_wasmer_Instance_nativeCall(
     env: JNIEnv,
     _class: JClass,
     instance_pointer: jlong,

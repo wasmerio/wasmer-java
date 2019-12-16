@@ -9,26 +9,26 @@ extern "C" {
 #endif
 /*
  * Class:     org_wasmer_Instance
- * Method:    instantiate
+ * Method:    nativeInstantiate
  * Signature: (Lorg/wasmer/Instance;[B)J
  */
-JNIEXPORT jlong JNICALL Java_org_wasmer_Instance_instantiate
+JNIEXPORT jlong JNICALL Java_org_wasmer_Instance_nativeInstantiate
   (JNIEnv *, jobject, jobject, jbyteArray);
 
 /*
  * Class:     org_wasmer_Instance
- * Method:    drop
+ * Method:    nativeDrop
  * Signature: (J)V
  */
-JNIEXPORT void JNICALL Java_org_wasmer_Instance_drop
+JNIEXPORT void JNICALL Java_org_wasmer_Instance_nativeDrop
   (JNIEnv *, jobject, jlong);
 
 /*
  * Class:     org_wasmer_Instance
- * Method:    dynCall
+ * Method:    nativeCall
  * Signature: (JLjava/lang/String;[I)I
  */
-JNIEXPORT jint JNICALL Java_org_wasmer_Instance_dynCall
+JNIEXPORT jint JNICALL Java_org_wasmer_Instance_nativeCall
   (JNIEnv *, jobject, jlong, jstring, jintArray);
 
 #ifdef __cplusplus

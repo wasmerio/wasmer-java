@@ -1,9 +1,9 @@
 package org.wasmer;
 
 class Instance {
-    private native long instantiate(Instance self, byte[] moduleBytes) throws RuntimeException;
-    private native void drop(long instancePointer);
-    private native int dynCall(long instancePointer, String exportName, int[] arguments) throws RuntimeException;
+    private native long nativeInstantiate(Instance self, byte[] moduleBytes) throws RuntimeException;
+    private native void nativeDrop(long instancePointer);
+    private native int nativeCall(long instancePointer, String exportName, int[] arguments) throws RuntimeException;
 
     private long instancePointer;
 
@@ -12,17 +12,17 @@ class Instance {
     }
 
     public Instance(byte[] moduleBytes) throws RuntimeException {
-        long instancePointer = this.instantiate(this, moduleBytes);
+        long instancePointer = this.nativeInstantiate(this, moduleBytes);
 
         this.instancePointer = instancePointer;
     }
 
     public int call(String exportName, int[] arguments) throws RuntimeException {
-        return this.dynCall(this.instancePointer, exportName, arguments);
+        return this.nativeCall(this.instancePointer, exportName, arguments);
     }
 
     public void close() {
-        this.drop(this.instancePointer);
+        this.nativeDrop(this.instancePointer);
     }
 
     public void finalize() {
