@@ -1,10 +1,10 @@
 use crate::{
     exception::{runtime_error, unwrap_or_throw, Error},
-    types::{jptr, Pointer},
+    types::{jptr, to_value, Pointer},
 };
 use jni::{
     objects::{GlobalRef, JClass, JObject, JString},
-    sys::{jbyteArray, jint, jintArray, jlong},
+    sys::{jbyteArray, jint, jlong, jobjectArray},
     JNIEnv,
 };
 use std::{panic, rc::Rc};
@@ -89,7 +89,7 @@ pub extern "system" fn Java_org_wasmer_Instance_nativeCall(
     _class: JClass,
     instance_pointer: jlong,
     export_name: JString,
-    arguments_pointer: jintArray,
+    arguments_pointer: jobjectArray,
 ) -> jint {
     let output = panic::catch_unwind(|| {
         let instance: &Instance = Into::<Pointer<Instance>>::into(instance_pointer).borrow();
@@ -100,15 +100,21 @@ pub extern "system" fn Java_org_wasmer_Instance_nativeCall(
 
         let arguments_length = env.get_array_length(arguments_pointer).unwrap();
 
-        let mut arguments: Vec<i32> = vec![0; arguments_length as usize];
-        env.get_int_array_region(arguments_pointer, 0, arguments.as_mut_slice())
-            .unwrap();
+        let arguments: Vec<JObject> = (0..arguments_length)
+            .map(|i| {
+                env.get_object_array_element(arguments_pointer, i)
+                    .expect("Could not get Java object")
+            })
+            .collect();
 
         let results = instance.call_exported_function(
             export_name,
             arguments
                 .iter()
-                .map(|argument| Value::I32(*argument))
+                .map(|argument| {
+                    to_value(&env, *argument)
+                        .expect("Could not convert an argument to a WebAssembly value")
+                })
                 .collect(),
         )?;
 

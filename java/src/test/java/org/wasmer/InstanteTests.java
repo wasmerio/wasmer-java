@@ -16,7 +16,7 @@ class InstanceTests {
 
         Instance instance = new Instance(moduleBytes);
 
-        int[] arguments = {1, 2};
+        Integer[] arguments = {1, 2};
         assertEquals(3, instance.call("sum", arguments));
 
         instance.close();
