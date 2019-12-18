@@ -1,14 +1,16 @@
 use crate::{
     exception::{runtime_error, unwrap_or_throw, Error},
-    types::{jptr, to_value, Pointer},
+    types::{jptr, Pointer},
+    value::Value,
 };
 use jni::{
     objects::{GlobalRef, JClass, JObject, JString},
     sys::{jbyteArray, jint, jlong, jobjectArray},
     JNIEnv,
 };
+use std::convert::TryFrom;
 use std::{panic, rc::Rc};
-use wasmer_runtime::{imports, instantiate, Value};
+use wasmer_runtime::{imports, instantiate, Value as WasmValue};
 use wasmer_runtime_core as core;
 
 pub struct Instance {
@@ -40,8 +42,8 @@ impl Instance {
     fn call_exported_function(
         &self,
         export_name: String,
-        arguments: Vec<Value>,
-    ) -> Result<Vec<Value>, Error> {
+        arguments: Vec<WasmValue>,
+    ) -> Result<Vec<WasmValue>, Error> {
         let function = self.instance.dyn_func(&export_name).map_err(|_| {
             runtime_error(format!(
                 "Exported function `{}` does not exist.",
@@ -112,15 +114,16 @@ pub extern "system" fn Java_org_wasmer_Instance_nativeCall(
             arguments
                 .iter()
                 .map(|argument| {
-                    to_value(&env, *argument)
+                    Value::try_from((&env, *argument))
                         .expect("Could not convert an argument to a WebAssembly value")
+                        .value
                 })
                 .collect(),
         )?;
 
         if results.len() > 0 {
             Ok(match results[0] {
-                Value::I32(result) => result as jint,
+                WasmValue::I32(result) => result as jint,
                 _ => unreachable!(),
             })
         } else {
