@@ -8,8 +8,7 @@ use jni::{
     sys::{jbyteArray, jint, jlong, jobjectArray},
     JNIEnv,
 };
-use std::convert::TryFrom;
-use std::{panic, rc::Rc};
+use std::{convert::TryFrom, panic, rc::Rc};
 use wasmer_runtime::{imports, instantiate, Value as WasmValue};
 use wasmer_runtime_core as core;
 
@@ -116,7 +115,7 @@ pub extern "system" fn Java_org_wasmer_Instance_nativeCall(
                 .map(|argument| {
                     Value::try_from((&env, *argument))
                         .expect("Could not convert an argument to a WebAssembly value")
-                        .value
+                        .inner()
                 })
                 .collect(),
         )?;
