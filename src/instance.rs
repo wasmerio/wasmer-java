@@ -1,11 +1,11 @@
 use crate::{
     exception::{runtime_error, unwrap_or_throw, Error},
     types::{jptr, Pointer},
-    value::Value,
+    value::{Value, DOUBLE_CLASS, FLOAT_CLASS, INT_CLASS, LONG_CLASS},
 };
 use jni::{
-    objects::{GlobalRef, JClass, JObject, JString},
-    sys::{jbyteArray, jint, jlong, jobjectArray},
+    objects::{GlobalRef, JClass, JObject, JString, JValue},
+    sys::{jbyteArray, jlong, jobjectArray},
     JNIEnv,
 };
 use std::{convert::TryFrom, panic, rc::Rc};
@@ -85,13 +85,13 @@ pub extern "system" fn Java_org_wasmer_Instance_nativeDrop(
 }
 
 #[no_mangle]
-pub extern "system" fn Java_org_wasmer_Instance_nativeCall(
-    env: JNIEnv,
+pub extern "system" fn Java_org_wasmer_Instance_nativeCall<'a>(
+    env: JNIEnv<'a>,
     _class: JClass,
     instance_pointer: jlong,
     export_name: JString,
     arguments_pointer: jobjectArray,
-) -> jint {
+) -> JObject<'a> {
     let output = panic::catch_unwind(|| {
         let instance: &Instance = Into::<Pointer<Instance>>::into(instance_pointer).borrow();
         let export_name: String = env
@@ -121,12 +121,24 @@ pub extern "system" fn Java_org_wasmer_Instance_nativeCall(
         )?;
 
         if results.len() > 0 {
-            Ok(match results[0] {
-                WasmValue::I32(result) => result as jint,
+            let obj = match results[0] {
+                WasmValue::I32(result) => {
+                    env.new_object(INT_CLASS, "(I)V", &[JValue::from(result)])
+                }
+                WasmValue::I64(result) => {
+                    env.new_object(LONG_CLASS, "(J)V", &[JValue::from(result)])
+                }
+                WasmValue::F32(result) => {
+                    env.new_object(FLOAT_CLASS, "(F)V", &[JValue::from(result)])
+                }
+                WasmValue::F64(result) => {
+                    env.new_object(DOUBLE_CLASS, "(D)V", &[JValue::from(result)])
+                }
                 _ => unreachable!(),
-            })
+            };
+            Ok(obj.expect("Could not convert a WebAssembly value to a Jave object"))
         } else {
-            Ok(jint::default())
+            Ok(JObject::null())
         }
     });
 

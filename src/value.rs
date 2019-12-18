@@ -12,10 +12,10 @@ impl Value {
     }
 }
 
-const INT_CLASS: &str = "java/lang/Integer";
-const LONG_CLASS: &str = "java/lang/Long";
-const FLOAT_CLASS: &str = "java/lang/Float";
-const DOUBLE_CLASS: &str = "java/lang/Double";
+pub const INT_CLASS: &str = "java/lang/Integer";
+pub const LONG_CLASS: &str = "java/lang/Long";
+pub const FLOAT_CLASS: &str = "java/lang/Float";
+pub const DOUBLE_CLASS: &str = "java/lang/Double";
 
 impl TryFrom<(&JNIEnv<'_>, JObject<'_>)> for Value {
     type Error = Error;

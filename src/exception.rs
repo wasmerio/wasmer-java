@@ -6,10 +6,7 @@ pub fn runtime_error(message: String) -> Error {
     Error::from_kind(ErrorKind::Msg(message))
 }
 
-pub fn unwrap_or_throw<T>(env: &JNIEnv, result: thread::Result<Result<T, Error>>) -> T
-where
-    T: Default,
-{
+pub fn unwrap_or_throw<T>(env: &JNIEnv, result: thread::Result<Result<T, Error>>) -> T {
     match result {
         Ok(result) => match result {
             Ok(result) => result,
@@ -19,14 +16,14 @@ where
                         .expect("Cannot throw an `java/lang/RuntimeException` exception.");
                 }
 
-                T::default()
+                unreachable!();
             }
         },
         Err(ref error) => {
             env.throw_new("java/lang/RuntimeException", format!("{:?}", error))
                 .expect("Cannot throw an `java/lang/RuntimeException` exception.");
 
-            T::default()
+            unreachable!();
         }
     }
 }
