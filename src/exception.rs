@@ -16,14 +16,14 @@ pub fn unwrap_or_throw<T>(env: &JNIEnv, result: thread::Result<Result<T, Error>>
                         .expect("Cannot throw an `java/lang/RuntimeException` exception.");
                 }
 
-                unreachable!();
+                panic!("Cannot unwrap an output")
             }
         },
         Err(ref error) => {
             env.throw_new("java/lang/RuntimeException", format!("{:?}", error))
                 .expect("Cannot throw an `java/lang/RuntimeException` exception.");
 
-            unreachable!();
+            panic!("Cannot unwrap an output")
         }
     }
 }

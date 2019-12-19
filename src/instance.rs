@@ -122,7 +122,7 @@ pub extern "system" fn Java_org_wasmer_Instance_nativeCall<'a>(
 
         let obj_array = env
             .new_object_array(
-                results.len().try_into().unwrap(),
+                i32::try_from(results.len()).unwrap(),
                 "java/lang/Object",
                 JObject::null(),
             )
