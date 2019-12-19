@@ -91,7 +91,7 @@ pub extern "system" fn Java_org_wasmer_Instance_nativeCall<'a>(
     instance_pointer: jlong,
     export_name: JString,
     arguments_pointer: jobjectArray,
-) -> JObject<'a> {
+) -> jobjectArray {
     let output = panic::catch_unwind(|| {
         let instance: &Instance = Into::<Pointer<Instance>>::into(instance_pointer).borrow();
         let export_name: String = env
@@ -120,25 +120,38 @@ pub extern "system" fn Java_org_wasmer_Instance_nativeCall<'a>(
                 .collect(),
         )?;
 
+        let obj_array = env
+            .new_object_array(
+                results.len().try_into().unwrap(),
+                "java/lang/Object",
+                JObject::null(),
+            )
+            .expect("Could not create a Java object array");
         if results.len() > 0 {
-            let obj = match results[0] {
-                WasmValue::I32(result) => {
-                    env.new_object(INT_CLASS, "(I)V", &[JValue::from(result)])
-                }
-                WasmValue::I64(result) => {
-                    env.new_object(LONG_CLASS, "(J)V", &[JValue::from(result)])
-                }
-                WasmValue::F32(result) => {
-                    env.new_object(FLOAT_CLASS, "(F)V", &[JValue::from(result)])
-                }
-                WasmValue::F64(result) => {
-                    env.new_object(DOUBLE_CLASS, "(D)V", &[JValue::from(result)])
-                }
-                _ => unreachable!(),
-            };
-            Ok(obj.expect("Could not convert a WebAssembly value to a Jave object"))
+            for (i, result) in results.iter().enumerate() {
+                let obj = match result {
+                    WasmValue::I32(val) => env.new_object(INT_CLASS, "(I)V", &[JValue::from(*val)]),
+                    WasmValue::I64(val) => {
+                        env.new_object(LONG_CLASS, "(J)V", &[JValue::from(*val)])
+                    }
+                    WasmValue::F32(val) => {
+                        env.new_object(FLOAT_CLASS, "(F)V", &[JValue::from(*val)])
+                    }
+                    WasmValue::F64(val) => {
+                        env.new_object(DOUBLE_CLASS, "(D)V", &[JValue::from(*val)])
+                    }
+                    _ => unreachable!(),
+                };
+                env.set_object_array_element(
+                    obj_array,
+                    i as i32,
+                    obj.expect("Could not create a Java object"),
+                )
+                .expect("Could not set a Java object element");
+            }
+            Ok(obj_array)
         } else {
-            Ok(JObject::null())
+            Ok(obj_array)
         }
     });
 
