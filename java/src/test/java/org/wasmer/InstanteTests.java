@@ -18,8 +18,16 @@ class InstanceTests {
     void sum() throws IOException,Exception {
         Instance instance = new Instance(getBytes());
 
-        Integer[] arguments = {1, 2};
-        assertEquals(3, (Integer) instance.call("sum", arguments)[0]);
+        assertEquals(3, (Integer) instance.exports.get("sum").apply(1, 2)[0]);
+
+        instance.close();
+    }
+
+    @Test
+    void arity_0() throws IOException,Exception {
+        Instance instance = new Instance(getBytes());
+
+        assertEquals(42, (Integer) instance.exports.get("arity_0").apply()[0]);
 
         instance.close();
     }
@@ -28,8 +36,7 @@ class InstanceTests {
     void i32_i32() throws IOException,Exception {
         Instance instance = new Instance(getBytes());
 
-        Integer[] arguments = {42};
-        assertEquals(42, (Integer) instance.call("i32_i32", arguments)[0]);
+        assertEquals(42, (Integer) instance.exports.get("i32_i32").apply(42)[0]);
 
         instance.close();
     }
@@ -38,8 +45,7 @@ class InstanceTests {
     void i64_i64() throws IOException,Exception {
         Instance instance = new Instance(getBytes());
 
-        Long[] arguments = {42l};
-        assertEquals(42l, (Long) instance.call("i64_i64", arguments)[0]);
+        assertEquals(42l, (Long) instance.exports.get("i64_i64").apply(42l)[0]);
 
         instance.close();
     }
@@ -48,8 +54,7 @@ class InstanceTests {
     void f32_f32() throws IOException,Exception {
         Instance instance = new Instance(getBytes());
 
-        Float[] arguments = {42.0f};
-        assertEquals(42.0f, (Float) instance.call("f32_f32", arguments)[0]);
+        assertEquals(42.0f, (Float) instance.exports.get("f32_f32").apply(42.0f)[0]);
 
         instance.close();
     }
@@ -58,8 +63,7 @@ class InstanceTests {
     void f64_f64() throws IOException,Exception {
         Instance instance = new Instance(getBytes());
 
-        Double[] arguments = {42.0d};
-        assertEquals(42.0d, (Double) instance.call("f64_f64", arguments)[0]);
+        assertEquals(42.0d, (Double) instance.exports.get("f64_f64").apply(42.0d)[0]);
 
         instance.close();
     }
@@ -68,8 +72,7 @@ class InstanceTests {
     void i32_i64_f32_f64_f64() throws IOException,Exception {
         Instance instance = new Instance(getBytes());
 
-        Object[] arguments = {1, 2l, 3.0f, 4.0d};
-        assertEquals(10.0d, (Double) instance.call("i32_i64_f32_f64_f64", arguments)[0]);
+        assertEquals(10.0d, (Double) instance.exports.get("i32_i64_f32_f64_f64").apply(1, 2l, 3.0f, 4.0d)[0]);
 
         instance.close();
     }

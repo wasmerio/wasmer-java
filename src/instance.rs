@@ -9,7 +9,7 @@ use jni::{
     JNIEnv,
 };
 use std::{convert::TryFrom, panic, rc::Rc};
-use wasmer_runtime::{imports, instantiate, Value as WasmValue};
+use wasmer_runtime::{imports, instantiate, Export, Value as WasmValue};
 use wasmer_runtime_core as core;
 
 pub struct Instance {
@@ -36,6 +36,23 @@ impl Instance {
             java_instance_object,
             instance,
         })
+    }
+
+    fn set_exported_functions(&self, env: &JNIEnv) {
+        for (export_name, export) in self.instance.exports() {
+            if let Export::Function { .. } = export {
+                let name = env
+                    .new_string(export_name)
+                    .expect("Failed to create a new string object.");
+                env.call_method(
+                    self.java_instance_object.as_obj(),
+                    "addExportFunction",
+                    "(Ljava/lang/String;)V",
+                    &[JObject::from(name).into()],
+                )
+                .expect("Failed to add an exported function.");
+            }
+        }
     }
 
     fn call_exported_function(
@@ -68,6 +85,7 @@ pub extern "system" fn Java_org_wasmer_Instance_nativeInstantiate(
         let java_instance = env.new_global_ref(this)?;
 
         let instance = Instance::new(java_instance, module_bytes)?;
+        instance.set_exported_functions(&env);
 
         Ok(Pointer::new(instance).into())
     });

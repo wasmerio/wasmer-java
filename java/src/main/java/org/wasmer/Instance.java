@@ -1,10 +1,20 @@
 package org.wasmer;
 
+import java.util.function.Function;
+import java.util.HashMap;
+import java.util.Map;
+
+@FunctionalInterface
+interface WasmFunction<T, R> {
+    R apply(T... args);
+}
+
 class Instance {
     private native long nativeInstantiate(Instance self, byte[] moduleBytes) throws RuntimeException;
     private native void nativeDrop(long instancePointer);
     private native Object[] nativeCall(long instancePointer, String exportName, Object[] arguments) throws RuntimeException;
 
+    public Map<String, WasmFunction<Object, Object[]>> exports = new HashMap<>();
     private long instancePointer;
 
     static {
@@ -17,8 +27,15 @@ class Instance {
         this.instancePointer = instancePointer;
     }
 
-    public Object[] call(String exportName, Object[] arguments) throws RuntimeException {
-        return this.nativeCall(this.instancePointer, exportName, arguments);
+    private Function<String, WasmFunction<Object, Object[]>> baseFunc =
+        exportName -> arguments -> this.nativeCall(this.instancePointer, exportName, arguments);
+
+    private WasmFunction<Object, Object[]> func(String exportName) {
+        return baseFunc.apply(exportName);
+    }
+
+    private void addExportFunction(String name) {
+        this.exports.put(name, this.func(name));
     }
 
     public void close() {
@@ -28,4 +45,5 @@ class Instance {
     public void finalize() {
         this.close();
     }
+
 }
