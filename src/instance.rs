@@ -149,10 +149,8 @@ pub extern "system" fn Java_org_wasmer_Instance_nativeCall<'a>(
                 )
                 .expect("Could not set a Java object element");
             }
-            Ok(obj_array)
-        } else {
-            Ok(obj_array)
         }
+        Ok(obj_array)
     });
 
     unwrap_or_throw(&env, output)
