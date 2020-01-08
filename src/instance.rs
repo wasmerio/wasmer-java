@@ -1,5 +1,5 @@
 use crate::{
-    exception::{runtime_error, unwrap_or_throw, Error},
+    exception::{joption_or_throw, runtime_error, Error},
     types::{jptr, Pointer},
     value::{Value, DOUBLE_CLASS, FLOAT_CLASS, INT_CLASS, LONG_CLASS},
 };
@@ -72,7 +72,7 @@ pub extern "system" fn Java_org_wasmer_Instance_nativeInstantiate(
         Ok(Pointer::new(instance).into())
     });
 
-    unwrap_or_throw(&env, output)
+    joption_or_throw(&env, output).unwrap_or(0)
 }
 
 #[no_mangle]
@@ -153,5 +153,5 @@ pub extern "system" fn Java_org_wasmer_Instance_nativeCall<'a>(
         Ok(obj_array)
     });
 
-    unwrap_or_throw(&env, output)
+    joption_or_throw(&env, output).unwrap_or(JObject::null().into_inner())
 }
