@@ -45,5 +45,4 @@ class Instance {
     public void finalize() {
         this.close();
     }
-
 }

@@ -1,6 +1,7 @@
 package org.wasmer;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertNull;
 
 import java.io.IOException;
 import java.nio.file.Files;
@@ -73,6 +74,15 @@ class InstanceTests {
         Instance instance = new Instance(getBytes());
 
         assertEquals(10.0d, (Double) instance.exports.get("i32_i64_f32_f64_f64").apply(1, 2l, 3.0f, 4.0d)[0]);
+
+        instance.close();
+    }
+
+    @Test
+    void nothing() throws IOException,Exception {
+        Instance instance = new Instance(getBytes());
+
+        assertNull(instance.exports.get("void").apply());
 
         instance.close();
     }
