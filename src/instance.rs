@@ -1,11 +1,11 @@
 use crate::{
-    exception::{runtime_error, unwrap_or_throw, Error},
+    exception::{joption_or_throw, runtime_error, Error},
     types::{jptr, Pointer},
-    value::Value,
+    value::{Value, DOUBLE_CLASS, FLOAT_CLASS, INT_CLASS, LONG_CLASS},
 };
 use jni::{
-    objects::{GlobalRef, JClass, JObject, JString},
-    sys::{jbyteArray, jint, jlong, jobjectArray},
+    objects::{GlobalRef, JClass, JObject, JString, JValue},
+    sys::{jbyteArray, jlong, jobjectArray},
     JNIEnv,
 };
 use std::{convert::TryFrom, panic, rc::Rc};
@@ -72,7 +72,7 @@ pub extern "system" fn Java_org_wasmer_Instance_nativeInstantiate(
         Ok(Pointer::new(instance).into())
     });
 
-    unwrap_or_throw(&env, output)
+    joption_or_throw(&env, output).unwrap_or(0)
 }
 
 #[no_mangle]
@@ -85,13 +85,13 @@ pub extern "system" fn Java_org_wasmer_Instance_nativeDrop(
 }
 
 #[no_mangle]
-pub extern "system" fn Java_org_wasmer_Instance_nativeCall(
-    env: JNIEnv,
+pub extern "system" fn Java_org_wasmer_Instance_nativeCall<'a>(
+    env: JNIEnv<'a>,
     _class: JClass,
     instance_pointer: jlong,
     export_name: JString,
     arguments_pointer: jobjectArray,
-) -> jint {
+) -> jobjectArray {
     let output = panic::catch_unwind(|| {
         let instance: &Instance = Into::<Pointer<Instance>>::into(instance_pointer).borrow();
         let export_name: String = env
@@ -120,15 +120,40 @@ pub extern "system" fn Java_org_wasmer_Instance_nativeCall(
                 .collect(),
         )?;
 
+        let obj_array = env
+            .new_object_array(
+                i32::try_from(results.len()).unwrap(),
+                "java/lang/Object",
+                JObject::null(),
+            )
+            .expect("Could not create a Java object array");
         if results.len() > 0 {
-            Ok(match results[0] {
-                WasmValue::I32(result) => result as jint,
-                _ => unreachable!(),
-            })
+            for (i, result) in results.iter().enumerate() {
+                let obj = match result {
+                    WasmValue::I32(val) => env.new_object(INT_CLASS, "(I)V", &[JValue::from(*val)]),
+                    WasmValue::I64(val) => {
+                        env.new_object(LONG_CLASS, "(J)V", &[JValue::from(*val)])
+                    }
+                    WasmValue::F32(val) => {
+                        env.new_object(FLOAT_CLASS, "(F)V", &[JValue::from(*val)])
+                    }
+                    WasmValue::F64(val) => {
+                        env.new_object(DOUBLE_CLASS, "(D)V", &[JValue::from(*val)])
+                    }
+                    _ => unreachable!(),
+                };
+                env.set_object_array_element(
+                    obj_array,
+                    i as i32,
+                    obj.expect("Could not create a Java object"),
+                )
+                .expect("Could not set a Java object element");
+            }
+            Ok(obj_array)
         } else {
-            Ok(jint::default())
+            Ok(JObject::null().into_inner())
         }
     });
 
-    unwrap_or_throw(&env, output)
+    joption_or_throw(&env, output).unwrap_or(JObject::null().into_inner())
 }
