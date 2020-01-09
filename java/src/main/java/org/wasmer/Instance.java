@@ -27,15 +27,15 @@ class Instance {
         this.instancePointer = instancePointer;
     }
 
-    private Function<String, WasmFunction<Object, Object[]>> baseFunc =
+    private Function<String, WasmFunction<Object, Object[]>> baseFunction =
         exportName -> arguments -> this.nativeCall(this.instancePointer, exportName, arguments);
 
-    private WasmFunction<Object, Object[]> func(String exportName) {
-        return baseFunc.apply(exportName);
+    private WasmFunction<Object, Object[]> wasmFunction(String exportName) {
+        return baseFunction.apply(exportName);
     }
 
     private void addExportFunction(String name) {
-        this.exports.put(name, this.func(name));
+        this.exports.put(name, this.wasmFunction(name));
     }
 
     public void close() {
