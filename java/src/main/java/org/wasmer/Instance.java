@@ -1,5 +1,6 @@
 package org.wasmer;
 
+import java.util.Collections;
 import java.util.function.Function;
 import java.util.HashMap;
 import java.util.Map;
@@ -36,6 +37,10 @@ class Instance {
 
     private void addExportFunction(String name) {
         this.exports.put(name, this.wasmFunction(name));
+    }
+
+    private void unmodifiableMap() {
+        this.exports = Collections.unmodifiableMap(this.exports);
     }
 
     public void close() {

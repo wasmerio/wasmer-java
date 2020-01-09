@@ -38,23 +38,6 @@ impl Instance {
         })
     }
 
-    fn set_exported_functions(&self, env: &JNIEnv) {
-        for (export_name, export) in self.instance.exports() {
-            if let Export::Function { .. } = export {
-                let name = env
-                    .new_string(export_name)
-                    .expect("Failed to create a new string object.");
-                env.call_method(
-                    self.java_instance_object.as_obj(),
-                    "addExportFunction",
-                    "(Ljava/lang/String;)V",
-                    &[JObject::from(name).into()],
-                )
-                .expect("Failed to add an exported function.");
-            }
-        }
-    }
-
     fn call_exported_function(
         &self,
         export_name: String,
@@ -70,6 +53,34 @@ impl Instance {
         function
             .call(arguments.as_slice())
             .map_err(|e| runtime_error(format!("{}", e)))
+    }
+
+    fn set_exported_functions(&self, env: &JNIEnv) {
+        for (export_name, export) in self.instance.exports() {
+            if let Export::Function { .. } = export {
+                let name = env
+                    .new_string(export_name)
+                    .expect("Failed to create a new string object.");
+                env.call_method(
+                    self.java_instance_object.as_obj(),
+                    "addExportFunction",
+                    "(Ljava/lang/String;)V",
+                    &[JObject::from(name).into()],
+                )
+                .expect("Failed to add an exported function.");
+            }
+        }
+        self.unmodifiable_map(env);
+    }
+
+    fn unmodifiable_map(&self, env: &JNIEnv) {
+        env.call_method(
+            self.java_instance_object.as_obj(),
+            "unmodifiableMap",
+            "()V",
+            &[],
+        )
+        .expect("Failed to make a hashmap unmodifiable.");
     }
 }
 
