@@ -2,6 +2,7 @@ package org.wasmer;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertNull;
+import static org.junit.jupiter.api.Assertions.assertTrue;
 
 import java.io.IOException;
 import java.nio.file.Files;
@@ -74,6 +75,15 @@ class InstanceTests {
         Instance instance = new Instance(getBytes());
 
         assertEquals(10.0d, (Double) instance.exports.get("i32_i64_f32_f64_f64").apply(1, 2l, 3.0f, 4.0d)[0]);
+
+        instance.close();
+    }
+
+    @Test
+    void bool_casted_to_i32() throws IOException,Exception {
+        Instance instance = new Instance(getBytes());
+
+        assertTrue((Integer) instance.exports.get("bool_casted_to_i32").apply()[0] == 1);
 
         instance.close();
     }

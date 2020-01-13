@@ -56,31 +56,30 @@ impl Instance {
     }
 
     fn set_exported_functions(&self, env: &JNIEnv) {
+        let exports_object = env
+            .get_field(
+                self.java_instance_object.as_obj(),
+                "exports",
+                "Lorg/wasmer/Export;",
+            )
+            .expect("Failed to get an exports object.")
+            .l()
+            .expect("Failed to unwrap JValue to JObject.");
+
         for (export_name, export) in self.instance.exports() {
             if let Export::Function { .. } = export {
                 let name = env
                     .new_string(export_name)
                     .expect("Failed to create a new string object.");
                 env.call_method(
-                    self.java_instance_object.as_obj(),
-                    "addExportFunction",
+                    exports_object,
+                    "addExportedFunction",
                     "(Ljava/lang/String;)V",
                     &[JObject::from(name).into()],
                 )
                 .expect("Failed to add an exported function.");
             }
         }
-        self.unmodifiable_map(env);
-    }
-
-    fn unmodifiable_map(&self, env: &JNIEnv) {
-        env.call_method(
-            self.java_instance_object.as_obj(),
-            "unmodifiableMap",
-            "()V",
-            &[],
-        )
-        .expect("Failed to make a hashmap unmodifiable.");
     }
 }
 

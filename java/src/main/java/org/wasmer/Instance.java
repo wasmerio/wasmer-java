@@ -1,46 +1,24 @@
 package org.wasmer;
 
-import java.util.Collections;
-import java.util.function.Function;
-import java.util.HashMap;
-import java.util.Map;
-
-@FunctionalInterface
-interface WasmFunction<T, R> {
-    R apply(T... args);
-}
-
 class Instance {
     private native long nativeInstantiate(Instance self, byte[] moduleBytes) throws RuntimeException;
     private native void nativeDrop(long instancePointer);
-    private native Object[] nativeCall(long instancePointer, String exportName, Object[] arguments) throws RuntimeException;
+    protected native Object[] nativeCall(long instancePointer, String exportName, Object[] arguments) throws RuntimeException;
 
-    public Map<String, WasmFunction<Object, Object[]>> exports = new HashMap<>();
-    private long instancePointer;
+    public final Export exports;
+    protected long instancePointer;
 
     static {
         System.loadLibrary("java_ext_wasm");
     }
 
     public Instance(byte[] moduleBytes) throws RuntimeException {
+        // Should make an export object and set it up to exports field
+        // before pass an instance object to Rust. Otherwise, the exports field is null.
+        this.exports = new Export(this);
+
         long instancePointer = this.nativeInstantiate(this, moduleBytes);
-
         this.instancePointer = instancePointer;
-    }
-
-    private Function<String, WasmFunction<Object, Object[]>> baseFunction =
-        exportName -> arguments -> this.nativeCall(this.instancePointer, exportName, arguments);
-
-    private WasmFunction<Object, Object[]> wasmFunction(String exportName) {
-        return baseFunction.apply(exportName);
-    }
-
-    private void addExportFunction(String name) {
-        this.exports.put(name, this.wasmFunction(name));
-    }
-
-    private void unmodifiableMap() {
-        this.exports = Collections.unmodifiableMap(this.exports);
     }
 
     public void close() {
