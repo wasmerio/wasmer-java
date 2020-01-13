@@ -19,7 +19,11 @@ pub struct Instance {
 }
 
 impl Instance {
-    fn new(java_instance_object: GlobalRef, module_bytes: Vec<u8>) -> Result<Self, Error> {
+    fn new(
+        java_instance_object: GlobalRef,
+        module_bytes: Vec<u8>,
+        env: &JNIEnv,
+    ) -> Result<Self, Error> {
         let module_bytes = module_bytes.as_slice();
         let imports = imports! {};
         let instance = match instantiate(module_bytes, &imports) {
@@ -32,10 +36,13 @@ impl Instance {
             }
         };
 
-        Ok(Self {
+        let instance_wrapper = Self {
             java_instance_object,
             instance,
-        })
+        };
+        instance_wrapper.set_exported_functions(&env);
+
+        Ok(instance_wrapper)
     }
 
     fn call_exported_function(
@@ -94,8 +101,7 @@ pub extern "system" fn Java_org_wasmer_Instance_nativeInstantiate(
         let module_bytes = env.convert_byte_array(module_bytes)?;
         let java_instance = env.new_global_ref(this)?;
 
-        let instance = Instance::new(java_instance, module_bytes)?;
-        instance.set_exported_functions(&env);
+        let instance = Instance::new(java_instance, module_bytes, &env)?;
 
         Ok(Pointer::new(instance).into())
     });
