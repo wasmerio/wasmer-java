@@ -161,3 +161,12 @@ Java has destructors, called `finalize` methods. We must also add
 must be dropped. This method must call an associated drop function on
 the Rust side. See `Java_org_wasmer_Instance_drop`. A `finalize`
 method must call a `close` method.
+
+
+# License
+
+The entire project is under the MIT License. Please read [the
+`LICENSE` file][license].
+
+
+[license]: https://github.com/wasmerio/wasmer/blob/master/LICENSE
