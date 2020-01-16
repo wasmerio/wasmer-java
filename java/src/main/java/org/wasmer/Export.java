@@ -15,6 +15,7 @@ import java.util.function.Function;
  */
 @FunctionalInterface
 interface ExportedFunction<Input, Output> {
+    @SuppressWarnings("unchecked")
     Output apply(Input... args);
 }
 
