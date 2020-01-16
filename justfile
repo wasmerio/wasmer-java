@@ -11,7 +11,7 @@ build-java:
 
 # Generate the Java C headers.
 build-headers:
-	javac -h include -sourcepath java/src/main/java/org/wasmer/*.java java/src/main/java/org/wasmer/Instance.java
+	javac -h include -Xlint:all -sourcepath java/src/main/java/org/wasmer/*.java
 
 # Run the tests.
 test: build-headers test-rust test-java
