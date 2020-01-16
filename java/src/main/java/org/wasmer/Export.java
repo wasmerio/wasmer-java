@@ -20,36 +20,30 @@ interface ExportedFunction<Input, Output> {
 }
 
 class Export {
-    private Map<String, ExportedFunction<Object, Object[]>> functionMap;
+    private Map<String, ExportedFunction<Object, Object[]>> inner;
     private Instance instance;
-
-    public Export(Instance instance) {
-        this.functionMap = new HashMap();
-        this.instance = instance;
-    }
 
     /**
      * Lambda expression for currying.
      * This takes a function name and returns the function to call WebAssembly function.
      */
-    private Function<String, ExportedFunction<Object, Object[]>> baseFunction =
+    private Function<String, ExportedFunction<Object, Object[]>> exportedFunctionWrapperGenerator =
         functionName -> arguments -> this.instance.nativeCall(this.instance.instancePointer, functionName, arguments);
 
-    private ExportedFunction<Object, Object[]> getWasmFunction(String functionName) {
-        return baseFunction.apply(functionName);
+    public Export(Instance instance) {
+        this.inner = new HashMap<String, ExportedFunction<Object, Object[]>>();
+        this.instance = instance;
+    }
+
+    private ExportedFunction<Object, Object[]> generateExportedFunctionWrapper(String functionName) {
+        return this.exportedFunctionWrapperGenerator.apply(functionName);
     }
 
     private void addExportedFunction(String name) {
-        this.functionMap.put(name, this.getWasmFunction(name));
-    }
-
-    private void addExportedFunctions(String[] names) {
-        for (String name: names) {
-            this.functionMap.put(name, this.getWasmFunction(name));
-        }
+        this.inner.put(name, this.generateExportedFunctionWrapper(name));
     }
 
     public ExportedFunction<Object, Object[]> get(String name) {
-        return this.functionMap.get(name);
+        return this.inner.get(name);
     }
 }
