@@ -1,9 +1,9 @@
 package org.wasmer;
 
 import java.util.Collections;
-import java.util.function.Function;
 import java.util.HashMap;
 import java.util.Map;
+import java.util.function.Function;
 
 /**
  * Functional interface for WebAssembly functions.
