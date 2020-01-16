@@ -4,12 +4,13 @@ use crate::{
     value::{Value, DOUBLE_CLASS, FLOAT_CLASS, INT_CLASS, LONG_CLASS},
 };
 use jni::{
+    errors,
     objects::{GlobalRef, JClass, JObject, JString, JValue},
     sys::{jbyteArray, jlong, jobjectArray},
     JNIEnv,
 };
 use std::{convert::TryFrom, panic, rc::Rc};
-use wasmer_runtime::{imports, instantiate, Value as WasmValue};
+use wasmer_runtime::{imports, instantiate, Export, Value as WasmValue};
 use wasmer_runtime_core as core;
 
 pub struct Instance {
@@ -19,7 +20,11 @@ pub struct Instance {
 }
 
 impl Instance {
-    fn new(java_instance_object: GlobalRef, module_bytes: Vec<u8>) -> Result<Self, Error> {
+    fn new(
+        java_instance_object: GlobalRef,
+        module_bytes: Vec<u8>,
+        env: &JNIEnv,
+    ) -> Result<Self, Error> {
         let module_bytes = module_bytes.as_slice();
         let imports = imports! {};
         let instance = match instantiate(module_bytes, &imports) {
@@ -32,10 +37,16 @@ impl Instance {
             }
         };
 
-        Ok(Self {
+        let instance_wrapper = Self {
             java_instance_object,
             instance,
-        })
+        };
+
+        instance_wrapper
+            .set_exported_functions(&env)
+            .map_err(|e| runtime_error(format!("Failed to set the exported functions: {}", e)))?;
+
+        Ok(instance_wrapper)
     }
 
     fn call_exported_function(
@@ -54,6 +65,31 @@ impl Instance {
             .call(arguments.as_slice())
             .map_err(|e| runtime_error(format!("{}", e)))
     }
+
+    fn set_exported_functions(&self, env: &JNIEnv) -> errors::Result<()> {
+        let exports_object: JObject = env
+            .get_field(
+                self.java_instance_object.as_obj(),
+                "exports",
+                "Lorg/wasmer/Export;",
+            )?
+            .l()?;
+
+        for (export_name, export) in self.instance.exports() {
+            if let Export::Function { .. } = export {
+                let name = env.new_string(export_name)?;
+
+                env.call_method(
+                    exports_object,
+                    "addExportedFunction",
+                    "(Ljava/lang/String;)V",
+                    &[JObject::from(name).into()],
+                )?;
+            }
+        }
+
+        Ok(())
+    }
 }
 
 #[no_mangle]
@@ -67,7 +103,7 @@ pub extern "system" fn Java_org_wasmer_Instance_nativeInstantiate(
         let module_bytes = env.convert_byte_array(module_bytes)?;
         let java_instance = env.new_global_ref(this)?;
 
-        let instance = Instance::new(java_instance, module_bytes)?;
+        let instance = Instance::new(java_instance, module_bytes, &env)?;
 
         Ok(Pointer::new(instance).into())
     });
