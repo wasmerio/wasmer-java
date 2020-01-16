@@ -4,6 +4,7 @@ use crate::{
     value::{Value, DOUBLE_CLASS, FLOAT_CLASS, INT_CLASS, LONG_CLASS},
 };
 use jni::{
+    errors,
     objects::{GlobalRef, JClass, JObject, JString, JValue},
     sys::{jbyteArray, jlong, jobjectArray},
     JNIEnv,
@@ -40,7 +41,10 @@ impl Instance {
             java_instance_object,
             instance,
         };
-        instance_wrapper.set_exported_functions(&env);
+
+        instance_wrapper
+            .set_exported_functions(&env)
+            .map_err(|e| runtime_error(format!("Failed to set the exported functions: {}", e)))?;
 
         Ok(instance_wrapper)
     }
@@ -62,31 +66,29 @@ impl Instance {
             .map_err(|e| runtime_error(format!("{}", e)))
     }
 
-    fn set_exported_functions(&self, env: &JNIEnv) {
-        let exports_object = env
+    fn set_exported_functions(&self, env: &JNIEnv) -> errors::Result<()> {
+        let exports_object: JObject = env
             .get_field(
                 self.java_instance_object.as_obj(),
                 "exports",
                 "Lorg/wasmer/Export;",
-            )
-            .expect("Failed to get an exports object.")
-            .l()
-            .expect("Failed to unwrap JValue to JObject.");
+            )?
+            .l()?;
 
         for (export_name, export) in self.instance.exports() {
             if let Export::Function { .. } = export {
-                let name = env
-                    .new_string(export_name)
-                    .expect("Failed to create a new string object.");
+                let name = env.new_string(export_name)?;
+
                 env.call_method(
                     exports_object,
                     "addExportedFunction",
                     "(Ljava/lang/String;)V",
                     &[JObject::from(name).into()],
-                )
-                .expect("Failed to add an exported function.");
+                )?;
             }
         }
+
+        Ok(())
     }
 }
 
