@@ -10,8 +10,7 @@ build-java:
 	cd java && mvn compile
 
 # Generate the Java C headers.
-build-headers:
-	javac -h include -Xlint:all -sourcepath java/src/main/java/org/wasmer/*.java
+build-headers: build-java
 
 # Run the tests.
 test: build-headers test-rust test-java
@@ -22,7 +21,12 @@ test-rust:
 
 # Run the Java tests.
 test-java: build-rust
-	cd java && mvn test
+	cd java && mvn -X test
+
+# Clean
+clean:
+	cargo clean
+	cd java && mvn clean
 
 # Local Variables:
 # mode: makefile
