@@ -10,13 +10,17 @@ use jni::{
     JNIEnv,
 };
 use std::{convert::TryFrom, panic, rc::Rc};
-use wasmer_runtime::{imports, instantiate, Export, Value as WasmValue};
+use wasmer_runtime::{imports, instantiate, Export, Memory as WasmMemory, Value as WasmValue};
 use wasmer_runtime_core as core;
+
+use std::cell::Cell;
+use wasmer_runtime::memory::MemoryView;
 
 pub struct Instance {
     #[allow(unused)]
     java_instance_object: GlobalRef,
     instance: Rc<core::Instance>,
+    memory: Option<Rc<WasmMemory>>,
 }
 
 impl Instance {
@@ -37,14 +41,23 @@ impl Instance {
             }
         };
 
+        let memory = instance.exports().find_map(|(_, export)| match export {
+            Export::Memory(memory) => Some(Rc::new(memory)),
+            _ => None,
+        });
+
         let instance_wrapper = Self {
             java_instance_object,
             instance,
+            memory,
         };
 
         instance_wrapper
             .set_exported_functions(&env)
             .map_err(|e| runtime_error(format!("Failed to set the exported functions: {}", e)))?;
+        instance_wrapper
+            .set_exported_memory(&env)
+            .map_err(|e| runtime_error(format!("Failed to set the exported memory: {}", e)))?;
 
         Ok(instance_wrapper)
     }
@@ -89,6 +102,31 @@ impl Instance {
         }
 
         Ok(())
+    }
+
+    fn set_exported_memory(&self, env: &JNIEnv) -> errors::Result<()> {
+        match &self.memory {
+            Some(memory) => {
+                let view: MemoryView<u8> = memory.view();
+                let mut data: Vec<u8> = view[0..view.len()].iter().map(Cell::get).collect();
+                let jbytebuffer = env.new_direct_byte_buffer(&mut data)?;
+                let exports_object: JObject = env
+                    .get_field(
+                        self.java_instance_object.as_obj(),
+                        "exports",
+                        "Lorg/wasmer/Export;",
+                    )?
+                    .l()?;
+                env.call_method(
+                    exports_object,
+                    "setMemory",
+                    "(Ljava/nio/ByteBuffer;)V",
+                    &[JObject::from(jbytebuffer).into()],
+                )?;
+                Ok(())
+            }
+            _ => Ok(()),
+        }
     }
 }
 
