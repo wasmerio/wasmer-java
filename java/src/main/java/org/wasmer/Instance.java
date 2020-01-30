@@ -3,9 +3,11 @@ package org.wasmer;
 class Instance {
     private native long nativeInstantiate(Instance self, byte[] moduleBytes) throws RuntimeException;
     private native void nativeDrop(long instancePointer);
+    private native byte[] nativeGetMemoryData(long instancePointer);
     protected native Object[] nativeCall(long instancePointer, String exportName, Object[] arguments) throws RuntimeException;
 
     public final Export exports;
+    public Memory memory;
     protected long instancePointer;
 
     static {
@@ -19,6 +21,7 @@ class Instance {
 
         long instancePointer = this.nativeInstantiate(this, moduleBytes);
         this.instancePointer = instancePointer;
+	this.memory = new Memory(this.nativeGetMemoryData(instancePointer));
     }
 
     public void close() {

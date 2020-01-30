@@ -3,12 +3,10 @@ package org.wasmer;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.function.Function;
-import java.nio.ByteBuffer;
 
 class Export {
     private Map<String, ExportedFunction<Object, Object[]>> inner;
     private Instance instance;
-    private ByteBuffer memory;
 
     /**
      * Lambda expression for currying.
@@ -32,13 +30,5 @@ class Export {
 
     public ExportedFunction<Object, Object[]> get(String name) {
         return this.inner.get(name);
-    }
-
-    public ByteBuffer memory() {
-	return this.memory;
-    }
-
-    private void setMemory(ByteBuffer bytes) {
-        this.memory = bytes;
     }
 }

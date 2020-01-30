@@ -55,9 +55,6 @@ impl Instance {
         instance_wrapper
             .set_exported_functions(&env)
             .map_err(|e| runtime_error(format!("Failed to set the exported functions: {}", e)))?;
-        instance_wrapper
-            .set_exported_memory(&env)
-            .map_err(|e| runtime_error(format!("Failed to set the exported memory: {}", e)))?;
 
         Ok(instance_wrapper)
     }
@@ -103,31 +100,6 @@ impl Instance {
 
         Ok(())
     }
-
-    fn set_exported_memory(&self, env: &JNIEnv) -> errors::Result<()> {
-        match &self.memory {
-            Some(memory) => {
-                let view: MemoryView<u8> = memory.view();
-                let mut data: Vec<u8> = view[0..view.len()].iter().map(Cell::get).collect();
-                let jbytebuffer = env.new_direct_byte_buffer(&mut data)?;
-                let exports_object: JObject = env
-                    .get_field(
-                        self.java_instance_object.as_obj(),
-                        "exports",
-                        "Lorg/wasmer/Export;",
-                    )?
-                    .l()?;
-                env.call_method(
-                    exports_object,
-                    "setMemory",
-                    "(Ljava/nio/ByteBuffer;)V",
-                    &[JObject::from(jbytebuffer).into()],
-                )?;
-                Ok(())
-            }
-            _ => Ok(()),
-        }
-    }
 }
 
 #[no_mangle]
@@ -156,6 +128,30 @@ pub extern "system" fn Java_org_wasmer_Instance_nativeDrop(
     instance_pointer: jptr,
 ) {
     let _: Pointer<Instance> = instance_pointer.into();
+}
+
+#[no_mangle]
+pub extern "system" fn Java_org_wasmer_Instance_nativeGetMemoryData(
+    env: JNIEnv,
+    _class: JClass,
+    instance_pointer: jptr,
+) -> jbyteArray {
+    let output = panic::catch_unwind(|| {
+        let instance: &Instance = Into::<Pointer<Instance>>::into(instance_pointer).borrow();
+        match &instance.memory {
+            Some(memory) => {
+                let view: MemoryView<u8> = memory.view();
+                let data: Vec<u8> = view[0..view.len()].iter().map(Cell::get).collect();
+                let output = env
+                    .byte_array_from_slice(&data)
+                    .expect("Failed to convert Rust byte slice to Java byte array.");
+                Ok(output)
+            }
+            _ => Ok(JObject::null().into_inner()),
+        }
+    });
+
+    joption_or_throw(&env, output).unwrap_or(JObject::null().into_inner())
 }
 
 #[no_mangle]
