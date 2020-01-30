@@ -19,37 +19,37 @@ class MemoryTest {
     void is_memory_class() throws IOException,Exception {
         Instance instance = new Instance(getBytes());
 
-	assertTrue(instance.memory instanceof Memory);
+        assertTrue(instance.memory instanceof Memory);
 
-	instance.close();
+        instance.close();
     }
 
     @Test
     void read_memory() throws IOException,Exception {
         Instance instance = new Instance(getBytes());
 
-	Memory memory = instance.memory;
-	byte[] readData = memory.read(0, 5);
-	for (int i = 0; i < 5; i++) {
-	    assertEquals(0, readData[i]);
-	}
+        Memory memory = instance.memory;
+        byte[] readData = memory.read(0, 5);
+        for (int i = 0; i < 5; i++) {
+            assertEquals(0, readData[i]);
+        }
 
-	instance.close();
+        instance.close();
     }
 
     @Test
     void write_memory() throws IOException,Exception {
         Instance instance = new Instance(getBytes());
 
-	Memory memory = instance.memory;
-	byte[] writeData = new byte[] {1, 2, 3, 4, 5};
-	memory.write(0, 5, writeData);
+        Memory memory = instance.memory;
+        byte[] writeData = new byte[] {1, 2, 3, 4, 5};
+        memory.write(0, 5, writeData);
 
-	byte[] readData = memory.read(0, 5);
-	for (int i = 0; i < 5; i++) {
-	    assertEquals(i+1, readData[i]);
-	}
+        byte[] readData = memory.read(0, 5);
+        for (int i = 0; i < 5; i++) {
+            assertEquals(i+1, readData[i]);
+        }
 
-	instance.close();
+        instance.close();
     }
 }

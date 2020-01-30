@@ -15,7 +15,7 @@ class Memory {
 
     public void write(int offset, int length, byte[] data) {
         for (int i = offset; i < length; i++) {
-	    this.inner[i] = data[i];
-	}
+            this.inner[i] = data[i];
+        }
     }
 }

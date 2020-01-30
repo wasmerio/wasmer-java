@@ -21,7 +21,7 @@ class Instance {
 
         long instancePointer = this.nativeInstantiate(this, moduleBytes);
         this.instancePointer = instancePointer;
-	this.memory = new Memory(this.nativeGetMemoryData(instancePointer));
+        this.memory = new Memory(this.nativeGetMemoryData(instancePointer));
     }
 
     public void close() {
