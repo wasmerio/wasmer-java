@@ -6,7 +6,7 @@ use crate::{
 use jni::{
     errors,
     objects::{GlobalRef, JClass, JObject, JString, JValue},
-    sys::{jbyteArray, jlong, jobjectArray},
+    sys::{jbyteArray, jobjectArray},
     JNIEnv,
 };
 use std::{convert::TryFrom, panic, rc::Rc};
@@ -56,7 +56,7 @@ impl Instance {
     ) -> Result<Vec<WasmValue>, Error> {
         let function = self.instance.dyn_func(&export_name).map_err(|_| {
             runtime_error(format!(
-                "Exported function `{}` does not exist.",
+                "Exported function `{}` does not exist",
                 export_name
             ))
         })?;
@@ -124,7 +124,7 @@ pub extern "system" fn Java_org_wasmer_Instance_nativeDrop(
 pub extern "system" fn Java_org_wasmer_Instance_nativeCall<'a>(
     env: JNIEnv<'a>,
     _class: JClass,
-    instance_pointer: jlong,
+    instance_pointer: jptr,
     export_name: JString,
     arguments_pointer: jobjectArray,
 ) -> jobjectArray {
@@ -132,7 +132,7 @@ pub extern "system" fn Java_org_wasmer_Instance_nativeCall<'a>(
         let instance: &Instance = Into::<Pointer<Instance>>::into(instance_pointer).borrow();
         let export_name: String = env
             .get_string(export_name)
-            .expect("Could not get Java string.")
+            .expect("Failed to get Java string")
             .into();
 
         let arguments_length = env.get_array_length(arguments_pointer).unwrap();
@@ -140,7 +140,7 @@ pub extern "system" fn Java_org_wasmer_Instance_nativeCall<'a>(
         let arguments: Vec<JObject> = (0..arguments_length)
             .map(|i| {
                 env.get_object_array_element(arguments_pointer, i)
-                    .expect("Could not get Java object")
+                    .expect("Failed to get Java object")
             })
             .collect();
 
@@ -150,7 +150,7 @@ pub extern "system" fn Java_org_wasmer_Instance_nativeCall<'a>(
                 .iter()
                 .map(|argument| {
                     Value::try_from((&env, *argument))
-                        .expect("Could not convert an argument to a WebAssembly value")
+                        .expect("Failed to convert an argument to a WebAssembly value")
                         .inner()
                 })
                 .collect(),
@@ -162,7 +162,7 @@ pub extern "system" fn Java_org_wasmer_Instance_nativeCall<'a>(
                 "java/lang/Object",
                 JObject::null(),
             )
-            .expect("Could not create a Java object array");
+            .expect("Failed to create a Java object array");
         if results.len() > 0 {
             for (i, result) in results.iter().enumerate() {
                 let obj = match result {
@@ -181,9 +181,9 @@ pub extern "system" fn Java_org_wasmer_Instance_nativeCall<'a>(
                 env.set_object_array_element(
                     obj_array,
                     i as i32,
-                    obj.expect("Could not create a Java object"),
+                    obj.expect("Failed to create a Java object"),
                 )
-                .expect("Could not set a Java object element");
+                .expect("Failed to set a Java object element");
             }
             Ok(obj_array)
         } else {
