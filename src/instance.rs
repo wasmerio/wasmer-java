@@ -1,5 +1,6 @@
 use crate::{
     exception::{joption_or_throw, runtime_error, Error},
+    memory::Memory,
     types::{jptr, Pointer},
     value::{Value, DOUBLE_CLASS, FLOAT_CLASS, INT_CLASS, LONG_CLASS},
 };
@@ -10,17 +11,14 @@ use jni::{
     JNIEnv,
 };
 use std::{convert::TryFrom, panic, rc::Rc};
-use wasmer_runtime::{imports, instantiate, Export, Memory as WasmMemory, Value as WasmValue};
+use wasmer_runtime::{imports, instantiate, Export, Value as WasmValue};
 use wasmer_runtime_core as core;
-
-use std::cell::Cell;
-use wasmer_runtime::memory::MemoryView;
 
 pub struct Instance {
     #[allow(unused)]
     java_instance_object: GlobalRef,
     instance: Rc<core::Instance>,
-    memory: Option<Rc<WasmMemory>>,
+    pub memory: Option<Memory>,
 }
 
 impl Instance {
@@ -42,7 +40,7 @@ impl Instance {
         };
 
         let memory = instance.exports().find_map(|(_, export)| match export {
-            Export::Memory(memory) => Some(Rc::new(memory)),
+            Export::Memory(memory) => Some(Memory::new(Rc::new(memory))),
             _ => None,
         });
 
@@ -128,30 +126,6 @@ pub extern "system" fn Java_org_wasmer_Instance_nativeDrop(
     instance_pointer: jptr,
 ) {
     let _: Pointer<Instance> = instance_pointer.into();
-}
-
-#[no_mangle]
-pub extern "system" fn Java_org_wasmer_Instance_nativeGetMemoryData(
-    env: JNIEnv,
-    _class: JClass,
-    instance_pointer: jptr,
-) -> jbyteArray {
-    let output = panic::catch_unwind(|| {
-        let instance: &Instance = Into::<Pointer<Instance>>::into(instance_pointer).borrow();
-        match &instance.memory {
-            Some(memory) => {
-                let view: MemoryView<u8> = memory.view();
-                let data: Vec<u8> = view[0..view.len()].iter().map(Cell::get).collect();
-                let output = env
-                    .byte_array_from_slice(&data)
-                    .expect("Failed to convert Rust byte slice to Java byte array.");
-                Ok(output)
-            }
-            _ => Ok(JObject::null().into_inner()),
-        }
-    });
-
-    joption_or_throw(&env, output).unwrap_or(JObject::null().into_inner())
 }
 
 #[no_mangle]

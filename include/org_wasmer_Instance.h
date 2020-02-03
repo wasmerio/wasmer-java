@@ -25,14 +25,6 @@ JNIEXPORT void JNICALL Java_org_wasmer_Instance_nativeDrop
 
 /*
  * Class:     org_wasmer_Instance
- * Method:    nativeGetMemoryData
- * Signature: (J)[B
- */
-JNIEXPORT jbyteArray JNICALL Java_org_wasmer_Instance_nativeGetMemoryData
-  (JNIEnv *, jobject, jlong);
-
-/*
- * Class:     org_wasmer_Instance
  * Method:    nativeCall
  * Signature: (JLjava/lang/String;[Ljava/lang/Object;)[Ljava/lang/Object;
  */
