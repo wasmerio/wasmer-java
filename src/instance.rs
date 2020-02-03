@@ -240,11 +240,7 @@ pub extern "system" fn Java_org_wasmer_Instance_nativeInitializeExportedMemories
 
             let view: MemoryView<u8> = memory.memory.view();
             for (i, byte) in view[0..view.len()].iter().enumerate() {
-                //buffer[i] = byte.as_ptr();
                 buffer[i] = byte.get();
-                if byte.get() != 0 {
-                    dbg!("{:#?}", byte);
-                }
             }
 
             jmap.put(*name, memory_object)?;

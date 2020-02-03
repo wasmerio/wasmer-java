@@ -6,6 +6,7 @@ class Memory {
     private ByteBuffer inner;
 
     private Memory() {
+        // Initial size is 114112 bytes (65536 bytes (64 KiB) * 17 pages).
         this.inner = ByteBuffer.allocateDirect(1114112);
     }
 
