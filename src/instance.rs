@@ -4,7 +4,6 @@ use crate::{
     value::{Value, DOUBLE_CLASS, FLOAT_CLASS, INT_CLASS, LONG_CLASS},
 };
 use jni::{
-    errors,
     objects::{GlobalRef, JClass, JObject, JString, JValue},
     sys::{jbyteArray, jobjectArray},
     JNIEnv,
@@ -23,7 +22,7 @@ impl Instance {
     fn new(
         java_instance_object: GlobalRef,
         module_bytes: Vec<u8>,
-        env: &JNIEnv,
+        _env: &JNIEnv,
     ) -> Result<Self, Error> {
         let module_bytes = module_bytes.as_slice();
         let imports = imports! {};
@@ -37,16 +36,10 @@ impl Instance {
             }
         };
 
-        let instance_wrapper = Self {
+        Ok(Self {
             java_instance_object,
             instance,
-        };
-
-        instance_wrapper
-            .set_exported_functions(&env)
-            .map_err(|e| runtime_error(format!("Failed to set the exported functions: {}", e)))?;
-
-        Ok(instance_wrapper)
+        })
     }
 
     fn call_exported_function(
@@ -64,31 +57,6 @@ impl Instance {
         function
             .call(arguments.as_slice())
             .map_err(|e| runtime_error(format!("{}", e)))
-    }
-
-    fn set_exported_functions(&self, env: &JNIEnv) -> errors::Result<()> {
-        let exports_object: JObject = env
-            .get_field(
-                self.java_instance_object.as_obj(),
-                "exports",
-                "Lorg/wasmer/Export;",
-            )?
-            .l()?;
-
-        for (export_name, export) in self.instance.exports() {
-            if let Export::Function { .. } = export {
-                let name = env.new_string(export_name)?;
-
-                env.call_method(
-                    exports_object,
-                    "addExportedFunction",
-                    "(Ljava/lang/String;)V",
-                    &[JObject::from(name).into()],
-                )?;
-            }
-        }
-
-        Ok(())
     }
 }
 
@@ -192,4 +160,38 @@ pub extern "system" fn Java_org_wasmer_Instance_nativeCall<'a>(
     });
 
     joption_or_throw(&env, output).unwrap_or(JObject::null().into_inner())
+}
+
+#[no_mangle]
+pub extern "system" fn Java_org_wasmer_Instance_nativeInitializeExportedFunctions(
+    env: JNIEnv,
+    _class: JClass,
+    instance_pointer: jptr,
+) {
+    let output = panic::catch_unwind(|| {
+        let instance: &Instance = Into::<Pointer<Instance>>::into(instance_pointer).borrow();
+        let exports_object: JObject = env
+            .get_field(
+                instance.java_instance_object.as_obj(),
+                "exports",
+                "Lorg/wasmer/Exports;",
+            )?
+            .l()?;
+
+        for (export_name, export) in instance.instance.exports() {
+            if let Export::Function { .. } = export {
+                let name = env.new_string(export_name)?;
+
+                env.call_method(
+                    exports_object,
+                    "addExportedFunction",
+                    "(Ljava/lang/String;)V",
+                    &[JObject::from(name).into()],
+                )?;
+            }
+        }
+        Ok(())
+    });
+
+    joption_or_throw(&env, output).unwrap_or(())
 }
