@@ -6,19 +6,19 @@ use crate::{
 };
 use jni::{
     errors,
-    objects::{GlobalRef, JClass, JObject, JString, JValue},
+    objects::{GlobalRef, JByteBuffer, JClass, JObject, JString, JValue},
     sys::{jbyteArray, jobjectArray},
     JNIEnv,
 };
-use std::{convert::TryFrom, panic, rc::Rc};
-use wasmer_runtime::{imports, instantiate, Export, Value as WasmValue};
+use std::{collections::HashMap, convert::TryFrom, panic, rc::Rc};
+use wasmer_runtime::{imports, instantiate, memory::MemoryView, Export, Value as WasmValue};
 use wasmer_runtime_core as core;
 
 pub struct Instance {
     #[allow(unused)]
-    java_instance_object: GlobalRef,
+    pub java_instance_object: GlobalRef,
     instance: Rc<core::Instance>,
-    pub memory: Option<Memory>,
+    pub memories: HashMap<String, Memory>,
 }
 
 impl Instance {
@@ -39,15 +39,18 @@ impl Instance {
             }
         };
 
-        let memory = instance.exports().find_map(|(_, export)| match export {
-            Export::Memory(memory) => Some(Memory::new(Rc::new(memory))),
-            _ => None,
-        });
+        let memories: HashMap<String, Memory> = instance
+            .exports()
+            .filter_map(|(export_name, export)| match export {
+                Export::Memory(memory) => Some((export_name, Memory::new(Rc::new(memory)))),
+                _ => None,
+            })
+            .collect();
 
         let instance_wrapper = Self {
             java_instance_object,
             instance,
-            memory,
+            memories,
         };
 
         instance_wrapper
@@ -200,4 +203,54 @@ pub extern "system" fn Java_org_wasmer_Instance_nativeCall<'a>(
     });
 
     joption_or_throw(&env, output).unwrap_or(JObject::null().into_inner())
+}
+
+#[no_mangle]
+pub extern "system" fn Java_org_wasmer_Instance_nativeInitializeExportedMemories(
+    env: JNIEnv,
+    _class: JClass,
+    instance_pointer: jptr,
+) {
+    let output = panic::catch_unwind(|| {
+        let instance: &Instance = Into::<Pointer<Instance>>::into(instance_pointer).borrow();
+
+        let memories_object = env
+            .get_field(
+                instance.java_instance_object.as_obj(),
+                "memories",
+                "Lorg/wasmer/Memories;",
+            )?
+            .l()?;
+        let inner_object = env
+            .get_field(memories_object, "inner", "Ljava/util/Map;")?
+            .l()?;
+        let jmap = env.get_map(inner_object)?;
+
+        let memory_class = env.find_class("org/wasmer/Memory")?;
+
+        for (export_name, memory) in &instance.memories {
+            let name = env.new_string(export_name)?;
+
+            let memory_object = env.new_object(memory_class, "()V", &[])?;
+            let java_buffer: JByteBuffer = env
+                .get_field(memory_object, "inner", "Ljava/nio/ByteBuffer;")?
+                .l()?
+                .into();
+            let buffer = env.get_direct_buffer_address(java_buffer)?;
+
+            let view: MemoryView<u8> = memory.memory.view();
+            for (i, byte) in view[0..view.len()].iter().enumerate() {
+                //buffer[i] = byte.as_ptr();
+                buffer[i] = byte.get();
+                if byte.get() != 0 {
+                    dbg!("{:#?}", byte);
+                }
+            }
+
+            jmap.put(*name, memory_object)?;
+        }
+        Ok(())
+    });
+
+    joption_or_throw(&env, output).unwrap_or(());
 }

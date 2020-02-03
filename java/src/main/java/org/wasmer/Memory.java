@@ -1,23 +1,12 @@
 package org.wasmer;
 
-import java.util.Arrays;
 import java.nio.ByteBuffer;
 
 class Memory {
-    private native int nativeSetMemoryData(long instancePointer, ByteBuffer buffer);
-
     private ByteBuffer inner;
-    private long instancePointer;
 
-    public Memory(long instancePointer) {
-        this.instancePointer = instancePointer;
-
-        // Initial size is 1114112 bytes (64 KiB (65536 bytes) x 17 pages).
+    private Memory() {
         this.inner = ByteBuffer.allocateDirect(1114112);
-        int length = nativeSetMemoryData(instancePointer, inner);
-        if (length > 0) {
-            this.inner.limit(length);
-        }
     }
 
     public byte[] read(int offset, int length) {
