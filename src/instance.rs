@@ -22,7 +22,6 @@ impl Instance {
     fn new(
         java_instance_object: GlobalRef,
         module_bytes: Vec<u8>,
-        _env: &JNIEnv,
     ) -> Result<Self, Error> {
         let module_bytes = module_bytes.as_slice();
         let imports = imports! {};
@@ -71,7 +70,7 @@ pub extern "system" fn Java_org_wasmer_Instance_nativeInstantiate(
         let module_bytes = env.convert_byte_array(module_bytes)?;
         let java_instance = env.new_global_ref(this)?;
 
-        let instance = Instance::new(java_instance, module_bytes, &env)?;
+        let instance = Instance::new(java_instance, module_bytes)?;
 
         Ok(Pointer::new(instance).into())
     });
