@@ -4,8 +4,9 @@ class Instance {
     private native long nativeInstantiate(Instance self, byte[] moduleBytes) throws RuntimeException;
     private native void nativeDrop(long instancePointer);
     protected native Object[] nativeCall(long instancePointer, String exportName, Object[] arguments) throws RuntimeException;
+    private static native void nativeInitializeExportedFunctions(long instancePointer);
 
-    public final Export exports;
+    public final Exports exports;
     protected long instancePointer;
 
     static {
@@ -13,12 +14,12 @@ class Instance {
     }
 
     public Instance(byte[] moduleBytes) throws RuntimeException {
-        // Should make an export object and set it up to exports field
-        // before pass an instance object to Rust. Otherwise, the exports field is null.
-        this.exports = new Export(this);
+        this.exports = new Exports(this);
 
         long instancePointer = this.nativeInstantiate(this, moduleBytes);
         this.instancePointer = instancePointer;
+
+        this.nativeInitializeExportedFunctions(instancePointer);
     }
 
     public void close() {
