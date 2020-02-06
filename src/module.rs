@@ -8,9 +8,7 @@ use jni::{
     sys::{jboolean, jbyteArray},
     JNIEnv,
 };
-
 use std::{panic, rc::Rc};
-
 use wasmer_runtime::{self as runtime, validate};
 use wasmer_runtime_core::imports;
 
