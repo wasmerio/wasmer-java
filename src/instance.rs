@@ -14,15 +14,12 @@ use wasmer_runtime_core as core;
 
 pub struct Instance {
     #[allow(unused)]
-    java_instance_object: GlobalRef,
-    instance: Rc<core::Instance>,
+    pub(crate) java_instance_object: GlobalRef,
+    pub(crate) instance: Rc<core::Instance>,
 }
 
 impl Instance {
-    fn new(
-        java_instance_object: GlobalRef,
-        module_bytes: Vec<u8>,
-    ) -> Result<Self, Error> {
+    fn new(java_instance_object: GlobalRef, module_bytes: Vec<u8>) -> Result<Self, Error> {
         let module_bytes = module_bytes.as_slice();
         let imports = imports! {};
         let instance = match instantiate(module_bytes, &imports) {

@@ -3,9 +3,9 @@ package org.wasmer;
 class Module {
     private native long nativeModuleInstantiate(Module self, byte[] moduleBytes) throws RuntimeException;
     private native void nativeDrop(long modulePointer);
+    private native long nativeInstantiate(long modulePointer, Instance instance);
     private static native boolean nativeValidate(byte[] moduleBytes);
 
-    private byte[] moduleBytes;
     private long modulePointer;
 
     static {
@@ -18,7 +18,6 @@ class Module {
 
     public Module(byte[] moduleBytes) throws RuntimeException {
         long modulePointer = this.nativeModuleInstantiate(this, moduleBytes);
-        this.moduleBytes = moduleBytes;
         this.modulePointer = modulePointer;
     }
 
@@ -31,6 +30,10 @@ class Module {
     }
 
     public Instance instantiate() {
-        return new Instance(this.moduleBytes);
+        Instance instance = new Instance();
+        long instancePointer = this.nativeInstantiate(this.modulePointer, instance);
+        instance.instancePointer = instancePointer;
+        instance.nativeInitializeExportedFunctions(instancePointer);
+        return instance;
     }
 }

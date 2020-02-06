@@ -1,5 +1,6 @@
 use crate::{
     exception::{joption_or_throw, runtime_error, Error},
+    instance::Instance,
     types::{jptr, Pointer},
 };
 use jni::{
@@ -8,14 +9,14 @@ use jni::{
     JNIEnv,
 };
 
-use std::panic;
+use std::{panic, rc::Rc};
 
 use wasmer_runtime::{self as runtime, validate};
+use wasmer_runtime_core::imports;
 
 pub struct Module {
     #[allow(unused)]
     java_module_object: GlobalRef,
-    #[allow(unused)]
     module: runtime::Module,
 }
 
@@ -58,6 +59,33 @@ pub extern "system" fn Java_org_wasmer_Module_nativeDrop(
     module_pointer: jptr,
 ) {
     let _: Pointer<Module> = module_pointer.into();
+}
+
+#[no_mangle]
+pub extern "system" fn Java_org_wasmer_Module_nativeInstantiate(
+    env: JNIEnv,
+    _class: JClass,
+    module_pointer: jptr,
+    instance_object: JObject,
+) -> jptr {
+    let output = panic::catch_unwind(|| {
+        let java_instance_object = env.new_global_ref(instance_object)?;
+
+        let module: &Module = Into::<Pointer<Module>>::into(module_pointer).borrow();
+        let import_object = imports! {};
+        let instance = module
+            .module
+            .instantiate(&import_object)
+            .expect("Failed to instantiate a WebAssembly module.");
+
+        Ok(Pointer::new(Instance {
+            java_instance_object,
+            instance: Rc::new(instance),
+        })
+        .into())
+    });
+
+    joption_or_throw(&env, output).unwrap_or(0)
 }
 
 #[no_mangle]

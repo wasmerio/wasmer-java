@@ -4,7 +4,7 @@ class Instance {
     private native long nativeInstantiate(Instance self, byte[] moduleBytes) throws RuntimeException;
     private native void nativeDrop(long instancePointer);
     protected native Object[] nativeCall(long instancePointer, String exportName, Object[] arguments) throws RuntimeException;
-    private static native void nativeInitializeExportedFunctions(long instancePointer);
+    protected static native void nativeInitializeExportedFunctions(long instancePointer);
 
     public final Exports exports;
     protected long instancePointer;
@@ -20,6 +20,10 @@ class Instance {
         this.instancePointer = instancePointer;
 
         this.nativeInitializeExportedFunctions(instancePointer);
+    }
+
+    protected Instance() {
+        this.exports = new Exports(this);
     }
 
     public void close() {
