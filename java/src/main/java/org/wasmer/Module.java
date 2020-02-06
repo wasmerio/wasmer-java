@@ -26,6 +26,10 @@ class Module {
         this.nativeDrop(this.modulePointer);
     }
 
+    public void finalize() {
+        this.close();
+    }
+
     public Instance instantiate() {
         return new Instance(this.moduleBytes);
     }
