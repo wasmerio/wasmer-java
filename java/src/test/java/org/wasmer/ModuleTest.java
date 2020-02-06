@@ -36,9 +36,12 @@ class moduleTest {
 
     @Test
     void failedToCompile() throws IOException,Exception {
-        Assertions.assertThrows(RuntimeException.class, () -> {
+        Exception exception = Assertions.assertThrows(RuntimeException.class, () -> {
             Module module = new Module(getBytes("invalid.wasm"));
         });
+
+        String expected = "Failed to compile the module: Validation error \"Invalid type\"";
+        assertEquals(expected, exception.getMessage());
     }
 
     @Test
