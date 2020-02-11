@@ -10,7 +10,7 @@ use jni::{
     sys::{jbyteArray, jobjectArray},
     JNIEnv,
 };
-use std::{collections::HashMap, convert::TryFrom, panic, rc::Rc};
+use std::{cell::Cell, collections::HashMap, convert::TryFrom, panic, rc::Rc};
 use wasmer_runtime::{imports, instantiate, memory::MemoryView, Export, Value as WasmValue};
 use wasmer_runtime_core as core;
 
@@ -236,12 +236,30 @@ pub extern "system" fn Java_org_wasmer_Instance_nativeInitializeExportedMemories
                 .get_field(memory_object, "inner", "Ljava/nio/ByteBuffer;")?
                 .l()?
                 .into();
-            let buffer = env.get_direct_buffer_address(java_buffer)?;
+            let mut _buffer = env.get_direct_buffer_address(java_buffer)?;
 
             let view: MemoryView<u8> = memory.memory.view();
-            for (i, byte) in view[0..view.len()].iter().enumerate() {
-                buffer[i] = byte.get();
+            _buffer = unsafe {
+                std::slice::from_raw_parts_mut(
+                    view[..].as_ptr() as *mut Cell<u8> as *mut u8,
+                    view.len(),
+                )
+            };
+
+            dbg!("======= debug memory in Wasmer =========");
+            for byte in view[0..view.len()].iter().map(Cell::get) {
+                if byte != 0 {
+                    dbg!("byte: {}", byte);
+                }
             }
+            dbg!("======= debug memory in Java Buffer =========");
+            buffer[1] = 42;
+            for b in _buffer {
+                if *b != 0 {
+                    dbg!("buffer: {:#?}", b);
+                }
+            }
+            dbg!("======= debug end ===========");
 
             jmap.put(*name, memory_object)?;
         }
