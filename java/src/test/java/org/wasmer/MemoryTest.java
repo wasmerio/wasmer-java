@@ -27,6 +27,25 @@ class MemoryTest {
     }
 
     @Test
+    void initial_data() throws IOException, Exception {
+        Instance instance = new Instance(getBytes());
+
+        byte[] expectedData = "Hello, World!".getBytes();
+
+        /* According to the `wasm-objdump -x tests.wasm`, the data starts from 1048576.
+         * Data[1]:
+         * - segment[0] memory=0 size=13 - init i32=1048576
+         * - 0100000: 4865 6c6c 6f2c 2057 6f72 6c64 21         Hello, World!
+         */
+        Memory memory = instance.memories.get("memory");
+        byte[] readData = memory.read(1048576, expectedData.length);
+
+        for (int i = 0; i < expectedData.length; i++) {
+            assertEquals(expectedData[i], readData[i]);
+        }
+    }
+
+    @Test
     void read_memory() throws IOException,Exception {
         Instance instance = new Instance(getBytes());
 
