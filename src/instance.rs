@@ -5,8 +5,7 @@ use crate::{
     value::{Value, DOUBLE_CLASS, FLOAT_CLASS, INT_CLASS, LONG_CLASS},
 };
 use jni::{
-    errors,
-    objects::{GlobalRef, JByteBuffer, JClass, JObject, JString, JValue},
+    objects::{GlobalRef, JClass, JObject, JString, JValue},
     sys::{jbyteArray, jobjectArray},
     JNIEnv,
 };
@@ -22,10 +21,7 @@ pub struct Instance {
 }
 
 impl Instance {
-    fn new(
-        java_instance_object: GlobalRef,
-        module_bytes: Vec<u8>,
-    ) -> Result<Self, Error> {
+    fn new(java_instance_object: GlobalRef, module_bytes: Vec<u8>) -> Result<Self, Error> {
         let module_bytes = module_bytes.as_slice();
         let imports = imports! {};
         let instance = match instantiate(module_bytes, &imports) {
@@ -172,7 +168,7 @@ pub extern "system" fn Java_org_wasmer_Instance_nativeCall<'a>(
 
     joption_or_throw(&env, output).unwrap_or(JObject::null().into_inner())
 }
-  
+
 #[no_mangle]
 pub extern "system" fn Java_org_wasmer_Instance_nativeInitializeExportedFunctions(
     env: JNIEnv,
@@ -181,7 +177,7 @@ pub extern "system" fn Java_org_wasmer_Instance_nativeInitializeExportedFunction
 ) {
     let output = panic::catch_unwind(|| {
         let instance: &Instance = Into::<Pointer<Instance>>::into(instance_pointer).borrow();
-      
+
         let exports_object: JObject = env
             .get_field(
                 instance.java_instance_object.as_obj(),
@@ -231,23 +227,24 @@ pub extern "system" fn Java_org_wasmer_Instance_nativeInitializeExportedMemories
         let memory_class = env.find_class("org/wasmer/Memory")?;
 
         for (export_name, memory) in &instance.memories {
-            let name = env.new_string(export_name)?;
-
-            let memory_object = env.new_object(memory_class, "()V", &[])?;
-            let java_buffer: JByteBuffer = env
-                .get_field(memory_object, "inner", "Ljava/nio/ByteBuffer;")?
-                .l()?
-                .into();
-            let mut _buffer = env.get_direct_buffer_address(java_buffer)?;
-
             let view: MemoryView<u8> = memory.memory.view();
-            _buffer = unsafe {
+            let data = unsafe {
                 std::slice::from_raw_parts_mut(
                     view[..].as_ptr() as *mut Cell<u8> as *mut u8,
                     view.len(),
                 )
             };
 
+            let memory_object = env.new_object(memory_class, "()V", &[])?;
+            let java_buffer = env.new_direct_byte_buffer(data)?;
+            env.set_field(
+                memory_object,
+                "inner",
+                "Ljava/nio/ByteBuffer;",
+                JObject::from(java_buffer).into(),
+            )?;
+
+            let name = env.new_string(export_name)?;
             jmap.put(*name, memory_object)?;
         }
         Ok(())
