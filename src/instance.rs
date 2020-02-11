@@ -246,21 +246,6 @@ pub extern "system" fn Java_org_wasmer_Instance_nativeInitializeExportedMemories
                 )
             };
 
-            dbg!("======= debug memory in Wasmer =========");
-            for byte in view[0..view.len()].iter().map(Cell::get) {
-                if byte != 0 {
-                    dbg!("byte: {}", byte);
-                }
-            }
-            dbg!("======= debug memory in Java Buffer =========");
-            buffer[1] = 42;
-            for b in _buffer {
-                if *b != 0 {
-                    dbg!("buffer: {:#?}", b);
-                }
-            }
-            dbg!("======= debug end ===========");
-
             jmap.put(*name, memory_object)?;
         }
         Ok(())
