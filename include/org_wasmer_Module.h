@@ -39,6 +39,22 @@ JNIEXPORT jlong JNICALL Java_org_wasmer_Module_nativeInstantiate
 JNIEXPORT jboolean JNICALL Java_org_wasmer_Module_nativeValidate
   (JNIEnv *, jclass, jbyteArray);
 
+/*
+ * Class:     org_wasmer_Module
+ * Method:    nativeSerialize
+ * Signature: (J)[B
+ */
+JNIEXPORT jbyteArray JNICALL Java_org_wasmer_Module_nativeSerialize
+  (JNIEnv *, jobject, jlong);
+
+/*
+ * Class:     org_wasmer_Module
+ * Method:    nativeDeserialize
+ * Signature: (Lorg/wasmer/Module;[B)J
+ */
+JNIEXPORT jlong JNICALL Java_org_wasmer_Module_nativeDeserialize
+  (JNIEnv *, jclass, jobject, jbyteArray);
+
 #ifdef __cplusplus
 }
 #endif
