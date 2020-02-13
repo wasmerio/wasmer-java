@@ -4,7 +4,6 @@ class Instance {
     private native long nativeInstantiate(Instance self, byte[] moduleBytes) throws RuntimeException;
     private native void nativeDrop(long instancePointer);
     protected native Object[] nativeCall(long instancePointer, String exportName, Object[] arguments) throws RuntimeException;
-
     private static native void nativeInitializeExportedFunctions(long instancePointer);
     private static native void nativeInitializeExportedMemories(long instancePointer);
 
