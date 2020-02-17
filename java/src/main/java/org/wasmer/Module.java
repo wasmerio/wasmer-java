@@ -16,6 +16,8 @@ class Module {
     private native void nativeDrop(long modulePointer);
     private native long nativeInstantiate(long modulePointer, Instance instance);
     private static native boolean nativeValidate(byte[] moduleBytes);
+    private native byte[] nativeSerialize(long modulePointer);
+    private static native long nativeDeserialize(Module module, byte[] serializedBytes);
 
     private long modulePointer;
 
@@ -44,6 +46,9 @@ class Module {
         this.modulePointer = modulePointer;
     }
 
+    private Module() {
+    }
+
     /**
      * Delete a module object pointer.
      */
@@ -70,5 +75,16 @@ class Module {
         instance.instancePointer = instancePointer;
         instance.nativeInitializeExportedFunctions(instancePointer);
         return instance;
+    }
+
+    public byte[] serialize() {
+        return this.nativeSerialize(this.modulePointer);
+    }
+
+    public static Module deserialize(byte[] serializedBytes) {
+        Module module = new Module();
+        long modulePointer = Module.nativeDeserialize(module, serializedBytes);
+        module.modulePointer = modulePointer;
+        return module;
     }
 }

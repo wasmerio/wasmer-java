@@ -53,4 +53,21 @@ class moduleTest {
 
         module.close();
     }
+
+    @Test
+    void serialize() throws IOException,Exception {
+        Module module = new Module(getBytes("tests.wasm"));
+        assertTrue(module.serialize() instanceof byte[]);
+    }
+
+    @Test
+    void deserialize() throws IOException,Exception {
+        Module module = new Module(getBytes("tests.wasm"));
+
+        byte[] serialized = module.serialize();
+        module = null;
+
+        Module deserializedModule = Module.deserialize(serialized);
+        assertEquals(3, (Integer) deserializedModule.instantiate().exports.get("sum").apply(1, 2)[0]);
+    }
 }
