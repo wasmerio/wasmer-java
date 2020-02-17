@@ -16,9 +16,8 @@ class Memory {
 
     public byte[] read(int offset, int length) {
         byte[] result = new byte[length];
-        for (int i = 0; i < length; i++) {
-            result[i] = this.inner.get(i + offset);
-        }
+        this.inner = this.inner.position(offset);
+        this.inner.get(result);
         return result;
     }
 
