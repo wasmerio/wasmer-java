@@ -33,7 +33,9 @@ class Module {
         Instance instance = new Instance();
         long instancePointer = this.nativeInstantiate(this.modulePointer, instance);
         instance.instancePointer = instancePointer;
+
         instance.nativeInitializeExportedFunctions(instancePointer);
+        instance.nativeInitializeExportedMemories(instancePointer);
         return instance;
     }
 }
