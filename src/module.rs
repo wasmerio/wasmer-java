@@ -9,9 +9,10 @@ use jni::{
     sys::{jboolean, jbyteArray},
     JNIEnv,
 };
+
 use std::{collections::HashMap, panic, rc::Rc};
 use wasmer_runtime::{self as runtime, validate, Export};
-use wasmer_runtime_core::imports;
+use wasmer_runtime_core::{cache::Artifact, imports, load_cache_with};
 
 pub struct Module {
     #[allow(unused)]
@@ -24,6 +25,44 @@ impl Module {
         let module_bytes = module_bytes.as_slice();
         let module = runtime::compile(module_bytes)
             .map_err(|e| runtime_error(format!("Failed to compile the module: {}", e)))?;
+
+        Ok(Self {
+            java_module_object,
+            module,
+        })
+    }
+
+    fn serialize(&self) -> Result<Vec<u8>, Error> {
+        match self.module.cache() {
+            Ok(artifact) => match artifact.serialize() {
+                Ok(serialized_artifact) => Ok(serialized_artifact),
+                Err(_) => {
+                    return Err(runtime_error(format!(
+                        "Failed to serialize the module artifact."
+                    )))
+                }
+            },
+            Err(_) => return Err(runtime_error(format!("Failed to get the module artifact."))),
+        }
+    }
+
+    fn deserialize(
+        java_module_object: GlobalRef,
+        serialized_module: Vec<u8>,
+    ) -> Result<Self, Error> {
+        let module = match Artifact::deserialize(serialized_module.as_slice()) {
+            Ok(artifact) => {
+                match unsafe { load_cache_with(artifact, &runtime::default_compiler()) } {
+                    Ok(module) => module,
+                    Err(_) => {
+                        return Err(runtime_error(format!(
+                            "Failed to compile the serialized module."
+                        )))
+                    }
+                }
+            }
+            Err(_) => return Err(runtime_error(format!("Failed to deserialize the module."))),
+        };
 
         Ok(Self {
             java_module_object,
@@ -108,6 +147,39 @@ pub extern "system" fn Java_org_wasmer_Module_nativeValidate(
             true => Ok(1),
             false => Ok(0),
         }
+    });
+
+    joption_or_throw(&env, output).unwrap_or(0)
+}
+
+#[no_mangle]
+pub extern "system" fn Java_org_wasmer_Module_nativeSerialize(
+    env: JNIEnv,
+    _class: JClass,
+    module_pointer: jptr,
+) -> jbyteArray {
+    let output = panic::catch_unwind(|| {
+        let module: &Module = Into::<Pointer<Module>>::into(module_pointer).borrow();
+        let serialized_module = module.serialize()?;
+        let java_serialized_module = env.byte_array_from_slice(serialized_module.as_slice())?;
+        Ok(java_serialized_module)
+    });
+
+    joption_or_throw(&env, output).unwrap_or(JObject::null().into_inner())
+}
+
+#[no_mangle]
+pub extern "system" fn Java_org_wasmer_Module_nativeDeserialize(
+    env: JNIEnv,
+    _class: JClass,
+    java_module: JObject,
+    java_serialized_module: jbyteArray,
+) -> jptr {
+    let output = panic::catch_unwind(|| {
+        let java_module_object = env.new_global_ref(java_module)?;
+        let serialized_module = env.convert_byte_array(java_serialized_module)?;
+        let module = Module::deserialize(java_module_object, serialized_module)?;
+        Ok(Pointer::new(module).into())
     });
 
     joption_or_throw(&env, output).unwrap_or(0)
