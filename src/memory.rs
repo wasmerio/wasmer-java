@@ -1,5 +1,11 @@
-use std::rc::Rc;
+use crate::{
+    exception::{joption_or_throw, runtime_error, Error},
+    types::{jptr, Pointer},
+};
+use jni::{objects::JClass, sys::jint, JNIEnv};
+use std::{panic, rc::Rc};
 use wasmer_runtime::Memory as WasmMemory;
+use wasmer_runtime_core::units::Pages;
 
 #[derive(Debug)]
 pub struct Memory {
@@ -10,6 +16,28 @@ impl Memory {
     pub fn new(memory: Rc<WasmMemory>) -> Self {
         Self { memory }
     }
+
+    pub fn grow(&self, number_of_pages: u32) -> Result<u32, Error> {
+        self.memory
+            .grow(Pages(number_of_pages))
+            .map(|previous_pages| previous_pages.0)
+            .map_err(|e| runtime_error(format!("Failed to grow the memory: {}", e)))
+    }
+}
+
+#[no_mangle]
+pub extern "system" fn Java_org_wasmer_Memory_nativeMemoryGrow(
+    env: JNIEnv,
+    _class: JClass,
+    memory_pointer: jptr,
+    number_of_pages: jint,
+) -> jint {
+    let output = panic::catch_unwind(|| {
+        let memory: &Memory = Into::<Pointer<Memory>>::into(memory_pointer).borrow();
+        Ok(memory.grow(number_of_pages as u32)? as i32)
+    });
+
+    joption_or_throw(&env, output).unwrap_or(0)
 }
 
 pub mod java {
@@ -54,6 +82,10 @@ pub mod java {
 
             // Instantiate the `Memory` class.
             let memory_object = env.new_object(memory_class, "()V", &[])?;
+
+            // Try to set the memory pointer to the field `org.wasmer.Memory.memoryPointer`.
+            let memory_pointer: jptr = Pointer::new(memory).into();
+            env.set_field(memory_object, "memoryPointer", "J", memory_pointer.into())?;
 
             // Try to write the `org.wasmer.Memory.inner` attribute by
             // calling the `org.wasmer.Memory.setInner` method.

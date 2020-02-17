@@ -19,11 +19,14 @@ import java.nio.ReadOnlyBufferException;
  * }</pre>
  */
 class Memory {
+    private native int nativeMemoryGrow(long instancePointer, int page);
+
     /**
      * Represents the actual WebAssembly memory data, borrowed from the runtime (in Rust).
      * The `setInner` method must be used to set this attribute.
      */
     private ByteBuffer inner;
+    private long memoryPointer;
 
     private Memory() {
         // This object is instantiated by Rust.
@@ -77,5 +80,9 @@ class Memory {
      */
     public int size() {
         return this.inner.limit();
+    }
+
+    public int grow(int page) {
+        return this.nativeMemoryGrow(this.memoryPointer, page);
     }
 }
