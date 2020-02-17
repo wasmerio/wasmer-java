@@ -237,11 +237,11 @@ pub extern "system" fn Java_org_wasmer_Instance_nativeInitializeExportedMemories
 
             let memory_object = env.new_object(memory_class, "()V", &[])?;
             let java_buffer = env.new_direct_byte_buffer(data)?;
-            env.set_field(
+            env.call_method(
                 memory_object,
-                "inner",
-                "Ljava/nio/ByteBuffer;",
-                JObject::from(java_buffer).into(),
+                "setInner",
+                "(Ljava/nio/ByteBuffer;)V",
+                &[JObject::from(java_buffer).into()],
             )?;
 
             let name = env.new_string(export_name)?;

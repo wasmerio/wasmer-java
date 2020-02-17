@@ -7,10 +7,13 @@ class Memory {
     private ByteBuffer inner;
 
     private Memory() {
-        // Initial size is 114112 bytes (65536 bytes (64 KiB) * 17 pages).
-        this.inner = ByteBuffer.allocateDirect(1114112);
+        // `inner` field is set in Rust.
+    }
+
+    private void setInner(ByteBuffer inner) {
+        this.inner = inner;
         if (this.inner.order() != ByteOrder.LITTLE_ENDIAN) {
-            this.inner = this.inner.order(ByteOrder.LITTLE_ENDIAN);
+            this.inner.order(ByteOrder.LITTLE_ENDIAN);
         }
     }
 
