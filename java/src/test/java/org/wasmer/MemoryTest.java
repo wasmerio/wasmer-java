@@ -1,7 +1,6 @@
 package org.wasmer;
 
 import static org.junit.jupiter.api.Assertions.assertArrayEquals;
-import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
 import java.io.IOException;
@@ -50,9 +49,7 @@ class MemoryTest {
 
         Memory memory = instance.memories.get("memory");
         byte[] readData = memory.read(0, 5);
-        for (int i = 0; i < readData.length; i++) {
-            assertEquals(0, readData[i]);
-        }
+        assertArrayEquals(new byte[]{0, 0, 0, 0, 0}, readData);
 
         instance.close();
     }
@@ -62,7 +59,7 @@ class MemoryTest {
         Instance instance = new Instance(getBytes());
 
         Memory memory = instance.memories.get("memory");
-        byte[] writeData = new byte[] {1, 2, 3, 4, 5};
+        byte[] writeData = new byte[]{1, 2, 3, 4, 5};
         memory.write(0, writeData);
 
         byte[] readData = memory.read(0, 5);
