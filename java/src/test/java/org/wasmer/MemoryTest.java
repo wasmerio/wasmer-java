@@ -61,12 +61,11 @@ class MemoryTest {
     void write_memory() throws IOException,Exception {
         Instance instance = new Instance(getBytes());
 
-        Memory memory1 = instance.memories.get("memory");
+        Memory memory = instance.memories.get("memory");
         byte[] writeData = new byte[] {1, 2, 3, 4, 5};
-        memory1.write(0, writeData);
+        memory.write(0, writeData);
 
-        Memory memory2 = instance.memories.get("memory");
-        byte[] readData = memory2.read(0, 5);
+        byte[] readData = memory.read(0, 5);
         assertArrayEquals(writeData, readData);
 
         instance.close();
