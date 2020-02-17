@@ -1,5 +1,6 @@
 use crate::{
     exception::{joption_or_throw, runtime_error, Error},
+    memory,
     memory::Memory,
     types::{jptr, Pointer},
     value::{Value, DOUBLE_CLASS, FLOAT_CLASS, INT_CLASS, LONG_CLASS},
@@ -9,8 +10,8 @@ use jni::{
     sys::{jbyteArray, jobjectArray},
     JNIEnv,
 };
-use std::{cell::Cell, collections::HashMap, convert::TryFrom, panic, rc::Rc};
-use wasmer_runtime::{imports, instantiate, memory::MemoryView, Export, Value as WasmValue};
+use std::{collections::HashMap, convert::TryFrom, panic, rc::Rc};
+use wasmer_runtime::{imports, instantiate, Export, Value as WasmValue};
 use wasmer_runtime_core as core;
 
 pub struct Instance {
@@ -211,42 +212,7 @@ pub extern "system" fn Java_org_wasmer_Instance_nativeInitializeExportedMemories
 ) {
     let output = panic::catch_unwind(|| {
         let instance: &Instance = Into::<Pointer<Instance>>::into(instance_pointer).borrow();
-
-        let memories_object = env
-            .get_field(
-                instance.java_instance_object.as_obj(),
-                "memories",
-                "Lorg/wasmer/Memories;",
-            )?
-            .l()?;
-        let inner_object = env
-            .get_field(memories_object, "inner", "Ljava/util/Map;")?
-            .l()?;
-        let jmap = env.get_map(inner_object)?;
-
-        let memory_class = env.find_class("org/wasmer/Memory")?;
-
-        for (export_name, memory) in &instance.memories {
-            let view: MemoryView<u8> = memory.memory.view();
-            let data = unsafe {
-                std::slice::from_raw_parts_mut(
-                    view[..].as_ptr() as *mut Cell<u8> as *mut u8,
-                    view.len(),
-                )
-            };
-
-            let memory_object = env.new_object(memory_class, "()V", &[])?;
-            let java_buffer = env.new_direct_byte_buffer(data)?;
-            env.call_method(
-                memory_object,
-                "setInner",
-                "(Ljava/nio/ByteBuffer;)V",
-                &[JObject::from(java_buffer).into()],
-            )?;
-
-            let name = env.new_string(export_name)?;
-            jmap.put(*name, memory_object)?;
-        }
+        memory::jni::initialize_memories(&env, instance)?;
         Ok(())
     });
     joption_or_throw(&env, output).unwrap_or(())
