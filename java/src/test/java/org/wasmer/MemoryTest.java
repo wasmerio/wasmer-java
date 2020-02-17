@@ -64,7 +64,7 @@ class MemoryTest {
 
         Memory memory1 = instance.memories.get("memory");
         byte[] writeData = new byte[] {1, 2, 3, 4, 5};
-        memory1.write(0, 5, writeData);
+        memory1.write(0, writeData);
 
         Memory memory2 = instance.memories.get("memory");
         byte[] readData = memory2.read(0, 5);

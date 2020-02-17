@@ -16,14 +16,13 @@ class Memory {
 
     public byte[] read(int offset, int length) {
         byte[] result = new byte[length];
-        this.inner = this.inner.position(offset);
+        this.inner.position(offset);
         this.inner.get(result);
         return result;
     }
 
-    public void write(int offset, int length, byte[] data) {
-        for (int i = 0; i < length; i++) {
-            this.inner.put(i + offset, data[i]);
-        }
+    public void write(int offset, byte[] data) {
+        this.inner.position(offset);
+        this.inner.put(data);
     }
 }
