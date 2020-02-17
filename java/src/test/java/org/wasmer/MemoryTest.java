@@ -1,5 +1,6 @@
 package org.wasmer;
 
+import static org.junit.jupiter.api.Assertions.assertArrayEquals;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
@@ -40,9 +41,7 @@ class MemoryTest {
         Memory memory = instance.memories.get("memory");
         byte[] readData = memory.read(1048576, expectedData.length);
 
-        for (int i = 0; i < expectedData.length; i++) {
-            assertEquals(expectedData[i], readData[i]);
-        }
+        assertArrayEquals(expectedData, readData);
     }
 
     @Test
@@ -51,7 +50,7 @@ class MemoryTest {
 
         Memory memory = instance.memories.get("memory");
         byte[] readData = memory.read(0, 5);
-        for (int i = 0; i < 5; i++) {
+        for (int i = 0; i < readData.length; i++) {
             assertEquals(0, readData[i]);
         }
 
@@ -68,9 +67,7 @@ class MemoryTest {
 
         Memory memory2 = instance.memories.get("memory");
         byte[] readData = memory2.read(0, 5);
-        for (int i = 0; i < 5; i++) {
-            assertEquals(writeData[i], readData[i]);
-        }
+        assertArrayEquals(writeData, readData);
 
         instance.close();
     }

@@ -14,7 +14,7 @@ class Memories {
         return this.inner.get(name);
     }
 
-    public Map<String, Memory> inner() {
+    protected Map<String, Memory> inner() {
         return this.inner;
     }
 }
