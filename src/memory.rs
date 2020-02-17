@@ -7,7 +7,7 @@ use std::{panic, rc::Rc};
 use wasmer_runtime::Memory as WasmMemory;
 use wasmer_runtime_core::units::Pages;
 
-#[derive(Debug)]
+#[derive(Debug, Clone)]
 pub struct Memory {
     pub memory: Rc<WasmMemory>,
 }
@@ -41,7 +41,11 @@ pub extern "system" fn Java_org_wasmer_Memory_nativeMemoryGrow(
 }
 
 pub mod java {
-    use crate::{exception::Error, instance::Instance};
+    use crate::{
+        exception::Error,
+        instance::Instance,
+        types::{jptr, Pointer},
+    };
     use jni::{objects::JObject, JNIEnv};
     use std::cell::Cell;
 
@@ -84,7 +88,7 @@ pub mod java {
             let memory_object = env.new_object(memory_class, "()V", &[])?;
 
             // Try to set the memory pointer to the field `org.wasmer.Memory.memoryPointer`.
-            let memory_pointer: jptr = Pointer::new(memory).into();
+            let memory_pointer: jptr = Pointer::new(memory.clone()).into();
             env.set_field(memory_object, "memoryPointer", "J", memory_pointer.into())?;
 
             // Try to write the `org.wasmer.Memory.inner` attribute by
