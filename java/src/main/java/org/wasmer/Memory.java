@@ -1,7 +1,11 @@
 package org.wasmer;
 
+import java.lang.IllegalArgumentException;
 import java.nio.ByteBuffer;
 import java.nio.ByteOrder;
+import java.nio.BufferUnderflowException;
+import java.nio.BufferOverflowException;
+import java.nio.ReadOnlyBufferException;
 
 class Memory {
     private ByteBuffer inner;
@@ -17,14 +21,14 @@ class Memory {
         }
     }
 
-    public byte[] read(int offset, int length) {
+    public byte[] read(int offset, int length) throws BufferUnderflowException, IllegalArgumentException {
         byte[] result = new byte[length];
         this.inner.position(offset);
         this.inner.get(result);
         return result;
     }
 
-    public void write(int offset, byte[] data) {
+    public void write(int offset, byte[] data) throws BufferOverflowException, IllegalArgumentException, ReadOnlyBufferException {
         this.inner.position(offset);
         this.inner.put(data);
     }
