@@ -8,12 +8,11 @@ import java.util.function.Function;
  * `Exports` is a Java class that represents the set of WebAssembly exported function.
  * It's basically a set of `ExportedFunction`.
  *
- * # Examples
- *
- * ```java
+ * Examples:
+ * <pre>{@code
  * Instance instance = new Instance(wasmBytes);
  * Object[] result = instance.exports.get("sum").apply(1, 2);
- * ```
+ * }</pre>
  */
 class Exports {
     private Map<String, ExportedFunction<Object, Object[]>> inner;

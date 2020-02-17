@@ -3,14 +3,13 @@ package org.wasmer;
 /**
  * `Module` is a Java class that represents a WebAssembly module.
  *
- * # Examples
- *
- * ```java
+ * Examples:
+ * <pre>{@code
  * boolean isValid = Module.validate(wasmBytes);
  *
  * Module module = new Module(wasmBytes);
  * Instance instance = module.instantiate();
- * ```
+ * }</pre>
  */
 class Module {
     private native long nativeModuleInstantiate(Module self, byte[] moduleBytes) throws RuntimeException;

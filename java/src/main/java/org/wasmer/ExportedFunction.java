@@ -1,7 +1,7 @@
 package org.wasmer;
 
 /**
- * Functional interface for WebAssembly exported functions. i.e. it
+ * Functional interface for WebAssembly exported functions, i.e. it
  * creates a new type for a closure that mimics a WebAssembly exported
  * function.
  *
