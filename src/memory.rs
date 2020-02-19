@@ -12,7 +12,7 @@ impl Memory {
     }
 }
 
-pub mod jni {
+pub mod java {
     use crate::{exception::Error, instance::Instance};
     use jni::{objects::JObject, JNIEnv};
     use std::cell::Cell;

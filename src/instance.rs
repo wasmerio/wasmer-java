@@ -212,7 +212,7 @@ pub extern "system" fn Java_org_wasmer_Instance_nativeInitializeExportedMemories
 ) {
     let output = panic::catch_unwind(|| {
         let instance: &Instance = Into::<Pointer<Instance>>::into(instance_pointer).borrow();
-        memory::jni::initialize_memories(&env, instance)?;
+        memory::java::initialize_memories(&env, instance)?;
         Ok(())
     });
     joption_or_throw(&env, output).unwrap_or(())
