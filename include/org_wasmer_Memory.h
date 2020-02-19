@@ -10,10 +10,10 @@ extern "C" {
 /*
  * Class:     org_wasmer_Memory
  * Method:    nativeMemoryGrow
- * Signature: (JI)I
+ * Signature: (Lorg/wasmer/Memory;JI)I
  */
 JNIEXPORT jint JNICALL Java_org_wasmer_Memory_nativeMemoryGrow
-  (JNIEnv *, jobject, jlong, jint);
+  (JNIEnv *, jobject, jobject, jlong, jint);
 
 #ifdef __cplusplus
 }

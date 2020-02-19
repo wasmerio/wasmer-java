@@ -2,9 +2,9 @@ use crate::{
     exception::{joption_or_throw, runtime_error, Error},
     types::{jptr, Pointer},
 };
-use jni::{objects::JClass, sys::jint, JNIEnv};
-use std::{panic, rc::Rc};
-use wasmer_runtime::Memory as WasmMemory;
+use jni::{objects::JClass, objects::JObject, sys::jint, JNIEnv};
+use std::{cell::Cell, panic, rc::Rc};
+use wasmer_runtime::{memory::MemoryView, Memory as WasmMemory};
 use wasmer_runtime_core::units::Pages;
 
 #[derive(Debug, Clone)]
@@ -29,12 +29,30 @@ impl Memory {
 pub extern "system" fn Java_org_wasmer_Memory_nativeMemoryGrow(
     env: JNIEnv,
     _class: JClass,
+    memory_object: JObject,
     memory_pointer: jptr,
     number_of_pages: jint,
 ) -> jint {
     let output = panic::catch_unwind(|| {
         let memory: &Memory = Into::<Pointer<Memory>>::into(memory_pointer).borrow();
-        Ok(memory.grow(number_of_pages as u32)? as i32)
+        let old_pages = memory.grow(number_of_pages as u32)?;
+
+        let view: MemoryView<u8> = memory.memory.view();
+        let data = unsafe {
+            std::slice::from_raw_parts_mut(
+                view[..].as_ptr() as *mut Cell<u8> as *mut u8,
+                view.len(),
+            )
+        };
+        let java_buffer = env.new_direct_byte_buffer(data)?;
+        env.call_method(
+            memory_object,
+            "setInner",
+            "(Ljava/nio/ByteBuffer;)V",
+            &[JObject::from(java_buffer).into()],
+        )?;
+
+        Ok(old_pages as i32)
     });
 
     joption_or_throw(&env, output).unwrap_or(0)

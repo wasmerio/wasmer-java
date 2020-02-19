@@ -19,7 +19,7 @@ import java.nio.ReadOnlyBufferException;
  * }</pre>
  */
 class Memory {
-    private native int nativeMemoryGrow(long instancePointer, int page);
+    private native int nativeMemoryGrow(Memory memory, long memoryPointer, int page);
 
     /**
      * Represents the actual WebAssembly memory data, borrowed from the runtime (in Rust).
@@ -83,6 +83,6 @@ class Memory {
     }
 
     public int grow(int page) {
-        return this.nativeMemoryGrow(this.memoryPointer, page);
+        return this.nativeMemoryGrow(this, this.memoryPointer, page);
     }
 }

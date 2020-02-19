@@ -158,4 +158,19 @@ class MemoryTest {
 
         instance.close();
     }
+
+    @Test
+    void memoryGrow() throws IOException,Exception {
+        Instance instance = new Instance(getBytes("tests.wasm"));
+        Memory memory = instance.memories.get("memory");
+
+        int oldSize = memory.size();
+        assertEquals(1114112, oldSize);
+        memory.grow(1);
+        int newSize = memory.size();
+        assertEquals(1179648, newSize);
+        assertEquals(65536, newSize - oldSize);
+
+        instance.close();
+    }
 }
