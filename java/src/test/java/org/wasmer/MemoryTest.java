@@ -153,4 +153,34 @@ class MemoryTest {
         assertNull(memory);
         instance.close();
     }
+
+    @Test
+    void memoryData() throws IOException,Exception {
+        Instance instance = new Instance(getBytes("tests.wasm"));
+        Memory memory = instance.memories.get("memory");
+
+        int pointer = (Integer) instance.exports.get("string").apply()[0];
+        byte[] stringBytes = memory.read(pointer, 13);
+
+        String expected = "Hello, World!";
+        assertEquals(expected, new String(stringBytes));
+
+        instance.close();
+    }
+
+    @Test
+    void memoryDataReadWrite() throws IOException,Exception {
+        Instance instance = new Instance(getBytes("tests.wasm"));
+        Memory memory = instance.memories.get("memory");
+
+        int pointer = (Integer) instance.exports.get("string").apply()[0];
+
+        assertEquals("Hello, World!", new String(memory.read(pointer, 13)));
+
+        memory.write(pointer, new byte[]{'A'});
+
+        assertEquals("Aello, World!", new String(memory.read(pointer, 13)));
+
+        instance.close();
+    }
 }
