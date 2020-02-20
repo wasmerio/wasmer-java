@@ -1,23 +1,30 @@
 package org.wasmer;
 
 import static org.junit.jupiter.api.Assertions.assertArrayEquals;
+import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertTrue;
+import static org.junit.jupiter.api.Assertions.assertNull;
 
+import java.lang.IllegalArgumentException;
 import java.io.IOException;
+import java.nio.BufferUnderflowException;
+import java.nio.BufferOverflowException;
+import java.nio.ReadOnlyBufferException;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
+import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.Test;
 
 class MemoryTest {
-    private byte[] getBytes() throws IOException,Exception {
-        Path modulePath = Paths.get(getClass().getClassLoader().getResource("tests.wasm").getPath());
+    private byte[] getBytes(String filename) throws IOException,Exception {
+        Path modulePath = Paths.get(getClass().getClassLoader().getResource(filename).getPath());
         return Files.readAllBytes(modulePath);
     }
 
     @Test
-    void is_memory_class() throws IOException,Exception {
-        Instance instance = new Instance(getBytes());
+    void isMemoryClass() throws IOException,Exception {
+        Instance instance = new Instance(getBytes("tests.wasm"));
 
         instance.memories.inner().forEach((name, memory) -> {
             assertTrue(memory instanceof Memory);
@@ -27,8 +34,18 @@ class MemoryTest {
     }
 
     @Test
-    void initial_data() throws IOException, Exception {
-        Instance instance = new Instance(getBytes());
+    void size() throws IOException,Exception {
+        Instance instance = new Instance(getBytes("tests.wasm"));
+        Memory memory = instance.memories.get("memory");
+
+        assertEquals(1114112, memory.size());
+
+        instance.close();
+    }
+
+    @Test
+    void initialData() throws IOException, Exception {
+        Instance instance = new Instance(getBytes("tests.wasm"));
 
         byte[] expectedData = "Hello, World!".getBytes();
 
@@ -44,8 +61,8 @@ class MemoryTest {
     }
 
     @Test
-    void read_memory() throws IOException,Exception {
-        Instance instance = new Instance(getBytes());
+    void readMemory() throws IOException,Exception {
+        Instance instance = new Instance(getBytes("tests.wasm"));
 
         Memory memory = instance.memories.get("memory");
         byte[] readData = memory.read(0, 5);
@@ -55,8 +72,8 @@ class MemoryTest {
     }
 
     @Test
-    void write_memory() throws IOException,Exception {
-        Instance instance = new Instance(getBytes());
+    void writeMemory() throws IOException,Exception {
+        Instance instance = new Instance(getBytes("tests.wasm"));
 
         Memory memory = instance.memories.get("memory");
         byte[] writeData = new byte[]{1, 2, 3, 4, 5};
@@ -65,6 +82,75 @@ class MemoryTest {
         byte[] readData = memory.read(0, 5);
         assertArrayEquals(writeData, readData);
 
+        instance.close();
+    }
+
+    @Test
+    void readInvalidIndex() throws IOException,Exception {
+        Instance instance = new Instance(getBytes("tests.wasm"));
+        Memory memory = instance.memories.get("memory");
+
+        Exception exception = Assertions.assertThrows(RuntimeException.class, () -> {
+            byte[] readData = memory.read(-1, 5);
+        });
+        String expected = "newPosition < 0: (-1 < 0)";
+
+        assertTrue(exception instanceof IllegalArgumentException);
+        assertEquals(expected, exception.getMessage());
+
+        instance.close();
+    }
+
+    @Test
+    void readOverLimit() throws IOException,Exception {
+        Instance instance = new Instance(getBytes("tests.wasm"));
+        Memory memory = instance.memories.get("memory");
+
+        Exception exception = Assertions.assertThrows(RuntimeException.class, () -> {
+            byte[] readData = memory.read(0, 1114113);
+        });
+
+        assertTrue(exception instanceof BufferUnderflowException);
+
+        instance.close();
+    }
+
+    @Test
+    void writeInvalidIndex() throws IOException,Exception {
+        Instance instance = new Instance(getBytes("tests.wasm"));
+        Memory memory = instance.memories.get("memory");
+
+        Exception exception = Assertions.assertThrows(RuntimeException.class, () -> {
+            memory.write(-1, new byte[]{1, 2, 3, 4, 5});
+        });
+        String expected = "newPosition < 0: (-1 < 0)";
+
+        assertTrue(exception instanceof IllegalArgumentException);
+        assertEquals(expected, exception.getMessage());
+
+        instance.close();
+    }
+
+    @Test
+    void writeOverLimit() throws IOException,Exception {
+        Instance instance = new Instance(getBytes("tests.wasm"));
+        Memory memory = instance.memories.get("memory");
+
+        byte[] writeData = new byte[1114113];
+        Exception exception = Assertions.assertThrows(RuntimeException.class, () -> {
+            memory.write(0, writeData);
+        });
+
+        assertTrue(exception instanceof BufferOverflowException);
+
+        instance.close();
+    }
+
+    @Test
+    void noMemory() throws IOException,Exception {
+        Instance instance = new Instance(getBytes("no_memory.wasm"));
+        Memory memory = instance.memories.get("memory");
+        assertNull(memory);
         instance.close();
     }
 }
