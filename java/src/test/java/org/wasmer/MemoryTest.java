@@ -173,4 +173,29 @@ class MemoryTest {
 
         instance.close();
     }
+
+    @Test
+    void writeMemoryAfterGrow() throws IOException,Exception {
+        Instance instance = new Instance(getBytes("tests.wasm"));
+        Memory memory = instance.memories.get("memory");
+
+        int overIndex = memory.size() + 1;
+        byte[] writeData = new byte[]{1, 2, 3, 4, 5};
+        Exception exception = Assertions.assertThrows(RuntimeException.class, () -> {
+            memory.write(overIndex, writeData);
+        });
+        String expected = "newPosition > limit: (1114113 > 1114112)";
+
+        assertTrue(exception instanceof IllegalArgumentException);
+        assertEquals(expected, exception.getMessage());
+
+        memory.grow(1);
+
+        memory.write(overIndex, writeData);
+        byte[] readData = memory.read(overIndex, writeData.length);
+
+        assertArrayEquals(writeData, readData);
+
+        instance.close();
+    }
 }

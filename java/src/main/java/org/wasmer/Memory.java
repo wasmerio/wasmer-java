@@ -82,6 +82,12 @@ class Memory {
         return this.inner.limit();
     }
 
+    /**
+     * Grow this memory by the specified number of pages.
+     *
+     * @param page The number of pages to grow. 1 page size is 64KiB.
+     * @return The privious number of pages.
+     */
     public int grow(int page) {
         return this.nativeMemoryGrow(this, this.memoryPointer, page);
     }
