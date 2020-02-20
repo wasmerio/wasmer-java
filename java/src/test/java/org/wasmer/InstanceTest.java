@@ -89,6 +89,18 @@ class InstanceTest {
     }
 
     @Test
+    void string() throws IOException,Exception {
+        Instance instance = new Instance(getBytes());
+        Memory memory = instance.memories.get("memory");
+
+        int pointer = (Integer) instance.exports.get("string").apply()[0];
+        byte[] stringBytes = memory.read(pointer, 13);
+
+        String expected = "Hello, World!";
+        assertEquals(expected, new String(stringBytes));
+    }
+
+    @Test
     void nothing() throws IOException,Exception {
         Instance instance = new Instance(getBytes());
 
