@@ -41,19 +41,20 @@ import java.nio.file.Files;
 
 class Example {
     public static void main(String[] args) {
-	    // Reads the WebAssembly module as bytes.
-	    byte[] wasmBytes = Files.readAllBytes("simple.wasm");
+        // Reads the WebAssembly module as bytes.
+        byte[] wasmBytes = Files.readAllBytes("simple.wasm");
 
-		// Instantiates the WebAssembly module.
-		Instanace = new Instance(wasmBytes);
+        // Instantiates the WebAssembly module.
+        Instanace = new Instance(wasmBytes);
 
-		// Calls an exported function, and returns an object array.
-		Object[] results = instance.exports.get("sum").apply(5, 37);
+        // Calls an exported function, and returns an object array.
+        Object[] results = instance.exports.get("sum").apply(5, 37);
 
-		System.out.println((Integer) results[0]); // 42
+        System.out.println((Integer) results[0]); // 42
 
-		instance.close();
-	}
+        // Drops an instance object pointer which is stored in Rust.
+        instance.close();
+    }
 }
 ```
 
@@ -72,7 +73,8 @@ int result = (Integer) results[0];
 
 System.out.println(result); // 3
 
-// Deletes an instance object pointer, but the garbage collector will call this method before an object is removed from the memory.
+// Drops an instance object pointer, but the garbage collector
+// will call this method before an object is removed from the memory.
 instance.close();
 ```
 
