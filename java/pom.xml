@@ -7,6 +7,9 @@
   <version>0.1</version>
   <name>wasmer</name>
   <url>https://wasmer.io/</url>
+  <properties>
+    <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
+  </properties>
   <dependencies>
     <dependency>
       <groupId>org.junit.jupiter</groupId>
@@ -34,7 +37,7 @@
         <version>2.22.2</version>
         <configuration>
           <argLine>-Djava.library.path=${project.basedir}/../target/release</argLine>
-        </configuration>   
+        </configuration>
       </plugin>
     </plugins>
   </build>
