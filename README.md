@@ -1,6 +1,6 @@
 <p align="center">
   <a href="https://wasmer.io" target="_blank" rel="noopener">
-    <img width="300" src="https://raw.githubusercontent.com/wasmerio/wasmer/master/logo.png" alt="Wasmer logo">
+    <img width="300" src="https://raw.githubusercontent.com/wasmerio/wasmer/master/assets/logo.png" alt="Wasmer logo">
   </a>
 </p>
 
@@ -11,7 +11,7 @@
     <img src="https://img.shields.io/github/license/wasmerio/wasmer.svg" alt="License"></a>
 </p>
 
-Wasmer is a Javac library for executing WebAssembly binaries:
+Wasmer is a Java library for executing WebAssembly binaries:
 
  * **Easy to use**: The `wasmer` API mimics the standard WebAssembly API,
  * **Fast**: `wasmer` executes the WebAssembly modules as fast as possible,
