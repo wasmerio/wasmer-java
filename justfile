@@ -23,6 +23,10 @@ test-rust:
 test-java: build-rust
 	cd java && mvn -X test
 
+# Make a JAR-file.
+package:
+    cd java && mvn package
+
 # Clean
 clean:
 	cargo clean
