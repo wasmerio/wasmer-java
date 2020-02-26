@@ -33,20 +33,18 @@ class MemoryTest {
     }
 
     @Test
-    void initialData() throws IOException, Exception {
+    void readStaticallyAllocatedDataInMemory() throws IOException, Exception {
         Instance instance = new Instance(getBytes("tests.wasm"));
 
         byte[] expectedData = "Hello, World!".getBytes();
 
-        /* According to the `wasm-objdump -x tests.wasm`, the data starts from 1048576.
-         * Data[1]:
-         * - segment[0] memory=0 size=13 - init i32=1048576
-         * - 0100000: 4865 6c6c 6f2c 2057 6f72 6c64 21         Hello, World!
-         */
+        int pointer = (Integer) instance.exports.get("string").apply()[0];
         Memory memory = instance.memories.get("memory");
-        byte[] readData = memory.read(1048576, expectedData.length);
+        byte[] readData = memory.read(pointer, expectedData.length);
 
         assertArrayEquals(expectedData, readData);
+
+        instance.close();
     }
 
     @Test
@@ -65,11 +63,11 @@ class MemoryTest {
         Instance instance = new Instance(getBytes("tests.wasm"));
 
         Memory memory = instance.memories.get("memory");
-        byte[] writeData = new byte[]{1, 2, 3, 4, 5};
-        memory.write(0, writeData);
+        byte[] data = new byte[]{1, 2, 3, 4, 5};
+        memory.write(0, data);
 
         byte[] readData = memory.read(0, 5);
-        assertArrayEquals(writeData, readData);
+        assertArrayEquals(data, readData);
 
         instance.close();
     }
@@ -139,26 +137,14 @@ class MemoryTest {
     void noMemory() throws IOException,Exception {
         Instance instance = new Instance(getBytes("no_memory.wasm"));
         Memory memory = instance.memories.get("memory");
+
         assertNull(memory);
-        instance.close();
-    }
-
-    @Test
-    void memoryData() throws IOException,Exception {
-        Instance instance = new Instance(getBytes("tests.wasm"));
-        Memory memory = instance.memories.get("memory");
-
-        int pointer = (Integer) instance.exports.get("string").apply()[0];
-        byte[] stringBytes = memory.read(pointer, 13);
-
-        String expected = "Hello, World!";
-        assertEquals(expected, new String(stringBytes));
 
         instance.close();
     }
 
     @Test
-    void memoryDataReadWrite() throws IOException,Exception {
+    void javaBorrowsRustMemory() throws IOException,Exception {
         Instance instance = new Instance(getBytes("tests.wasm"));
         Memory memory = instance.memories.get("memory");
 
@@ -168,7 +154,7 @@ class MemoryTest {
 
         memory.write(pointer, new byte[]{'A'});
 
-        assertEquals("Aello, World!", new String(memory.read(pointer, 13)));
+        assertEquals("Aello, World!", new String(instance.memories.get("memory").read(pointer, 13)));
 
         instance.close();
     }
