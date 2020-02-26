@@ -3,7 +3,7 @@ package org.wasmer;
 /**
  * `Module` is a Java class that represents a WebAssembly module.
  *
- * Examples:
+ * Example:
  * <pre>{@code
  * boolean isValid = Module.validate(wasmBytes);
  *
@@ -11,7 +11,7 @@ package org.wasmer;
  * Instance instance = module.instantiate();
  * }</pre>
  */
-class Module {
+public class Module {
     private native long nativeModuleInstantiate(Module self, byte[] moduleBytes) throws RuntimeException;
     private native void nativeDrop(long modulePointer);
     private native long nativeInstantiate(long modulePointer, Instance instance);
@@ -79,10 +79,20 @@ class Module {
         return instance;
     }
 
+    /**
+     * Create a serialized byte array from a WebAssembly module.
+     *
+     * @return Serialized bytes.
+     */
     public byte[] serialize() {
         return this.nativeSerialize(this.modulePointer);
     }
 
+    /**
+     * Create an original Module object from a byte array.
+     *
+     * @return Module object.
+     */
     public static Module deserialize(byte[] serializedBytes) {
         Module module = new Module();
         long modulePointer = Module.nativeDeserialize(module, serializedBytes);

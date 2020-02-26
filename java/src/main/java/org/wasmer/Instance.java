@@ -3,12 +3,12 @@ package org.wasmer;
 /**
  * `Instance` is a Java class that represents a WebAssembly instance.
  *
- * Examples:
+ * Example:
  * <pre>{@code
  * Instance instance = new Instance(wasmBytes);
- * }</pre> 
+ * }</pre>
  */
-class Instance {
+public class Instance {
     private native long nativeInstantiate(Instance self, byte[] moduleBytes) throws RuntimeException;
     private native void nativeDrop(long instancePointer);
     protected native Object[] nativeCall(long instancePointer, String exportName, Object[] arguments) throws RuntimeException;
