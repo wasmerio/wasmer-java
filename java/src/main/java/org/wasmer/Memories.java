@@ -24,6 +24,7 @@ class Memories {
      * Returns the memory object to which the specified name is mapped, or null if this contains no mapping for the name.
      *
      * @param name Memory name.
+     * @return Memory or null if `name` is not a memory name.
      */
     public Memory get(String name) {
         return this.inner.get(name);
