@@ -19,11 +19,14 @@ Wasmer is a Java library for executing WebAssembly binaries:
    importantly, completely safe and sandboxed.
 
 # Install
-TODO: Upload this project to [maven central](https://mvnrepository.com/repos/central)?  
+
+TODO: Upload this project to [maven central](https://mvnrepository.com/repos/central)?
 TODO: Write how to import this project to your project.
 
 # Example
-There is a toy program in `java/src/test/resources/simple.rs`, written in Rust (or any other language that compiles to WebAssembly):
+
+There is a toy program in `java/src/test/resources/simple.rs`, written
+in Rust (or any other language that compiles to WebAssembly):
 
 ```rust
 #[no_mangle]
@@ -32,7 +35,10 @@ pub extern fn sum(x: i32, y: i32) -> i32 {
 }
 ```
 
-After compilation to WebAssembly, the [`java/src/test/resources/simple.wasm`](https://github.com/wasmerio/java-ext-wasm/blob/master/java/src/test/resources/simple.wasm) binary file is generated. ([Download it](https://github.com/wasmerio/java-ext-wasm/raw/master/java/src/test/resources/simple.wasm)).
+After compilation to WebAssembly, the
+[`java/src/test/resources/simple.wasm`](https://github.com/wasmerio/java-ext-wasm/blob/master/java/src/test/resources/simple.wasm)
+binary file is generated. ([Download
+it](https://github.com/wasmerio/java-ext-wasm/raw/master/java/src/test/resources/simple.wasm)).
 
 Then, we can execute it in Java:
 
@@ -58,9 +64,14 @@ class Example {
 }
 ```
 
-# API of the `wasmer` extension/module
+# API of the `wasmer` library
+
 ## The `Instance` class
-Instantiates a WebAssembly module represented by bytes, and calls exported functions on it:
+
+The `Instance` constructor compiles and instantiates a WebAssembly
+module. It is built upon bytes.  From here, it is possible to call
+exported functions, or exported memories. For example:
+
 ```java
 // Instantiates the WebAssembly module.
 Instance instance = new Instance(wasmBytes);
@@ -73,30 +84,54 @@ int result = (Integer) results[0];
 
 System.out.println(result); // 3
 
-// Drops an instance object pointer, but the garbage collector
+// Drops an instance object pointer manually. Note that the garbage collector
 // will call this method before an object is removed from the memory.
 instance.close();
 ```
 
 ### Exported functions
-All exported functions are accessible on the `exports` field in the `Instance` class. Arguments of these functions are automatically casted to WebAssembly values.
+
+All exported functions are accessible on the `Instance.exports` field
+in the `Instance` class. The `get` method allows to get a single
+exported function by its name. An exported function is a Java closure,
+where all arguments are automatically casted to WebAssembly values if
+possible, and all results are of type `Object`, which can be typed to
+`Integer` or `Float` for instance.
+
 ```java
-Exports exportedFunction = instance.exports;
+Exports exportedFunctions = instance.exports;
+ExportedFunction sum = exportedFunctions.get("sum");
+
+Object[] results = sum.apply(1, 2);
+
+System.out.println((Integer) results[0]); // 3
 ```
 
 ### Exported memories
-The `memories` field exposes the `Memories` class representing the set of memories of that particular instance, e.g.:
+
+The `Instance.memories` field exposes the `Memories` class
+representing the set of memories of that particular instance, e.g.:
+
 ```java
 Memories memories = instance.memories;
 ```
-See the `Memory` class section for more information.
+
+See the [`Memory`][#memory] class section for more information.
 
 ## The `Module` class
-Compiles a sequence of bytes into a WebAssembly module. From here, it is possible to instantiate it:
+
+The `Module.validate` static method checks whether a sequence of bytes
+represents a valid WebAssembly module:
+
 ```java
 // Checks that given bytes represent a valid WebAssembly module.
 boolean isValid = Module.validate(wasmBytes);
+```
 
+The `Module` constructor compiles a sequence of bytes into a
+WebAssembly module. From here, it is possible to instantiate it:
+
+```java
 // Compiles the bytes into a WebAssembly module.
 Module module = new Module(wasmBytes);
 
@@ -105,7 +140,12 @@ Instance instance = module.instantiate();
 ```
 
 ### Serialization and deserialization
-The `Module.serialize` method and its complementary `Module.deserialize` static method help to respectively serialize and deserialize a compiled WebAssembly module, thus saving the compilation time for the next use:
+
+The `Module.serialize` method and its complementary
+`Module.deserialize` static method help to respectively serialize and
+deserialize a _compiled_ WebAssembly module, thus saving the compilation
+time for the next use:
+
 ```java
 // Compiles the bytes into a WebAssembly module.
 Module module1 = new Module(wasmBytes);
@@ -126,7 +166,11 @@ System.out.println((Integer) results[0]); // 3
 ```
 
 ## The `Memory` class
-A WebAssembly instance has a linear memory, represented by the `Memory` class. Let's see how to read it. Consider the following Rust program:
+
+A WebAssembly instance has a linear memory, represented by the
+`Memory` class. Let's see how to read it. Consider the following Rust
+program:
+
 ```rust
 #[no_mangle]
 pub extern fn return_hello() -> *const u8 {
@@ -134,7 +178,8 @@ pub extern fn return_hello() -> *const u8 {
 }
 ```
 
-The `return_hello` function returns a pointer to a string. This string is stored in the WebAssembly memory. Let's read it.
+The `return_hello` function returns a pointer to a string. This string
+is stored in the WebAssembly memory. Let's read it.
 
 ```java
 Instance instance = new Instance(wasmBytes);
@@ -154,92 +199,48 @@ instance.close();
 ```
 
 ### Memory grow
+
 The `Memory.grow` methods allows to grow the memory by a number of pages (of 64KiB each).
+
 ```java
 // Grows the memory by the specified number of pages, and returns the number of old pages.
 int oldPageSize = memory.grow(1);
 ```
 
 # Development
+
 You need [just](https://github.com/casey/just/) to build the project.
 
 To build Java parts, run the following command:
+
 ```sh
 $ just build-java
 ```
 
 To build Rust parts, run the following command:
+
 ```sh
 $ just build-rust
 ```
 
 To build the entire project, run the following command:
+
 ```sh
 $ just build
 ```
 
 # Testing
+
 Run the following command:
+
 ```sh
 $ just test
 ```
+
 Testing automatically build the project.
 
-# JNI overview
-Java allows to write native code, and to expose it through a Java
-interface. For example, in `Instance.java`, we can read:
-```java
-class Instance {
-    private native long nativeInstantiate(Instance self, byte[] moduleBytes) throws RuntimeException;
-    // …
-}
-```
-
-We define a public method to call a native method, such as:
-```java
-    public Instance(byte[] moduleBytes) throws RuntimeException {
-        long instancePointer = this.instantiate(this, moduleBytes);
-
-        this.instancePointer = instancePointer;
-    }
-```
-
-The native implementation is written in Rust. First, a C header is generated
-with `just build-headers` which is located in `include/`. The generated code for
-`nativeInstantiate` is the following:
-
-```c
-/*
- * Class:     org_wasmer_Instance
- * Method:    nativeInstantiate
- * Signature: (Lorg/wasmer/Instance;[B)J
- */
-JNIEXPORT jlong JNICALL Java_org_wasmer_Instance_nativeInstantiate
-  (JNIEnv *, jobject, jobject, jbyteArray);
-```
-
-Second, on the Rust side, we have to declare a function with the same naming:
-```rust
-#[no_mangle]
-pub extern "system" fn Java_org_wasmer_Instance_nativeInstantiate(
-    env: JNIEnv,
-    _class: JClass,
-    this: JObject,
-    module_bytes: jbyteArray,
-) -> jptr {
-    // …
-}
-```
-
-And the dynamic linking does the rest (it's done with the
-`java.library.path` configuration on the Java side). It uses a shared
-library (`.dylib` on macOS, `.so` on Linux, `.dll` on Windows).
-
-Then, we have to convert “Java data” to “Rust data”. [`jni-rs`'s
-documentation](https://docs.rs/jni/0.14.0/jni/index.html) is our best
-friend here.
-
 # What is WebAssembly?
+
 Quoting [the WebAssembly site](https://webassembly.org/):
 
 > WebAssembly (abbreviated Wasm) is a binary instruction format for a
@@ -260,6 +261,7 @@ About safety:
 > environment](https://webassembly.org/docs/semantics/#linear-memory) […].
 
 # License
+
 The entire project is under the MIT License. Please read [the
 `LICENSE` file][license].
 
