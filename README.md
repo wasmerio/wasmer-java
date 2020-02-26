@@ -1,14 +1,237 @@
-# Wasmer in Java
+<p align="center">
+  <a href="https://wasmer.io" target="_blank" rel="noopener">
+    <img width="300" src="https://raw.githubusercontent.com/wasmerio/wasmer/master/assets/logo.png" alt="Wasmer logo">
+  </a>
+</p>
 
-## Build and test
+<p align="center">
+  <a href="https://spectrum.chat/wasmer">
+    <img src="https://withspectrum.github.io/badge/badge.svg" alt="Join the Wasmer Community"></a>
+  <a href="https://github.com/wasmerio/wasmer/blob/master/LICENSE">
+    <img src="https://img.shields.io/github/license/wasmerio/wasmer.svg" alt="License"></a>
+</p>
 
-To build:
+Wasmer is a Java library for executing WebAssembly binaries:
+
+ * **Easy to use**: The `wasmer` API mimics the standard WebAssembly API,
+ * **Fast**: `wasmer` executes the WebAssembly modules as fast as possible,
+ * **Safe**: All calls to WebAssembly will be fast, but more
+   importantly, completely safe and sandboxed.
+
+# Install
+
+TODO: Upload this project to [maven central](https://mvnrepository.com/repos/central)?
+TODO: Write how to import this project to your project.
+
+# Example
+
+There is a toy program in `java/src/test/resources/simple.rs`, written
+in Rust (or any other language that compiles to WebAssembly):
+
+```rust
+#[no_mangle]
+pub extern fn sum(x: i32, y: i32) -> i32 {
+    x + y
+}
+```
+
+After compilation to WebAssembly, the
+[`java/src/test/resources/simple.wasm`](https://github.com/wasmerio/java-ext-wasm/blob/master/java/src/test/resources/simple.wasm)
+binary file is generated. ([Download
+it](https://github.com/wasmerio/java-ext-wasm/raw/master/java/src/test/resources/simple.wasm)).
+
+Then, we can execute it in Java:
+
+```java
+import java.nio.file.Files;
+
+class Example {
+    public static void main(String[] args) {
+        // Reads the WebAssembly module as bytes.
+        byte[] wasmBytes = Files.readAllBytes("simple.wasm");
+
+        // Instantiates the WebAssembly module.
+        Instanace = new Instance(wasmBytes);
+
+        // Calls an exported function, and returns an object array.
+        Object[] results = instance.exports.get("sum").apply(5, 37);
+
+        System.out.println((Integer) results[0]); // 42
+
+        // Drops an instance object pointer which is stored in Rust.
+        instance.close();
+    }
+}
+```
+
+# API of the `wasmer` library
+
+## The `Instance` class
+
+The `Instance` constructor compiles and instantiates a WebAssembly
+module. It is built upon bytes.  From here, it is possible to call
+exported functions, or exported memories. For example:
+
+```java
+// Instantiates the WebAssembly module.
+Instance instance = new Instance(wasmBytes);
+
+// Calls an exported function.
+Object[] results = instance.exports.get("sum").apply(1, 2);
+
+// Casts an object to an integer object because the result is an object array.
+int result = (Integer) results[0];
+
+System.out.println(result); // 3
+
+// Drops an instance object pointer manually. Note that the garbage collector
+// will call this method before an object is removed from the memory.
+instance.close();
+```
+
+### Exported functions
+
+All exported functions are accessible on the `Instance.exports` field
+in the `Instance` class. The `get` method allows to get a single
+exported function by its name. An exported function is a Java closure,
+where all arguments are automatically casted to WebAssembly values if
+possible, and all results are of type `Object`, which can be typed to
+`Integer` or `Float` for instance.
+
+```java
+Exports exportedFunctions = instance.exports;
+ExportedFunction sum = exportedFunctions.get("sum");
+
+Object[] results = sum.apply(1, 2);
+
+System.out.println((Integer) results[0]); // 3
+```
+
+### Exported memories
+
+The `Instance.memories` field exposes the `Memories` class
+representing the set of memories of that particular instance, e.g.:
+
+```java
+Memories memories = instance.memories;
+```
+
+See the [`Memory`][#memory] class section for more information.
+
+## The `Module` class
+
+The `Module.validate` static method checks whether a sequence of bytes
+represents a valid WebAssembly module:
+
+```java
+// Checks that given bytes represent a valid WebAssembly module.
+boolean isValid = Module.validate(wasmBytes);
+```
+
+The `Module` constructor compiles a sequence of bytes into a
+WebAssembly module. From here, it is possible to instantiate it:
+
+```java
+// Compiles the bytes into a WebAssembly module.
+Module module = new Module(wasmBytes);
+
+// Instantiates the WebAssembly module.
+Instance instance = module.instantiate();
+```
+
+### Serialization and deserialization
+
+The `Module.serialize` method and its complementary
+`Module.deserialize` static method help to respectively serialize and
+deserialize a _compiled_ WebAssembly module, thus saving the compilation
+time for the next use:
+
+```java
+// Compiles the bytes into a WebAssembly module.
+Module module1 = new Module(wasmBytes);
+
+// Serializes the module.
+byte[] serializedModule = module1.serialize();
+
+// Let's forget about the module for this example.
+module1 = null;
+
+// Deserializes the module.
+Module module2 = Module.deserialize(serializedModule);
+
+// Instantiates and uses it.
+Object[] results = module2.instantiate().exports.get("sum").apply(1, 2);
+
+System.out.println((Integer) results[0]); // 3
+```
+
+## The `Memory` class
+
+A WebAssembly instance has a linear memory, represented by the
+`Memory` class. Let's see how to read it. Consider the following Rust
+program:
+
+```rust
+#[no_mangle]
+pub extern fn return_hello() -> *const u8 {
+    b"Hello, World!\0".as_ptr()
+}
+```
+
+The `return_hello` function returns a pointer to a string. This string
+is stored in the WebAssembly memory. Let's read it.
+
+```java
+Instance instance = new Instance(wasmBytes);
+
+// Gets the memory by specifing its exported name.
+Memory memory = instance.memories.get("memory");
+
+// Gets the pointer value as an integer.
+int pointer = (Integer) instance.exports.get("return_hello").apply()[0];
+
+// Reads the data from the memory.
+byte[] stringBytes = memory.read(pointer, 13);
+
+System.out.println(new String(stringBytes)); // Hello, World!
+
+instance.close();
+```
+
+### Memory grow
+
+The `Memory.grow` methods allows to grow the memory by a number of pages (of 64KiB each).
+
+```java
+// Grows the memory by the specified number of pages, and returns the number of old pages.
+int oldPageSize = memory.grow(1);
+```
+
+# Development
+
+You need [just](https://github.com/casey/just/) to build the project.
+
+To build Java parts, run the following command:
+
+```sh
+$ just build-java
+```
+
+To build Rust parts, run the following command:
+
+```sh
+$ just build-rust
+```
+
+To build the entire project, run the following command:
 
 ```sh
 $ just build
 ```
 
-To test:
+# Testing
+
+Run the following command:
 
 ```sh
 $ just test
@@ -16,156 +239,30 @@ $ just test
 
 Testing automatically build the project.
 
-And yes, you need [`just`](https://github.com/casey/just/).
+# What is WebAssembly?
 
-## Workflows
+Quoting [the WebAssembly site](https://webassembly.org/):
 
-That's early development of this project, but here is how it works for
-the moment.
+> WebAssembly (abbreviated Wasm) is a binary instruction format for a
+> stack-based virtual machine. Wasm is designed as a portable target
+> for compilation of high-level languages like C/C++/Rust, enabling
+> deployment on the web for client and server applications.
 
-Java allows to write native code, and to expose it through a Java
-interface. For example, in `Instance.java`, we can read:
+About speed:
 
-```java
-class Instance {
-    private native long instantiate(Instance self, byte[] moduleBytes) throws RuntimeException;
-    // …
-}
-```
+> WebAssembly aims to execute at native speed by taking advantage of
+> [common hardware
+> capabilities](https://webassembly.org/docs/portability/#assumptions-for-efficient-execution)
+> available on a wide range of platforms.
 
-It is better for the moment to keep all the native implementations
-private, and to expose a friendly public method around it, such as:
+About safety:
 
-```java
-    public Instance(byte[] moduleBytes) throws RuntimeException {
-        long instancePointer = this.instantiate(this, moduleBytes);
+> WebAssembly describes a memory-safe, sandboxed [execution
+> environment](https://webassembly.org/docs/semantics/#linear-memory) […].
 
-        this.instancePointer = instancePointer;
-    }
-```
-
-The private implementation is written in Rust. First, a C header is
-generated (with `just build-headers` but it's automatically done for
-most workflows). It is located in `include/`. The generated code for
-`instantiate` is the following:
-
-```c
-/*
- * Class:     org_wasmer_Instance
- * Method:    instantiate
- * Signature: (Lorg/wasmer/Instance;[B)J
- */
-JNIEXPORT jlong JNICALL Java_org_wasmer_Instance_instantiate
-  (JNIEnv *, jobject, jobject, jbyteArray);
-```
-
-This code isn't particularily useful for us. It is used by the tools
-building the project.
-
-Second, on the Rust side, we have to declare a function with the same
-naming:
-
-```rust
-#[no_mangle]
-pub extern "system" fn Java_org_wasmer_Instance_instantiate(
-    env: JNIEnv,
-    _class: JClass,
-    this: JObject,
-    module_bytes: jbyteArray,
-) -> jptr {
-    // …
-}
-```
-
-And the dynamic linking does the rest (it's done with the
-`java.library.path` configuration on the Java side). It uses a shared
-library (`.dylib` on macOS, `.so` on Linux, `.dll` on Windows).
-
-Then, we have to convert “Java data” to “Rust data”. [`jni-rs`'s
-documentation](https://docs.rs/jni/0.14.0/jni/index.html) is our best
-friend here.
-
-### Opaque pointers
-
-Most of the time, we want to handle everything on the Rust side, with
-structures for example, and to just pass opaque pointers to Java. This
-is how it works for the moment. We have an `Instance` structure,
-managed by Rust, and a pointer is passed to Java. For example, the
-`instantiate` function returns a `jptr`, which is a type alias for
-`jlong` (semantics matters).
-
-There is this special `Pointer` structure that must be used with the
-following patterns:
-
-  * `Pointer::new(data).into()` to put the data on the heap, and to
-    return its pointer as a `jptr`,
-  * `let _: Pointer<Instance> = pointer.into()` to get a typed
-    `Pointer` from a `jptr`, but this data is owned! So once `Pointer`
-    goes out of scope, the data it holds is dropped,
-  * `let _: &mut Instance =
-    Into::<Pointer<Instance>>::into(pointer).borrow()` is similar to
-    the previous pattern, but this time, the data is borrowed.
-
-Those small patterns aimed at ensuring safety between Java <-> JNI <->
-Rust boundaries.
-
-### Panics, errors, and exceptions
-
-The project comes with an `unwrap_or_throw` utility function. It
-generates a `RuntimeException` in case of an error. This function
-doesn't stop the execution on the Rust side, so it must be used when
-the function returns a value.
-
-A typical usage is the following:
-
-```rust
-#[no_mangle]
-pub extern "system" fn Java_org_wasmer_Instance_instantiate(
-    env: JNIEnv,
-    _class: JClass,
-    this: JObject,
-    module_bytes: jbyteArray,
-) -> jptr {
-    let output = panic::catch_unwind(|| {
-        let module_bytes = env.convert_byte_array(module_bytes)?;
-        let java_instance = env.new_global_ref(this)?;
-
-        let instance = Instance::new(java_instance, module_bytes);
-
-        Ok(Pointer::new(instance).into())
-    });
-
-    unwrap_or_throw(&env, output)
-}
-```
-
-`output` contains the result of `panic::catch_unwind`. And
-`unwrap_or_throw` returns the pointer to an instance
-(`Ok(Pointer::new(…).into())`), or a `jptr::default()` value in case
-of an exception.
-
-Note: When testing exceptions with `just test`, it runs Maven on the
-background. The test plugin (Surefire) is broken with exceptions
-thrown on the native side (Rust side), but it works well outside
-Surefire.
-
-### Memory management
-
-Java is a garbage collected runtime. To avoid the garbage collector to
-collect our data, it's better to keep a `GlobalRef` of an object (see
-`Instance.java_instance`). I think it's the way to do. Not sure yet at
-100%.
-
-Java has destructors, called `finalize` methods. We must also add
-`close` methods, and it's up to the user to call them when the data
-must be dropped. This method must call an associated drop function on
-the Rust side. See `Java_org_wasmer_Instance_drop`. A `finalize`
-method must call a `close` method.
-
-## License
+# License
 
 The entire project is under the MIT License. Please read [the
 `LICENSE` file][license].
-
 
 [license]: https://github.com/wasmerio/wasmer/blob/master/LICENSE
