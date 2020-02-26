@@ -50,6 +50,7 @@ class ModuleTest {
         Instance instance = module.instantiate();
         assertEquals(3, (Integer) instance.exports.get("sum").apply(1, 2)[0]);
 
+        instance.close();
         module.close();
     }
 
@@ -57,6 +58,7 @@ class ModuleTest {
     void serialize() throws IOException,Exception {
         Module module = new Module(getBytes("tests.wasm"));
         assertTrue(module.serialize() instanceof byte[]);
+        module.close();
     }
 
     @Test
