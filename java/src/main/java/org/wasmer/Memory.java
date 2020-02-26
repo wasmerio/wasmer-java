@@ -19,14 +19,25 @@ import java.nio.ReadOnlyBufferException;
  * }</pre>
  */
 class Memory {
+    /**
+     * Represents the actual WebAssembly memory data, borrowed from the runtime (in Rust).
+     * The `setInner` method must be used to set this attribute.
+     */
     private ByteBuffer inner;
 
     private Memory() {
         // This object is instantiated by Rust.
     }
 
+    /**
+     * Set the `ByteBuffer` of this memory. See `Memory.inner` to learn more.
+     *
+     * In addition, this method correctly sets the endianess of the `ByteBuffer`.
+     */
     private void setInner(ByteBuffer inner) {
         this.inner = inner;
+
+        // Ensure the endianess matches WebAssemly specification.
         if (this.inner.order() != ByteOrder.LITTLE_ENDIAN) {
             this.inner.order(ByteOrder.LITTLE_ENDIAN);
         }
@@ -37,13 +48,14 @@ class Memory {
      *
      * @param offset The offset within the memory data of the first byte to be read.
      * @param length The number of bytes to be read from the memory data.
-     *
      * @return The set of bytes.
      */
     public byte[] read(int offset, int length) throws BufferUnderflowException, IllegalArgumentException {
         byte[] result = new byte[length];
+
         this.inner.position(offset);
         this.inner.get(result);
+
         return result;
     }
 
