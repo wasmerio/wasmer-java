@@ -9,7 +9,6 @@ use jni::{
     sys::{jboolean, jbyteArray},
     JNIEnv,
 };
-
 use std::{collections::HashMap, panic, rc::Rc};
 use wasmer_runtime::{self as runtime, validate, Export};
 use wasmer_runtime_core::{cache::Artifact, imports, load_cache_with};

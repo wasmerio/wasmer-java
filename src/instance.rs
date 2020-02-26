@@ -138,6 +138,7 @@ pub extern "system" fn Java_org_wasmer_Instance_nativeCall<'a>(
                 JObject::null(),
             )
             .expect("Failed to create a Java object array");
+
         if results.len() > 0 {
             for (i, result) in results.iter().enumerate() {
                 let obj = match result {
@@ -200,6 +201,7 @@ pub extern "system" fn Java_org_wasmer_Instance_nativeInitializeExportedFunction
         }
         Ok(())
     });
+
     joption_or_throw(&env, output).unwrap_or(())
 }
 
@@ -211,8 +213,11 @@ pub extern "system" fn Java_org_wasmer_Instance_nativeInitializeExportedMemories
 ) {
     let output = panic::catch_unwind(|| {
         let instance: &Instance = Into::<Pointer<Instance>>::into(instance_pointer).borrow();
+
         memory::java::initialize_memories(&env, instance)?;
+
         Ok(())
     });
+
     joption_or_throw(&env, output).unwrap_or(())
 }
