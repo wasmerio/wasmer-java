@@ -1,5 +1,7 @@
 use crate::{
     exception::{joption_or_throw, runtime_error, Error},
+    memory,
+    memory::Memory,
     types::{jptr, Pointer},
     value::{Value, DOUBLE_CLASS, FLOAT_CLASS, INT_CLASS, LONG_CLASS},
 };
@@ -8,14 +10,14 @@ use jni::{
     sys::{jbyteArray, jobjectArray},
     JNIEnv,
 };
-use std::{convert::TryFrom, panic, rc::Rc};
+use std::{collections::HashMap, convert::TryFrom, panic, rc::Rc};
 use wasmer_runtime::{imports, instantiate, Export, Value as WasmValue};
 use wasmer_runtime_core as core;
 
 pub struct Instance {
-    #[allow(unused)]
-    pub(crate) java_instance_object: GlobalRef,
-    pub(crate) instance: Rc<core::Instance>,
+    pub java_instance_object: GlobalRef,
+    pub instance: Rc<core::Instance>,
+    pub memories: HashMap<String, Memory>,
 }
 
 impl Instance {
@@ -32,9 +34,18 @@ impl Instance {
             }
         };
 
+        let memories: HashMap<String, Memory> = instance
+            .exports()
+            .filter_map(|(export_name, export)| match export {
+                Export::Memory(memory) => Some((export_name, Memory::new(Rc::new(memory)))),
+                _ => None,
+            })
+            .collect();
+
         Ok(Self {
             java_instance_object,
             instance,
+            memories,
         })
     }
 
@@ -127,6 +138,7 @@ pub extern "system" fn Java_org_wasmer_Instance_nativeCall<'a>(
                 JObject::null(),
             )
             .expect("Failed to create a Java object array");
+
         if results.len() > 0 {
             for (i, result) in results.iter().enumerate() {
                 let obj = match result {
@@ -166,6 +178,7 @@ pub extern "system" fn Java_org_wasmer_Instance_nativeInitializeExportedFunction
 ) {
     let output = panic::catch_unwind(|| {
         let instance: &Instance = Into::<Pointer<Instance>>::into(instance_pointer).borrow();
+
         let exports_object: JObject = env
             .get_field(
                 instance.java_instance_object.as_obj(),
@@ -186,6 +199,23 @@ pub extern "system" fn Java_org_wasmer_Instance_nativeInitializeExportedFunction
                 )?;
             }
         }
+        Ok(())
+    });
+
+    joption_or_throw(&env, output).unwrap_or(())
+}
+
+#[no_mangle]
+pub extern "system" fn Java_org_wasmer_Instance_nativeInitializeExportedMemories(
+    env: JNIEnv,
+    _class: JClass,
+    instance_pointer: jptr,
+) {
+    let output = panic::catch_unwind(|| {
+        let instance: &Instance = Into::<Pointer<Instance>>::into(instance_pointer).borrow();
+
+        memory::java::initialize_memories(&env, instance)?;
+
         Ok(())
     });
 

@@ -13,11 +13,13 @@ class Instance {
     private native void nativeDrop(long instancePointer);
     protected native Object[] nativeCall(long instancePointer, String exportName, Object[] arguments) throws RuntimeException;
     protected static native void nativeInitializeExportedFunctions(long instancePointer);
+    protected static native void nativeInitializeExportedMemories(long instancePointer);
 
     /**
      * All WebAssembly exported functions.
      */
     public final Exports exports;
+    public final Memories memories;
     protected long instancePointer;
 
     static {
@@ -32,15 +34,18 @@ class Instance {
      */
     public Instance(byte[] moduleBytes) throws RuntimeException {
         this.exports = new Exports(this);
+        this.memories = new Memories();
 
         long instancePointer = this.nativeInstantiate(this, moduleBytes);
         this.instancePointer = instancePointer;
 
         this.nativeInitializeExportedFunctions(instancePointer);
+        this.nativeInitializeExportedMemories(instancePointer);
     }
 
     protected Instance() {
         this.exports = new Exports(this);
+        this.memories = new Memories();
     }
 
     /**

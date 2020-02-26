@@ -1,6 +1,7 @@
 use crate::{
     exception::{joption_or_throw, runtime_error, Error},
     instance::Instance,
+    memory::Memory,
     types::{jptr, Pointer},
 };
 use jni::{
@@ -8,8 +9,8 @@ use jni::{
     sys::{jboolean, jbyteArray},
     JNIEnv,
 };
-use std::{panic, rc::Rc};
-use wasmer_runtime::{self as runtime, validate};
+use std::{collections::HashMap, panic, rc::Rc};
+use wasmer_runtime::{self as runtime, validate, Export};
 use wasmer_runtime_core::{cache::Artifact, imports, load_cache_with};
 
 pub struct Module {
@@ -114,9 +115,18 @@ pub extern "system" fn Java_org_wasmer_Module_nativeInstantiate(
             .instantiate(&import_object)
             .expect("Failed to instantiate a WebAssembly module.");
 
+        let memories: HashMap<String, Memory> = instance
+            .exports()
+            .filter_map(|(export_name, export)| match export {
+                Export::Memory(memory) => Some((export_name, Memory::new(Rc::new(memory)))),
+                _ => None,
+            })
+            .collect();
+
         Ok(Pointer::new(Instance {
             java_instance_object,
             instance: Rc::new(instance),
+            memories,
         })
         .into())
     });
