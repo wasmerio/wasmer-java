@@ -15,7 +15,6 @@ use wasmer_runtime::{imports, instantiate, Export, Value as WasmValue};
 use wasmer_runtime_core as core;
 
 pub struct Instance {
-    #[allow(unused)]
     pub java_instance_object: GlobalRef,
     pub instance: Rc<core::Instance>,
     pub memories: HashMap<String, Memory>,
