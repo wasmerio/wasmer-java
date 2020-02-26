@@ -116,7 +116,7 @@ representing the set of memories of that particular instance, e.g.:
 Memories memories = instance.memories;
 ```
 
-See the [`Memory`][#memory] class section for more information.
+See the [`Memory`](#memory) class section for more information.
 
 ## The `Module` class
 
