@@ -9,7 +9,7 @@ package org.wasmer;
  * an output.
  */
 @FunctionalInterface
-interface ExportedFunction<Input, Output> {
+public interface ExportedFunction<Input, Output> {
     @SuppressWarnings("unchecked")
-    Output apply(Input... args);
+    public Output apply(Input... args);
 }
