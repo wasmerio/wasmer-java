@@ -5,10 +5,10 @@ import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.junit.jupiter.api.Assertions.assertNull;
 
-import java.lang.IllegalArgumentException;
 import java.io.IOException;
-import java.nio.BufferUnderflowException;
+import java.lang.IllegalArgumentException;
 import java.nio.BufferOverflowException;
+import java.nio.BufferUnderflowException;
 import java.nio.ReadOnlyBufferException;
 import java.nio.file.Files;
 import java.nio.file.Path;
@@ -20,17 +20,6 @@ class MemoryTest {
     private byte[] getBytes(String filename) throws IOException,Exception {
         Path modulePath = Paths.get(getClass().getClassLoader().getResource(filename).getPath());
         return Files.readAllBytes(modulePath);
-    }
-
-    @Test
-    void isMemoryClass() throws IOException,Exception {
-        Instance instance = new Instance(getBytes("tests.wasm"));
-
-        instance.memories.inner().forEach((name, memory) -> {
-            assertTrue(memory instanceof Memory);
-        });
-
-        instance.close();
     }
 
     @Test

@@ -28,8 +28,4 @@ class Memories {
     public Memory get(String name) {
         return this.inner.get(name);
     }
-
-    protected Map<String, Memory> inner() {
-        return this.inner;
-    }
 }
