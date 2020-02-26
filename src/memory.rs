@@ -44,12 +44,17 @@ pub extern "system" fn Java_org_wasmer_Memory_nativeMemoryGrow(
                 view.len(),
             )
         };
-        let java_buffer = env.new_direct_byte_buffer(data)?;
+        // Create a new `JByteBuffer`, aka `java.nio.ByteBuffer`,
+        // borrowing the data from the WebAssembly memory.
+        let byte_buffer = env.new_direct_byte_buffer(data)?;
+
+        // Try to rewrite the `org.wasmer.Memory.inner` attribute by
+        // calling the `org.wasmer.Memory.setInner` method.
         env.call_method(
             memory_object,
             "setInner",
             "(Ljava/nio/ByteBuffer;)V",
-            &[JObject::from(java_buffer).into()],
+            &[JObject::from(byte_buffer).into()],
         )?;
 
         Ok(old_pages as i32)
