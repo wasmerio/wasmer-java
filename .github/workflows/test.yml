@@ -24,7 +24,7 @@ jobs:
       - name: Set up Java
         uses: actions/setup-java@v1
         with:
-          java-version: '8.0.x'
+          java-version: '11.0.x'
 
       - name: Set up Rust
         shell: bash
