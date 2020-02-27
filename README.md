@@ -20,8 +20,42 @@ Wasmer is a Java library for executing WebAssembly binaries:
 
 # Install
 
-TODO: Upload this project to [maven central](https://mvnrepository.com/repos/central)?
-TODO: Write how to import this project to your project.
+Need these tools in your environment:
+- [Maven](https://maven.apache.org/): a package management tool
+- [just](https://github.com/casey/just/): a build automation tool
+
+First, you need to download this project, and make `wasmer-0.1.jar` and
+`libjava_ext_wasm.so` by the `just package` command. `wasmer-0.1.jar` is the
+JAR file to contains Java interface for [`Wasmer`](https://github.com/wasmerio/wasmer).
+`libjava_ext_wasm.so` is the shared library of [`Wasmer`](https://github.com/wasmerio/wasmer)
+(`.dylib` on macOS, `.so` on Linux, `.dll` on Windows).
+
+```sh
+// Download java-ext-wasm.
+$ git clone https://github.com/wasmerio/java-ext-wasm/
+$ cd java-ext-wasm
+
+// Build the project and make a jar file.
+$ just package
+```
+
+You need to copy both files `wasmer-0.1.jar` and `libjava_ext_wasm.so` to your
+project. Then, install a jar file to your project, compile your Java source
+code, and execute it with the path which a shared library exists.
+```sh
+// Install a Wasmer plugin to our project.
+$ mvn install:install-file -Dfile=wasmer-0.1.jar
+
+// Compile java source files.
+$ mvn compile
+
+// Execute our project with the library path.
+$ MAVEN_OPTS=-Djava.library.path=. mvn exec:java
+```
+
+This is overall steps to execute your Java project with `java-ext-wasm`. For
+more information, you can see [the example
+project](https://github.com/d0iasm/example-java-ext-wasm).
 
 # Example
 
@@ -43,12 +77,13 @@ it](https://github.com/wasmerio/java-ext-wasm/raw/master/java/src/test/resources
 Then, we can execute it in Java:
 
 ```java
-import java.nio.file.Files;
-
 class Example {
     public static void main(String[] args) {
+        // simple.wasm is located at src/main/resources/.
+        Path wasmPath = Paths.get(new Example().getClass().getClassLoader().getResource("simple.wasm").getPath());
+
         // Reads the WebAssembly module as bytes.
-        byte[] wasmBytes = Files.readAllBytes("simple.wasm");
+        byte[] wasmBytes = Files.readAllBytes(wasmPath);
 
         // Instantiates the WebAssembly module.
         Instanace = new Instance(wasmBytes);
@@ -69,7 +104,7 @@ class Example {
 ## The `Instance` class
 
 The `Instance` constructor compiles and instantiates a WebAssembly
-module. It is built upon bytes.  From here, it is possible to call
+module. It is built upon bytes. From here, it is possible to call
 exported functions, or exported memories. For example:
 
 ```java
