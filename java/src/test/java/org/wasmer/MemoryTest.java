@@ -77,7 +77,7 @@ class MemoryTest {
         Instance instance = new Instance(getBytes("tests.wasm"));
         Memory memory = instance.memories.get("memory");
 
-        Exception exception = Assertions.assertThrows(RuntimeException.class, () -> {
+        Exception exception = Assertions.assertThrows(IllegalArgumentException.class, () -> {
             byte[] readData = memory.read(-1, 5);
         });
         String expected = "newPosition < 0: (-1 < 0)";
@@ -93,7 +93,7 @@ class MemoryTest {
         Instance instance = new Instance(getBytes("tests.wasm"));
         Memory memory = instance.memories.get("memory");
 
-        Exception exception = Assertions.assertThrows(RuntimeException.class, () -> {
+        Exception exception = Assertions.assertThrows(BufferUnderflowException.class, () -> {
             byte[] readData = memory.read(0, 1114113);
         });
 
@@ -107,7 +107,7 @@ class MemoryTest {
         Instance instance = new Instance(getBytes("tests.wasm"));
         Memory memory = instance.memories.get("memory");
 
-        Exception exception = Assertions.assertThrows(RuntimeException.class, () -> {
+        Exception exception = Assertions.assertThrows(IllegalArgumentException.class, () -> {
             memory.write(-1, new byte[]{1, 2, 3, 4, 5});
         });
         String expected = "newPosition < 0: (-1 < 0)";
@@ -124,7 +124,7 @@ class MemoryTest {
         Memory memory = instance.memories.get("memory");
 
         byte[] writeData = new byte[1114113];
-        Exception exception = Assertions.assertThrows(RuntimeException.class, () -> {
+        Exception exception = Assertions.assertThrows(BufferOverflowException.class, () -> {
             memory.write(0, writeData);
         });
 
@@ -181,7 +181,7 @@ class MemoryTest {
 
         int overIndex = memory.size() + 1;
         byte[] writeData = new byte[]{1, 2, 3, 4, 5};
-        Exception exception = Assertions.assertThrows(RuntimeException.class, () -> {
+        Exception exception = Assertions.assertThrows(IllegalArgumentException.class, () -> {
             memory.write(overIndex, writeData);
         });
         String expected = "newPosition > limit: (1114113 > 1114112)";
