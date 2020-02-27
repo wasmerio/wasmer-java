@@ -35,13 +35,14 @@ JAR file to contains Java interface for [`Wasmer`](https://github.com/wasmerio/w
 $ git clone https://github.com/wasmerio/java-ext-wasm/
 $ cd java-ext-wasm
 
-// Build the project and make a jar file.
+// Build the project and make a JAR file.
 $ just package
 ```
 
-You need to copy both files `wasmer-0.1.jar` and `libjava_ext_wasm.so` to your
-project. Then, install a jar file to your project, compile your Java source
-code, and execute it with the path which a shared library exists.
+You need to copy both files from `wasmer-0.1.jar` in the java/target directory and
+`libjava_ext_wasm.so` in the target/release directory to your project. Then, install
+a JAR file to your project, compile your Java source code, and execute it with the
+path which a shared library exists.
 ```sh
 // Install a Wasmer plugin to our project.
 $ mvn install:install-file -Dfile=wasmer-0.1.jar
