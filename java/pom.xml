@@ -38,6 +38,7 @@
         <version>3.0.0-M4</version>
         <configuration>
           <argLine>-Djava.library.path=${project.basedir}/../target/release</argLine>
+          <testFailureIgnore>true</testFailureIgnore>
         </configuration>
       </plugin>
     </plugins>
