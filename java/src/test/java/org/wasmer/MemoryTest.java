@@ -77,10 +77,10 @@ class MemoryTest {
         Instance instance = new Instance(getBytes("tests.wasm"));
         Memory memory = instance.memories.get("memory");
 
+        String expected = "newPosition < 0: (-1 < 0)";
         Exception exception = Assertions.assertThrows(RuntimeException.class, () -> {
             byte[] readData = memory.read(-1, 5);
-        });
-        String expected = "newPosition < 0: (-1 < 0)";
+        }, expected);
 
         assertTrue(exception instanceof IllegalArgumentException);
         assertEquals(expected, exception.getMessage());
@@ -107,10 +107,10 @@ class MemoryTest {
         Instance instance = new Instance(getBytes("tests.wasm"));
         Memory memory = instance.memories.get("memory");
 
+        String expected = "newPosition < 0: (-1 < 0)";
         Exception exception = Assertions.assertThrows(RuntimeException.class, () -> {
             memory.write(-1, new byte[]{1, 2, 3, 4, 5});
-        });
-        String expected = "newPosition < 0: (-1 < 0)";
+        }, expected);
 
         assertTrue(exception instanceof IllegalArgumentException);
         assertEquals(expected, exception.getMessage());
@@ -181,10 +181,10 @@ class MemoryTest {
 
         int overIndex = memory.size() + 1;
         byte[] writeData = new byte[]{1, 2, 3, 4, 5};
+        String expected = "newPosition > limit: (1114113 > 1114112)";
         Exception exception = Assertions.assertThrows(RuntimeException.class, () -> {
             memory.write(overIndex, writeData);
-        });
-        String expected = "newPosition > limit: (1114113 > 1114112)";
+        }, expected);
 
         assertTrue(exception instanceof IllegalArgumentException);
         assertEquals(expected, exception.getMessage());
