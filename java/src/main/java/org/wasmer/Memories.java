@@ -13,7 +13,7 @@ import java.util.Map;
  * Memory memory = memories.get("memory-name");
  * }</pre>
  */
-class Memories {
+public class Memories {
     private Map<String, Memory> inner;
 
     protected Memories() {

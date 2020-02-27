@@ -18,7 +18,7 @@ import java.nio.ReadOnlyBufferException;
  * byte[] bytes = memory.read(0, 5);
  * }</pre>
  */
-class Memory {
+public class Memory {
     private native int nativeMemoryGrow(Memory memory, long memoryPointer, int page);
 
     /**
