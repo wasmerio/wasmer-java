@@ -98,6 +98,8 @@ class InstanceTest {
 
         String expected = "Hello, World!";
         assertEquals(expected, new String(stringBytes));
+
+        instance.close();
     }
 
     @Test

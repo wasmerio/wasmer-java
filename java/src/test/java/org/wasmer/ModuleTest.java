@@ -12,10 +12,9 @@ import java.nio.file.Paths;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.Test;
 
-class moduleTest {
+class ModuleTest {
     private byte[] getBytes(String filename) throws IOException,Exception {
         Path modulePath = Paths.get(getClass().getClassLoader().getResource(filename).getPath());
-        System.out.println(modulePath);
         return Files.readAllBytes(modulePath);
     }
 
@@ -51,6 +50,7 @@ class moduleTest {
         Instance instance = module.instantiate();
         assertEquals(3, (Integer) instance.exports.get("sum").apply(1, 2)[0]);
 
+        instance.close();
         module.close();
     }
 
@@ -58,6 +58,7 @@ class moduleTest {
     void serialize() throws IOException,Exception {
         Module module = new Module(getBytes("tests.wasm"));
         assertTrue(module.serialize() instanceof byte[]);
+        module.close();
     }
 
     @Test

@@ -18,12 +18,15 @@ import java.nio.ReadOnlyBufferException;
  * byte[] bytes = memory.read(0, 5);
  * }</pre>
  */
-class Memory {
+public class Memory {
+    private native int nativeMemoryGrow(Memory memory, long memoryPointer, int page);
+
     /**
      * Represents the actual WebAssembly memory data, borrowed from the runtime (in Rust).
      * The `setInner` method must be used to set this attribute.
      */
     private ByteBuffer inner;
+    private long memoryPointer;
 
     private Memory() {
         // This object is instantiated by Rust.
@@ -77,5 +80,15 @@ class Memory {
      */
     public int size() {
         return this.inner.limit();
+    }
+
+    /**
+     * Grow this memory by the specified number of pages.
+     *
+     * @param page The number of pages to grow. 1 page size is 64KiB.
+     * @return The privious number of pages.
+     */
+    public int grow(int page) {
+        return this.nativeMemoryGrow(this, this.memoryPointer, page);
     }
 }
