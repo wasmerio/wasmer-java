@@ -15,6 +15,7 @@ import java.nio.file.Path;
 import java.nio.file.Paths;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.Disabled;
 
 class MemoryTest {
     private byte[] getBytes(String filename) throws IOException,Exception {
@@ -76,7 +77,7 @@ class MemoryTest {
     // TODO: We need to fix the root of the problematic
     // https://github.com/wasmerio/java-ext-wasm/runs/518222687
     @Test
-    @Ignore("Memory API needs to be fixed")
+    @Disabled("Memory API needs to be fixed")
     void readInvalidIndex() throws IOException,Exception {
         Instance instance = new Instance(getBytes("tests.wasm"));
         Memory memory = instance.memories.get("memory");
@@ -110,7 +111,7 @@ class MemoryTest {
     // TODO: We need to fix the root of the problematic
     // https://github.com/wasmerio/java-ext-wasm/runs/518222687
     @Test
-    @Ignore("Memory API needs to be fixed")
+    @Disabled("Memory API needs to be fixed")
     void writeInvalidIndex() throws IOException,Exception {
         Instance instance = new Instance(getBytes("tests.wasm"));
         Memory memory = instance.memories.get("memory");
@@ -186,7 +187,7 @@ class MemoryTest {
     // TODO: We need to fix the root of the problematic
     // https://github.com/wasmerio/java-ext-wasm/runs/518222687
     @Test
-    @Ignore("Memory API needs to be fixed")
+    @Disabled("Memory API needs to be fixed")
     void writeMemoryAfterGrow() throws IOException,Exception {
         Instance instance = new Instance(getBytes("tests.wasm"));
         Memory memory = instance.memories.get("memory");
