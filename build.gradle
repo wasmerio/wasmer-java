@@ -24,7 +24,7 @@ task generateJniHeaders(type: JavaCompile) {
     source = sourceSets.main.java
         options.compilerArgs += [
             '-h', file("include"),
-            '-d', file("${buildDir}/generated/jni-tmp")
+            // '-d', file("${buildDir}/generated/jni-tmp")
         ]
         options.verbose = true
 }
