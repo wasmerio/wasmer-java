@@ -30,9 +30,15 @@ jobs:
         shell: bash
         run: |
           curl https://sh.rustup.rs -sSf | sh -s -- -y
+          export PATH="$HOME/.cargo/bin:$PATH"
+
+      # - name: Run all the tests
+      #   shell: bash
+      #   run: |
+      #     export PATH="$HOME/.cargo/bin:$PATH"
+      #     make test
 
       - name: Run all the tests
-        shell: bash
-        run: |
-          export PATH="$HOME/.cargo/bin:$PATH"
-          make test
+        uses: eskatos/gradle-command-action@v1
+        with:
+          arguments: test
