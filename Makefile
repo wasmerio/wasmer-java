@@ -49,7 +49,7 @@ build-rust-x86_64-windows:
 
 # Compile the Java part.
 build-java:
-	./gradlew build
+	"./gradlew" build
 
 # Generate the Java C headers.
 build-headers: build-java
@@ -63,17 +63,14 @@ test-rust:
 
 # Run the Java tests.
 test-java:
-	./gradlew test
+	"./gradlew" test
 
 # Make a JAR-file.
 package:
-	./gradlew jar
+	"./gradlew" jar
 
 # Clean
 clean:
 	cargo clean
-	cd java && mvn clean
-
-# Local Variables:
-# mode: makefile
-# End:
+	rm -rf build
+	rm -rf artifacts
