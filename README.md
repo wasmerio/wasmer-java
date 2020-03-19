@@ -21,13 +21,12 @@ Wasmer is a Java library for executing WebAssembly binaries:
 # Install
 
 Need these tools in your environment:
-- [Maven](https://maven.apache.org/): a package management tool
-- [just](https://github.com/casey/just/): a build automation tool
+- [Gradle](https://gradle.org/): a package management tool
 
 First, you need to download this project, and make `wasmer-0.1.jar` and
-`libjava_ext_wasm.so` by the `just package` command. `wasmer-0.1.jar` is the
+`libwasmer-jni.so` by the `just package` command. `wasmer-0.1.jar` is the
 JAR file to contains Java interface for [`Wasmer`](https://github.com/wasmerio/wasmer).
-`libjava_ext_wasm.so` is the shared library of [`Wasmer`](https://github.com/wasmerio/wasmer)
+`libwasmer-jni.so` is the shared library of [`Wasmer`](https://github.com/wasmerio/wasmer)
 (`.dylib` on macOS, `.so` on Linux, `.dll` on Windows).
 
 ```sh
@@ -36,11 +35,11 @@ $ git clone https://github.com/wasmerio/java-ext-wasm/
 $ cd java-ext-wasm
 
 // Build the project and make a JAR file.
-$ just package
+$ make package
 ```
 
 You need to copy both files from `wasmer-0.1.jar` in the java/target directory and
-`libjava_ext_wasm.so` in the target/release directory to your project. Then, install
+`libwasmer-jni.so` in the target/release directory to your project. Then, install
 a JAR file to your project, compile your Java source code, and execute it with the
 path which a shared library exists.
 ```sh

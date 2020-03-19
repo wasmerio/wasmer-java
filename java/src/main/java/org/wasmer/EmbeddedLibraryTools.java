@@ -116,7 +116,7 @@ public class EmbeddedLibraryTools {
         String[] libs;
         final String libsFromProps = System.getProperty("wasmer-native");
         if (libsFromProps == null)
-            libs = new String[]{"libjava_ext_wasm.so", "libjava_ext_wasm.dylib", "java_ext_wasm.dll"};
+            libs = new String[]{"libwasmer_jni.so", "libwasmer_jni.dylib", "wasmer_jni.dll"};
         else
             libs = libsFromProps.split(",");
         StringBuilder url = new StringBuilder();
@@ -129,11 +129,11 @@ public class EmbeddedLibraryTools {
             if (nativeLibraryUrl != null)
                 break;
         }
-
+        // System.out.println(url.toString());
         if (nativeLibraryUrl != null) {
             // native library found within JAR, extract and load
             try {
-                final File libfile = File.createTempFile("java_ext_wasm", ".lib");
+                final File libfile = File.createTempFile("wasmer_jni", ".lib");
                 libfile.deleteOnExit(); // just in case
 
                 final InputStream in = nativeLibraryUrl.openStream();

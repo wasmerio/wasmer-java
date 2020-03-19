@@ -11,22 +11,21 @@ build-rust-all-targets: build-rust-x86_64-darwin build-rust-x86_64-linux build-r
 build-rust-x86_64-darwin:
 	rustup target add x86_64-apple-darwin
 	cargo build --release --target=x86_64-apple-darwin
-	mkdir -p artifacts/x86_64/darwin
-	cp target/release/libjava_ext_wasm.dylib artifacts/x86_64/darwin
-	install_name_tool -id "@rpath/libjava_ext_wasm.dylib" ./artifacts/x86_64/darwin/libjava_ext_wasm.dylib
-
+	mkdir -p artifacts/darwin-x86_64
+	cp target/x86_64-apple-darwin/release/libwasmer_jni.dylib artifacts/darwin-x86_64
+	install_name_tool -id "@rpath/libwasmer-jni.dylib" ./artifacts/darwin-x86_64/libwasmer_jni.dylib
 
 build-rust-x86_64-linux:
 	rustup target add x86_64-unknown-linux-gnu
 	cargo build --release --target=x86_64-unknown-linux-gnu
-	mkdir -p artifacts/x86_64/linux
-	cp target/release/libjava_ext_wasm.so artifacts/x86_64/linux
+	mkdir -p artifacts/linux-x86_64
+	cp target/x86_64-unknown-linux-gnu/release/libwasmer_jni.so artifacts/linux-x86_64/
 
 build-rust-x86_64-windows:
 	rustup target add x86_64-pc-windows-msvc
 	cargo build --release --target=x86_64-pc-windows-msvc
-	mkdir -p artifacts/x86_64/windows
-	cp target/release/libjava_ext_wasm.so artifacts/x86_64/windows
+	mkdir -p artifacts/windows-x86_64
+	cp target/x86_64-pc-windows-msvc/release/libwasmer_jni.so artifacts/windows-x86_64/
 
 # Compile the Java part.
 build-java:

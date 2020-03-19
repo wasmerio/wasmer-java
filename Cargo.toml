@@ -1,6 +1,6 @@
 [package]
 publish = false
-name = "java-ext-wasm"
+name = "wasmer-jni"
 version = "0.1.0"
 authors = ["Ivan Enderlin <ivan.enderlin@hoa-project.net>"]
 edition = "2018"

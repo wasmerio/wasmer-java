@@ -310,15 +310,6 @@ dependencies = [
 ]
 
 [[package]]
-name = "java-ext-wasm"
-version = "0.1.0"
-dependencies = [
- "jni 0.15.0 (registry+https://github.com/rust-lang/crates.io-index)",
- "wasmer-runtime 0.16.2 (registry+https://github.com/rust-lang/crates.io-index)",
- "wasmer-runtime-core 0.16.2 (registry+https://github.com/rust-lang/crates.io-index)",
-]
-
-[[package]]
 name = "jni"
 version = "0.15.0"
 source = "registry+https://github.com/rust-lang/crates.io-index"
@@ -716,6 +707,15 @@ dependencies = [
  "thiserror 1.0.11 (registry+https://github.com/rust-lang/crates.io-index)",
  "wasmer-clif-fork-frontend 0.59.0 (registry+https://github.com/rust-lang/crates.io-index)",
  "wasmparser 0.51.4 (registry+https://github.com/rust-lang/crates.io-index)",
+]
+
+[[package]]
+name = "wasmer-jni"
+version = "0.1.0"
+dependencies = [
+ "jni 0.15.0 (registry+https://github.com/rust-lang/crates.io-index)",
+ "wasmer-runtime 0.16.2 (registry+https://github.com/rust-lang/crates.io-index)",
+ "wasmer-runtime-core 0.16.2 (registry+https://github.com/rust-lang/crates.io-index)",
 ]
 
 [[package]]

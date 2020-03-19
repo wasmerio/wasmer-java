@@ -6,13 +6,19 @@ plugins {
 
 version = '0.1.0'
 
+// This is neede for the Java plugin to make sure
+// the generated class files are compatible with
+// old versions of Java.
+sourceCompatibility = 1.8
+targetCompatibility = 1.8
+
 task buildLocal(type:Exec) {
   commandLine 'make', 'build-rust'
 }
 
-task buildTargets(type:Exec) {
-  commandLine 'make', 'build-rust-all-targets'
-}
+// task buildTargets(type:Exec) {
+//   commandLine 'make', 'build-rust-all-targets'
+// }
 
 task copyAllArtifacts(type: Copy) {
     from "artifacts"
@@ -38,7 +44,6 @@ sourceSets {
             srcDirs 'java/src/main'
         }
     }
-
     test {
         resources {
             srcDirs "java/src/test/resources"

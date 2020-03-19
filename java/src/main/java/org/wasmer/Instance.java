@@ -25,7 +25,7 @@ public class Instance {
     static {
         // if no embedded native library, revert to loading from java.library.path
         if (!EmbeddedLibraryTools.LOADED_EMBEDDED_LIBRARY)
-            System.loadLibrary("java_ext_wasm");
+            System.loadLibrary("wasmer_jni");
     }
 
     /**

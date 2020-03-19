@@ -31,20 +31,8 @@ jobs:
         run: |
           curl https://sh.rustup.rs -sSf | sh -s -- -y
 
-      - name: Set up just
-        shell: bash
-        run: |
-          export PATH="$HOME/.cargo/bin:$PATH"
-          test -f $HOME/.cargo/bin/just || cargo install just
-
-      - name: Build the project
-        shell: bash
-        run: |
-          export PATH="$HOME/.cargo/bin:$PATH"
-          just build
-
       - name: Run all the tests
         shell: bash
         run: |
           export PATH="$HOME/.cargo/bin:$PATH"
-          just test
+          make test
