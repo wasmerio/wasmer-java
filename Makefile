@@ -1,9 +1,29 @@
+UNAME_S := $(shell uname -s)
+
+ifeq ($(UNAME_S),Darwin)
+	build_os := darwin
+endif
+ifeq ($(OS),Windows_NT)
+	build_os := windows
+endif
+ifeq ($(UNAME_S),Linux)
+	build_os := linux
+endif
+ARCH := $(shell uname -m)
+ifeq ($(ARCH),x86_64)
+	build_arch = x86_64
+else
+	$(error Architecture not supported yet)
+endif
+
 # Compile everything!
 build: build-headers build-rust build-java
 
-# Compile the Rust part.
-build-rust: 
-	cargo build --release
+# Compile the Rust part (only for one target).
+# We relay this command to the others, to make sure that
+# Artifacts are set properly
+build-rust: build-rust-$(build_arch)-$(build_os)
+	# cargo build --release
 
 # Compile the Rust part.
 build-rust-all-targets: build-rust-x86_64-darwin build-rust-x86_64-linux build-rust-x86_64-windows
