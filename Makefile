@@ -55,7 +55,7 @@ build-java:
 build-headers: build-java
 
 # Run the tests.
-test: build-headers test-rust test-java
+test: test-rust build-headers test-java
 
 # Run the Rust tests.
 test-rust:
@@ -68,6 +68,10 @@ test-java:
 # Make a JAR-file.
 package:
 	"./gradlew" jar
+
+# Publish the package artifact to a public repository
+publish:
+	"./gradlew" publish
 
 # Clean
 clean:

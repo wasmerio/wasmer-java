@@ -1,10 +1,21 @@
 plugins {
     id 'java'
     id 'java-library'
-    id 'maven'
 }
 
-version = '0.1.0'
+version '0.1.0'
+group 'org.wasmer'
+
+allprojects {
+    group 'org.wasmer'
+    version '0.1.0'
+}
+
+javadoc {
+    options.links 'https://docs.oracle.com/javase/8/docs/api/'
+    // TODO: change when https://github.com/gradle/gradle/issues/2354 is fixed
+    options.addStringOption 'Xdoclint:all', '-Xdoclint:-missing'
+}
 
 // This is neede for the Java plugin to make sure
 // the generated class files are compatible with
@@ -79,3 +90,83 @@ tasks.withType(Test) {
 // We build the integration before running any test
 compileTestJava.dependsOn buildLocal
 processResources.dependsOn copyAllArtifacts
+
+// To publish it
+task publish(dependsOn: build) {
+    print   "CACA"
+    publishSettings(project, 'wasmer-jni', false)
+    publishSettings(project, 'wasmer-jni-annotations', true)
+}
+
+def publishSettings(project, projectName, includeJavadoc) {
+    project.with {
+        if (!project.hasProperty('ossrhUsername')) return
+        apply plugin: 'maven'
+        apply plugin: 'signing'
+
+        archivesBaseName = projectName
+
+        task packageSources(type: Jar) {
+            classifier = 'sources'
+            from sourceSets.main.allSource
+        }
+
+        if (includeJavadoc) {
+            task packageJavadoc(type: Jar, dependsOn: 'javadoc') {
+                from javadoc.destinationDir
+                classifier = 'javadoc'
+            }
+        } else {
+            task packageJavadoc(type: Jar) {
+                // Empty to satisfy Sonatype's javadoc.jar requirement
+                classifier 'javadoc'
+            }
+        }
+
+        artifacts {
+            archives packageSources, packageJavadoc
+        }
+
+        signing {
+            sign configurations.archives
+        }
+
+        uploadArchives {
+            repositories {
+                mavenDeployer {
+                    beforeDeployment { MavenDeployment deployment -> signing.signPom(deployment) }
+                    repository(url: 'https://oss.sonatype.org/service/local/staging/deploy/maven2/') {
+                        authentication(userName: ossrhUsername, password: ossrhPassword)
+                    }
+                    snapshotRepository(url: 'https://oss.sonatype.org/content/repositories/snapshots/') {
+                        authentication(userName: ossrhUsername, password: ossrhPassword)
+                    }
+                    pom.project {
+                        name projectName
+                        packaging 'jar'
+                        description 'Wasmer is a library to execute WebAssembly binaries'
+                        url 'https://wasmer.io'
+                        scm {
+                            connection 'scm:git:git@github.com:wasmerio/java-ext-wasm.git'
+                            developerConnection 'scm:git:git@github.com:wasmerio/java-ext-wasm.git'
+                            url 'git@github.com:wasmerio/java-ext-wasm.git'
+                        }
+                        licenses {
+                            license {
+                                name 'MIT License'
+                                url 'https://opensource.org/licenses/MIT'
+                            }
+                        }
+                        developers {
+                            developer {
+                                id 'syrusakbary'
+                                name 'Syrus Akbary'
+                                url 'https://github.com/syrusakbary'
+                            }
+                        }
+                    }
+                }
+            }
+        }
+    }
+}
