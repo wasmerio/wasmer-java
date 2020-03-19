@@ -245,24 +245,22 @@ int oldPageSize = memory.grow(1);
 
 # Development
 
-You need [just](https://github.com/casey/just/) to build the project.
-
 To build Java parts, run the following command:
 
 ```sh
-$ just build-java
+$ make build-java
 ```
 
 To build Rust parts, run the following command:
 
 ```sh
-$ just build-rust
+$ make build-rust
 ```
 
 To build the entire project, run the following command:
 
 ```sh
-$ just build
+$ make build
 ```
 
 # Testing
@@ -270,7 +268,7 @@ $ just build
 Run the following command:
 
 ```sh
-$ just test
+$ make test
 ```
 
 Testing automatically build the project.

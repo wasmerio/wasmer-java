@@ -22,7 +22,9 @@ public class Module {
     private long modulePointer;
 
     static {
-        System.loadLibrary("java_ext_wasm");
+        // if no embedded native library, revert to loading from java.library.path
+        if (!EmbeddedLibraryTools.LOADED_EMBEDDED_LIBRARY)
+            System.loadLibrary("java_ext_wasm");
     }
 
     /**

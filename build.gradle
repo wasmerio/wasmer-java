@@ -1,0 +1,76 @@
+plugins {
+    id 'java'
+    id 'java-library'
+    id 'maven'
+}
+
+version = '0.1.0'
+
+task buildLocal(type:Exec) {
+  commandLine 'make', 'build-rust'
+}
+
+task buildTargets(type:Exec) {
+  commandLine 'make', 'build-rust-all-targets'
+}
+
+task copyAllArtifacts(type: Copy) {
+    from "artifacts"
+    include "**/*"
+    into "$buildDir/toArtifact/org/wasmer/native/"
+}
+
+repositories {
+    jcenter()
+    google()
+    maven {
+        url "https://plugins.gradle.org/m2/"
+    }
+}
+
+sourceSets {
+    main {
+        resources {
+            srcDirs "$buildDir/toArtifact"
+            srcDirs "java/src/main/resources"
+        }
+        java {
+            srcDirs 'java/src/main'
+        }
+    }
+
+    test {
+        resources {
+            srcDirs "java/src/test/resources"
+        }
+        java {
+            srcDir 'java/src/test'
+        }
+    }
+}
+
+dependencies {
+    testImplementation('org.junit.jupiter:junit-jupiter-api:5.4.2')
+    testRuntime('org.junit.jupiter:junit-jupiter-engine:5.4.2')
+}
+
+test {
+    useJUnitPlatform()
+}
+
+jar {
+    manifest {
+        attributes('Implementation-Title': project.name,
+                   'Implementation-Version': project.version)
+    }
+}
+
+tasks.withType(Test) {
+    // We add the path, so the Java Tests can find the
+    // shared object file
+    systemProperty "java.library.path", "target/release/"
+}
+
+// We build the integration before running any test
+compileTestJava.dependsOn buildLocal
+processResources.dependsOn copyAllArtifacts
