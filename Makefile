@@ -45,7 +45,7 @@ build-rust-x86_64-windows:
 	rustup target add x86_64-pc-windows-msvc
 	cargo build --release --target=x86_64-pc-windows-msvc
 	mkdir -p artifacts/windows-x86_64
-	cp target/x86_64-pc-windows-msvc/release/libwasmer_jni.so artifacts/windows-x86_64/
+	cp target/x86_64-pc-windows-msvc/release/wasmer_jni.dll artifacts/windows-x86_64/
 
 # Compile the Java part.
 build-java:
