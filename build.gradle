@@ -24,11 +24,11 @@ task generateJniHeaders(type: JavaCompile) {
     source = sourceSets.main.java
         options.compilerArgs += [
             '-h', file("include"),
-            '-d', file("${buildDir}/generated/jni-tmp")
+            '-d', file("include-tmp")
         ]
         options.verbose = true
     doLast {
-        delete file("${buildDir}/generated/jni-tmp")
+        delete file("include-tmp")
     }
 }
 
