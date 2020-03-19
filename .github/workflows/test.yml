@@ -24,7 +24,7 @@ jobs:
       - name: Set up Java
         uses: actions/setup-java@v1
         with:
-          java-version: '11.0.x'
+          java-version: 1.8
 
       - name: Set up Rust
         shell: bash
@@ -32,13 +32,13 @@ jobs:
           curl https://sh.rustup.rs -sSf | sh -s -- -y
           export PATH="$HOME/.cargo/bin:$PATH"
 
-      # - name: Run all the tests
-      #   shell: bash
-      #   run: |
-      #     export PATH="$HOME/.cargo/bin:$PATH"
-      #     make test
-
       - name: Run all the tests
-        uses: eskatos/gradle-command-action@v1
-        with:
-          arguments: test
+        shell: bash
+        run: |
+          export PATH="$HOME/.cargo/bin:$PATH"
+          make test
+
+      # - name: Run all the tests
+      #   uses: eskatos/gradle-command-action@v1
+      #   with:
+      #     arguments: test
