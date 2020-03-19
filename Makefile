@@ -52,10 +52,11 @@ build-java:
 	"./gradlew" build
 
 # Generate the Java C headers.
-build-headers: build-java
+build-headers:
+	"./gradlew" generateJniHeaders
 
 # Run the tests.
-test: test-rust build-headers test-java
+test: build-headers test-rust test-java
 
 # Run the Rust tests.
 test-rust:
