@@ -26,11 +26,15 @@ jobs:
         with:
           java-version: 1.8
 
-      - name: Set up Rust
-        shell: bash
-        run: |
-          curl https://sh.rustup.rs -sSf | sh -s -- -y
-          export PATH="$HOME/.cargo/bin:$PATH"
+      # - name: Set up Rust
+      #   shell: bash
+      #   run: |
+      #     curl https://sh.rustup.rs -sSf | sh -s -- -y
+      #     export PATH="$HOME/.cargo/bin:$PATH"
+
+      # Instal Rust from other source
+      - name: Install Rust toolchain
+        uses: actions-rs/toolchain@v1
 
       - name: Run all the tests
         shell: bash
