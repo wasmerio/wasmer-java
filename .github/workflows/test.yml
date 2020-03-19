@@ -35,6 +35,9 @@ jobs:
       # Instal Rust from other source
       - name: Install Rust toolchain
         uses: actions-rs/toolchain@v1
+        with:
+          toolchain: stable
+          profile: minimal
 
       - name: Run all the tests
         shell: bash
