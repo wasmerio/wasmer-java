@@ -56,7 +56,7 @@ build-headers:
 	"./gradlew" generateJniHeaders
 
 # Run the tests.
-test: build-headers test-rust test-java
+test: build-headers test-rust build-java test-java
 
 # Run the Rust tests.
 test-rust:
