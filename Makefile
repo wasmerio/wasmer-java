@@ -62,12 +62,15 @@ test-rust: build-rust-$(build_arch)-$(build_os) test-rust-$(build_arch)-$(build_
 
 test-rust-x86_64-darwin:
 	cargo test --release --target=x86_64-apple-darwin
+	ln -s x86_64-apple-darwin/release target/release
 
 test-rust-x86_64-linux:
 	cargo test --release --target=x86_64-unknown-linux-gnu
+	ln -s x86_64-unknown-linux-gnu/release target/release
 
 test-rust-x86_64-windows:
 	cargo test --release --target=x86_64-pc-windows-msvc
+	ln -s x86_64-pc-windows-msvc/release target/release
 
 # Run the Java tests.
 test-java:
