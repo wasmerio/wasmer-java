@@ -12,6 +12,14 @@ package org.wasmer;
  * }</pre>
  */
 public class Module {
+    /**
+     * Native bindings.
+     */
+    static {
+        // if no embedded native library, revert to loading from java.library.path
+        if (!EmbeddedLibraryTools.LOADED_EMBEDDED_LIBRARY)
+            System.loadLibrary("wasmer_jni");
+    }
     private native long nativeModuleInstantiate(Module self, byte[] moduleBytes) throws RuntimeException;
     private native void nativeDrop(long modulePointer);
     private native long nativeInstantiate(long modulePointer, Instance instance);
@@ -21,11 +29,6 @@ public class Module {
 
     private long modulePointer;
 
-    static {
-        // if no embedded native library, revert to loading from java.library.path
-        if (!EmbeddedLibraryTools.LOADED_EMBEDDED_LIBRARY)
-            System.loadLibrary("wasmer_jni");
-    }
 
     /**
      * Check that given bytes represent a valid WebAssembly module.
@@ -48,8 +51,7 @@ public class Module {
         this.modulePointer = modulePointer;
     }
 
-    private Module() {
-    }
+    private Module() {}
 
     /**
      * Delete a module object pointer.
