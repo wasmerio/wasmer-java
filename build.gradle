@@ -12,36 +12,35 @@ allprojects {
     version '0.1.0'
 }
 
-javadoc {
-    options.links 'https://docs.oracle.com/javase/8/docs/api/'
-    // TODO: change when https://github.com/gradle/gradle/issues/2354 is fixed
-    options.addStringOption 'Xdoclint:all', '-Xdoclint:-missing'
-}
-
-task generateJniHeaders(type: JavaCompile) {
-    classpath = sourceSets.main.compileClasspath
-    destinationDir file("include")
-    source = sourceSets.main.java
-        options.compilerArgs += [
-            '-h', file("include"),
-        ]
-        options.verbose = true
-}
-
 // This is needed for the Java plugin to make sure
 // the generated class files are compatible with
 // old versions of Java.
 sourceCompatibility = 1.8
 targetCompatibility = 1.8
 
-task buildLocal(type:Exec) {
-  commandLine 'make', 'build-rust'
+sourceSets {
+    main {
+        java {
+            srcDir 'src'
+        }
+        resources {
+            srcDir "$buildDir/toArtifact"
+        }
+    }
+    test {
+        java {
+            srcDir 'tests'
+        }
+        resources {
+            srcDir 'tests/resources'
+        }
+    }
 }
 
-task copyAllArtifacts(type: Copy) {
-    from "artifacts"
-    include "**/*"
-    into "$buildDir/toArtifact/org/wasmer/native/"
+javadoc {
+    options.links 'https://docs.oracle.com/javase/8/docs/api/'
+    // TODO: change when https://github.com/gradle/gradle/issues/2354 is fixed
+    options.addStringOption 'Xdoclint:all', '-Xdoclint:-missing'
 }
 
 repositories {
@@ -49,25 +48,6 @@ repositories {
     google()
     maven {
         url "https://plugins.gradle.org/m2/"
-    }
-}
-
-sourceSets {
-    main {
-        resources {
-            srcDirs "$buildDir/toArtifact"
-        }
-        java {
-            srcDirs 'src'
-        }
-    }
-    test {
-        resources {
-            srcDirs "tests/resources"
-        }
-        java {
-            srcDir 'tests'
-        }
     }
 }
 
@@ -85,6 +65,26 @@ jar {
         attributes('Implementation-Title': project.name,
                    'Implementation-Version': project.version)
     }
+}
+
+task generateJniHeaders(type: JavaCompile) {
+    classpath = sourceSets.main.compileClasspath
+    destinationDir file("include")
+    source = sourceSets.main.java
+    options.compilerArgs += [
+        '-h', file("include"),
+    ]
+    options.verbose = true
+}
+
+task buildLocal(type:Exec) {
+    commandLine 'make', 'build-rust'
+}
+
+task copyAllArtifacts(type: Copy) {
+    from "artifacts"
+    include "**/*"
+    into "$buildDir/toArtifact/org/wasmer/native/"
 }
 
 tasks.withType(Test) {
