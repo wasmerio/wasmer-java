@@ -60,6 +60,12 @@ public class Memory {
             throw new IllegalArgumentException("newPosition < 0: (" +  offset + " < 0)");
         }
 
+        int size = this.size();
+
+        if (offset > size) {
+            throw new IllegalArgumentException("newPosition > limit: (" + offset + " > " + size + ")");
+        }
+
         this.inner.position(offset);
         this.inner.get(result);
 
@@ -75,6 +81,12 @@ public class Memory {
     public void write(int offset, byte[] data) throws BufferOverflowException, IllegalArgumentException, ReadOnlyBufferException {
         if (offset < 0) {
             throw new IllegalArgumentException("newPosition < 0: (" +  offset + " < 0)");
+        }
+
+        int size = this.size();
+
+        if (offset > size) {
+            throw new IllegalArgumentException("newPosition > limit: (" + offset + " > " + size + ")");
         }
 
         this.inner.position(offset);
