@@ -21,9 +21,8 @@ build: build-headers build-rust build-java
 
 # Compile the Rust part (only for one target).
 # We relay this command to the others, to make sure that
-# Artifacts are set properly
+# artifacts are set properly.
 build-rust: build-rust-$(build_arch)-$(build_os)
-	# cargo build --release
 
 # Compile the Rust part.
 build-rust-all-targets: build-rust-x86_64-darwin build-rust-x86_64-linux build-rust-x86_64-windows
