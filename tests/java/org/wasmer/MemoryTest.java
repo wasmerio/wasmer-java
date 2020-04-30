@@ -73,11 +73,7 @@ class MemoryTest {
         instance.close();
     }
 
-    // Skipping as it currently makes our CI unhappy.
-    // TODO: We need to fix the root of the problematic
-    // https://github.com/wasmerio/java-ext-wasm/runs/518222687
     @Test
-    @Disabled("Memory API needs to be fixed")
     void readInvalidIndex() throws IOException,Exception {
         Instance instance = new Instance(getBytes("tests.wasm"));
         Memory memory = instance.memories.get("memory");

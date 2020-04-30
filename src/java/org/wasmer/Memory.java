@@ -56,6 +56,10 @@ public class Memory {
     public byte[] read(int offset, int length) throws BufferUnderflowException, IllegalArgumentException {
         byte[] result = new byte[length];
 
+        if (offset < 0) {
+            throw new IllegalArgumentException("newPosition < 0: (" +  offset + " < 0)");
+        }
+
         this.inner.position(offset);
         this.inner.get(result);
 
