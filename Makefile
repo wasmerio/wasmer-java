@@ -32,7 +32,7 @@ build-rust-x86_64-darwin:
 	cargo build --release --target=x86_64-apple-darwin
 	mkdir -p artifacts/darwin-x86_64
 	cp target/x86_64-apple-darwin/release/libwasmer_jni.dylib artifacts/darwin-x86_64
-	install_name_tool -id "@rpath/libwasmer-jni.dylib" ./artifacts/darwin-x86_64/libwasmer_jni.dylib
+	install_name_tool -id "@rpath/libwasmer_jni.dylib" ./artifacts/darwin-x86_64/libwasmer_jni.dylib
 
 build-rust-x86_64-linux:
 	rustup target add x86_64-unknown-linux-gnu
