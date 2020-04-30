@@ -1,4 +1,5 @@
-/target
-/build
-/artifacts
 /.gradle
+/artifacts
+/build
+/include/org/
+/target
