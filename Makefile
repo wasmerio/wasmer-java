@@ -48,7 +48,7 @@ build-rust-x86_64-windows:
 
 # Compile the Java part.
 build-java:
-	"./gradlew" build --debug
+	"./gradlew" build --info
 
 # Generate the Java C headers.
 build-headers:
@@ -63,7 +63,7 @@ test-rust:
 
 # Run the Java tests.
 test-java:
-	"./gradlew" test --debug
+	"./gradlew" test --info
 
 # Make a JAR-file.
 package:
