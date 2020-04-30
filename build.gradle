@@ -21,18 +21,18 @@ targetCompatibility = 1.8
 sourceSets {
     main {
         java {
-            srcDir 'src'
+            srcDirs = ['src/java']
         }
         resources {
-            srcDir "$buildDir/toArtifact"
+            srcDirs = ["$buildDir/toArtifact"]
         }
     }
     test {
         java {
-            srcDir 'tests'
+            srcDirs = ['tests']
         }
         resources {
-            srcDir 'tests/resources'
+            srcDirs = ['tests/resources']
         }
     }
 }
