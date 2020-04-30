@@ -94,7 +94,7 @@ task copyAllArtifacts(type: Copy) {
 tasks.withType(Test) {
     // We add the path, so the Java Tests can find the
     // shared object file
-    systemProperty "java.library.path", "target/release/"
+    systemProperty "java.library.path", "target/current/"
 
     // Don't capture the standard output.
     testLogging {
