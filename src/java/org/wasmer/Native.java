@@ -14,15 +14,14 @@ import java.util.List;
 import java.util.jar.JarEntry;
 import java.util.jar.JarFile;
 
-public class EmbeddedLibraryTools {
-
+public class Native {
     public static final boolean LOADED_EMBEDDED_LIBRARY;
 
     static {
         LOADED_EMBEDDED_LIBRARY = loadEmbeddedLibrary();
     }
 
-    private EmbeddedLibraryTools() {}
+    private Native() {}
 
     public static String getCurrentPlatformIdentifier() {
         String osName = System.getProperty("os.name").toLowerCase();

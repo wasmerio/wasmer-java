@@ -13,8 +13,7 @@ public class Instance {
      * Native bindings.
      */
     static {
-        // if no embedded native library, revert to loading from java.library.path
-        if (!EmbeddedLibraryTools.LOADED_EMBEDDED_LIBRARY) {
+        if (!Native.LOADED_EMBEDDED_LIBRARY) {
             System.loadLibrary("wasmer_jni");
         }
     }
