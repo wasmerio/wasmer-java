@@ -58,7 +58,7 @@ sourceSets {
             srcDirs "$buildDir/toArtifact"
         }
         java {
-            srcDirs 'main'
+            srcDirs 'src'
         }
     }
     test {
