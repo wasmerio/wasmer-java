@@ -58,15 +58,15 @@ sourceSets {
             srcDirs "$buildDir/toArtifact"
         }
         java {
-            srcDirs 'java/main'
+            srcDirs 'main'
         }
     }
     test {
         resources {
-            srcDirs "java/test/resources"
+            srcDirs "test/resources"
         }
         java {
-            srcDir 'java/test'
+            srcDir 'test'
         }
     }
 }
