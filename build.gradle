@@ -63,10 +63,10 @@ sourceSets {
     }
     test {
         resources {
-            srcDirs "test/resources"
+            srcDirs "tests/resources"
         }
         java {
-            srcDir 'test'
+            srcDir 'tests'
         }
     }
 }
