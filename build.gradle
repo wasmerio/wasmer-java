@@ -77,7 +77,7 @@ task generateJniHeaders(type: JavaCompile) {
     options.verbose = true
 }
 
-task buildLocal(type:Exec) {
+task buildRust(type:Exec) {
     commandLine 'make', 'build-rust'
 }
 
@@ -94,7 +94,7 @@ tasks.withType(Test) {
 }
 
 // We build the integration before running any test
-compileTestJava.dependsOn buildLocal
+compileTestJava.dependsOn buildRust
 processResources.dependsOn copyAllArtifacts
 
 def publishSettings(project, projectName, includeJavadoc) {
