@@ -46,7 +46,7 @@ build-rust-x86_64-windows:
 	mkdir -p artifacts/windows-x86_64
 	cp target/x86_64-pc-windows-msvc/release/wasmer_jni.dll artifacts/windows-x86_64/
 
-# Compile the Java part.
+# Compile the Java part (incl. `build-test`, see `gradlew`).
 build-java:
 	"./gradlew" build --info
 
@@ -55,7 +55,7 @@ build-headers:
 	"./gradlew" generateJniHeaders
 
 # Run the tests.
-test: build-headers test-rust build-java test-java
+test: build-headers test-rust build-java
 
 # Run the Rust tests.
 test-rust:
