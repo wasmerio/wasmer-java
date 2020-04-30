@@ -73,6 +73,10 @@ public class Memory {
      * @param length The number of bytes to be read from the memory data.
      */
     public void write(int offset, byte[] data) throws BufferOverflowException, IllegalArgumentException, ReadOnlyBufferException {
+        if (offset < 0) {
+            throw new IllegalArgumentException("newPosition < 0: (" +  offset + " < 0)");
+        }
+
         this.inner.position(offset);
         this.inner.put(data);
     }
