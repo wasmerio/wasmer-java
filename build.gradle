@@ -24,17 +24,11 @@ task generateJniHeaders(type: JavaCompile) {
     source = sourceSets.main.java
         options.compilerArgs += [
             '-h', file("include"),
-            // '-d', file("${buildDir}/generated/jni-tmp")
         ]
         options.verbose = true
 }
 
-// compileJava {
-//     options.compilerArgs += ["-h", file("include")]
-//     options.verbose = true
-// }
-
-// This is neede for the Java plugin to make sure
+// This is needed for the Java plugin to make sure
 // the generated class files are compatible with
 // old versions of Java.
 sourceCompatibility = 1.8
@@ -43,10 +37,6 @@ targetCompatibility = 1.8
 task buildLocal(type:Exec) {
   commandLine 'make', 'build-rust'
 }
-
-// task buildTargets(type:Exec) {
-//   commandLine 'make', 'build-rust-all-targets'
-// }
 
 task copyAllArtifacts(type: Copy) {
     from "artifacts"
@@ -66,18 +56,17 @@ sourceSets {
     main {
         resources {
             srcDirs "$buildDir/toArtifact"
-            srcDirs "java/src/main/resources"
         }
         java {
-            srcDirs 'java/src/main'
+            srcDirs 'java/main'
         }
     }
     test {
         resources {
-            srcDirs "java/src/test/resources"
+            srcDirs "java/test/resources"
         }
         java {
-            srcDir 'java/src/test'
+            srcDir 'java/test'
         }
     }
 }
@@ -107,12 +96,6 @@ tasks.withType(Test) {
 // We build the integration before running any test
 compileTestJava.dependsOn buildLocal
 processResources.dependsOn copyAllArtifacts
-
-// To publish it
-// task publish(dependsOn: build) {
-//     publishSettings(project, 'wasmer-jni', false)
-//     publishSettings(project, 'wasmer-jni-annotations', true)
-// }
 
 def publishSettings(project, projectName, includeJavadoc) {
     project.with {
