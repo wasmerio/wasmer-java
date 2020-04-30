@@ -82,6 +82,8 @@ task buildRust(type:Exec) {
 }
 
 task copyAllArtifacts(type: Copy) {
+    dependsOn buildRust
+
     from "artifacts"
     include "**/*"
     into "$buildDir/toArtifact/org/wasmer/native/"
