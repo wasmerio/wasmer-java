@@ -58,8 +58,16 @@ build-headers:
 test: build-headers test-rust build-java
 
 # Run the Rust tests.
-test-rust:
-	cargo test --release
+test-rust: build-rust-$(build_arch)-$(build_os) test-rust-$(build_arch)-$(build_os)
+
+test-rust-x86_64-darwin:
+	cargo test --release --target=x86_64-apple-darwin
+
+test-rust-x86_64-linux:
+	cargo test --release --target=x86_64-unknown-linux-gnu
+
+test-rust-x86_64-windows:
+	cargo test --release --target=x86_64-pc-windows-msvc
 
 # Run the Java tests.
 test-java:
