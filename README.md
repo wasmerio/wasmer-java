@@ -53,7 +53,7 @@ Then, we can execute it in Java:
 ```java
 class Example {
     public static void main(String[] args) {
-        // simple.wasm is located at src/main/resources/.
+        // simple.wasm is located at `tests/resources/`.
         Path wasmPath = Paths.get(new Example().getClass().getClassLoader().getResource("simple.wasm").getPath());
 
         // Reads the WebAssembly module as bytes.
