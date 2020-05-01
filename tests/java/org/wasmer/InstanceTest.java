@@ -5,6 +5,7 @@ import static org.junit.jupiter.api.Assertions.assertNull;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
 import java.io.IOException;
+import java.net.URL;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
@@ -12,7 +13,8 @@ import org.junit.jupiter.api.Test;
 
 class InstanceTest {
     private byte[] getBytes() throws IOException,Exception {
-        Path modulePath = Paths.get(getClass().getClassLoader().getResource("tests.wasm").getPath());
+        URL url = getClass().getClassLoader().getResource("tests.wasm");
+        Path modulePath = Paths.get(url.toURI());
         return Files.readAllBytes(modulePath);
     }
 

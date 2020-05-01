@@ -19,7 +19,7 @@ import org.junit.jupiter.api.Disabled;
 
 class MemoryTest {
     private byte[] getBytes(String filename) throws IOException,Exception {
-        Path modulePath = Paths.get(getClass().getClassLoader().getResource(filename).getPath());
+        Path modulePath = Paths.get(getClass().getClassLoader().getResource(filename).toURI());
         return Files.readAllBytes(modulePath);
     }
 
