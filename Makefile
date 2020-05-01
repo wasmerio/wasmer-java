@@ -1,19 +1,24 @@
-UNAME_S := $(shell uname -s)
 
-ifeq ($(UNAME_S),Darwin)
-	build_os := darwin
-endif
+
+
 ifeq ($(OS),Windows_NT)
 	build_os := windows
-endif
-ifeq ($(UNAME_S),Linux)
-	build_os := linux
-endif
-ARCH := $(shell uname -m)
-ifeq ($(ARCH),x86_64)
-	build_arch = x86_64
+	build_arch := x86_64
 else
-	$(error Architecture not supported yet)
+    UNAME_S := $(shell uname -s)
+    
+	ifeq ($(UNAME_S),Darwin)
+		build_os := darwin
+	endif
+	ifeq ($(UNAME_S),Linux)
+		build_os := linux
+	endif
+	ARCH := $(shell uname -m)
+	ifeq ($(ARCH),x86_64)
+		build_arch = x86_64
+	else
+		$(error Architecture not supported yet)
+	endif
 endif
 
 # Compile everything!
@@ -45,17 +50,18 @@ build-rust-x86_64-linux:
 build-rust-x86_64-windows:
 	rustup target add x86_64-pc-windows-msvc
 	cargo build --release --target=x86_64-pc-windows-msvc
-	mkdir -p artifacts/windows-x86_64
-	cp target/x86_64-pc-windows-msvc/release/wasmer_jni.dll artifacts/windows-x86_64/
-	test -h target/current || ln -s x86_64-pc-windows-msvc/release target/current
+	if not exist .\artifacts\windows-x86_64 mkdir .\artifacts\windows-x86_64
+	copy target\x86_64-pc-windows-msvc\release\wasmer_jni.dll artifacts\windows-x86_64
+	if not exist .\target\current mkdir .\target\current
+	copy target\x86_64-pc-windows-msvc\release\wasmer_jni.dll target\current
 
 # Compile the Java part (incl. `build-test`, see `gradlew`).
 build-java:
-	"./gradlew" build --info
+	gradlew build --info
 
 # Generate the Java C headers.
 build-headers:
-	"./gradlew" generateJniHeaders
+	gradlew generateJniHeaders
 
 # Run the tests.
 test: build-headers build-rust test-rust build-java
@@ -74,15 +80,15 @@ test-rust-x86_64-windows:
 
 # Run the Java tests.
 test-java:
-	"./gradlew" test --info
+	gradlew test --info
 
 # Make a JAR-file.
 package:
-	"./gradlew" jar
+	gradlew jar
 
 # Publish the package artifact to a public repository
 publish:
-	"./gradlew" publish
+	gradlew publish
 
 # Clean
 clean:
