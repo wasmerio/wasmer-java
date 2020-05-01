@@ -38,21 +38,23 @@ build-rust-x86_64-darwin:
 	mkdir -p artifacts/darwin-x86_64
 	cp target/x86_64-apple-darwin/release/libwasmer_jni.dylib artifacts/darwin-x86_64
 	install_name_tool -id "@rpath/libwasmer_jni.dylib" ./artifacts/darwin-x86_64/libwasmer_jni.dylib
-	test -h target/current || ln -s x86_64-apple-darwin/release target/current
+	test -h target/current || ln -s target/x86_64-apple-darwin/release target/current
 
 build-rust-x86_64-linux:
 	rustup target add x86_64-unknown-linux-gnu
 	cargo build --release --target=x86_64-unknown-linux-gnu
 	mkdir -p artifacts/linux-x86_64
 	cp target/x86_64-unknown-linux-gnu/release/libwasmer_jni.so artifacts/linux-x86_64/
-	test -h target/current || ln -s x86_64-unknown-linux-gnu/release target/current
+	test -h target/current || ln -s target/x86_64-unknown-linux-gnu/release target/current
 
 build-rust-x86_64-windows:
 	rustup target add x86_64-pc-windows-msvc
 	cargo build --release --target=x86_64-pc-windows-msvc
 	mkdir -p artifacts/windows-x86_64
 	cp target/x86_64-pc-windows-msvc/release/wasmer_jni.dll artifacts/windows-x86_64/
-	test -h target/current || ln -s x86_64-pc-windows-msvc/release target/current
+	mkdir -p target/current
+	cp target/x86_64-pc-windows-msvc/release/wasmer_jni.dll target/current/
+
 # if not exist .\artifacts\windows-x86_64 mkdir .\artifacts\windows-x86_64
 # copy target\x86_64-pc-windows-msvc\release\wasmer_jni.dll artifacts\windows-x86_64
 # if not exist .\target\current mkdir .\target\current
