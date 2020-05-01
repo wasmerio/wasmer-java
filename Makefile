@@ -57,11 +57,11 @@ build-rust-x86_64-windows:
 
 # Compile the Java part (incl. `build-test`, see `gradlew`).
 build-java:
-	gradlew build --info
+	"./gradlew" build --info
 
 # Generate the Java C headers.
 build-headers:
-	gradlew generateJniHeaders
+	"./gradlew" generateJniHeaders
 
 # Run the tests.
 test: build-headers build-rust test-rust build-java
@@ -80,15 +80,15 @@ test-rust-x86_64-windows:
 
 # Run the Java tests.
 test-java:
-	gradlew test --info
+	"./gradlew" test --info
 
 # Make a JAR-file.
 package:
-	gradlew jar
+	"./gradlew" jar
 
 # Publish the package artifact to a public repository
 publish:
-	gradlew publish
+	"./gradlew" publish
 
 # Clean
 clean:
