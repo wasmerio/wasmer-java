@@ -50,10 +50,13 @@ build-rust-x86_64-linux:
 build-rust-x86_64-windows:
 	rustup target add x86_64-pc-windows-msvc
 	cargo build --release --target=x86_64-pc-windows-msvc
-	if not exist .\artifacts\windows-x86_64 mkdir .\artifacts\windows-x86_64
-	copy target\x86_64-pc-windows-msvc\release\wasmer_jni.dll artifacts\windows-x86_64
-	if not exist .\target\current mkdir .\target\current
-	copy target\x86_64-pc-windows-msvc\release\wasmer_jni.dll target\current
+	mkdir -p artifacts/windows-x86_64
+	cp target/x86_64-pc-windows-msvc/release/wasmer_jni.dll artifacts/windows-x86_64/
+	test -h target/current || ln -s x86_64-pc-windows-msvc/release target/current
+# if not exist .\artifacts\windows-x86_64 mkdir .\artifacts\windows-x86_64
+# copy target\x86_64-pc-windows-msvc\release\wasmer_jni.dll artifacts\windows-x86_64
+# if not exist .\target\current mkdir .\target\current
+# copy target\x86_64-pc-windows-msvc\release\wasmer_jni.dll target\current
 
 # Compile the Java part (incl. `build-test`, see `gradlew`).
 build-java:
