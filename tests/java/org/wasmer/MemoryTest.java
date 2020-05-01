@@ -15,10 +15,11 @@ import java.nio.file.Path;
 import java.nio.file.Paths;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.Disabled;
 
 class MemoryTest {
     private byte[] getBytes(String filename) throws IOException,Exception {
-        Path modulePath = Paths.get(getClass().getClassLoader().getResource(filename).getPath());
+        Path modulePath = Paths.get(getClass().getClassLoader().getResource(filename).toURI());
         return Files.readAllBytes(modulePath);
     }
 

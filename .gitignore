@@ -1,1 +1,5 @@
+/.gradle
+/artifacts
+/build
+/include/org/
 /target

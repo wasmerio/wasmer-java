@@ -1,0 +1,181 @@
+plugins {
+    id 'java'
+    // As Wasmer is a package, we need tools to build the JARs and so
+    id 'java-library'
+}
+
+version '0.1.0'
+group 'org.wasmer'
+
+allprojects {
+    group 'org.wasmer'
+    version '0.1.0'
+}
+
+// This is needed for the Java plugin to make sure
+// the generated class files are compatible with
+// old versions of Java.
+sourceCompatibility = 1.8
+targetCompatibility = 1.8
+
+sourceSets {
+    main {
+        java {
+            srcDirs = ['src/java']
+        }
+        resources {
+            srcDirs = ["$buildDir/toArtifact"]
+        }
+    }
+    test {
+        java {
+            srcDirs = ['tests']
+        }
+        resources {
+            srcDirs = ['tests/resources']
+        }
+    }
+}
+
+javadoc {
+    options.links 'https://docs.oracle.com/javase/8/docs/api/'
+    // TODO: change when https://github.com/gradle/gradle/issues/2354 is fixed
+    options.addStringOption 'Xdoclint:all', '-Xdoclint:-missing'
+}
+
+repositories {
+    jcenter()
+    google()
+    maven {
+        url "https://plugins.gradle.org/m2/"
+    }
+}
+
+dependencies {
+    testImplementation('org.junit.jupiter:junit-jupiter-api:5.4.2')
+    testRuntimeOnly('org.junit.jupiter:junit-jupiter-engine:5.4.2')
+}
+
+test {
+    useJUnitPlatform()
+}
+
+jar {
+    manifest {
+        attributes('Implementation-Title': project.name,
+                   'Implementation-Version': project.version)
+    }
+}
+
+task generateJniHeaders(type: JavaCompile) {
+    classpath = sourceSets.main.compileClasspath
+    destinationDir file("include")
+    source = sourceSets.main.java
+    options.compilerArgs += [
+        '-h', file("include"),
+    ]
+    options.verbose = true
+}
+
+task buildRust(type:Exec) {
+    dependsOn generateJniHeaders
+
+    commandLine 'make', 'build-rust'
+}
+
+task copyAllArtifacts(type: Copy) {
+    dependsOn buildRust
+
+    from "artifacts"
+    include "**/*"
+    into "$buildDir/toArtifact/org/wasmer/native/"
+}
+
+tasks.withType(Test) {
+    // We add the path, so the Java Tests can find the
+    // shared object file
+    systemProperty "java.library.path", "target/current/"
+
+    // Don't capture the standard output.
+    testLogging {
+        outputs.upToDateWhen { false }
+        showStandardStreams = true
+    }
+}
+
+// We build the integration before running any test
+compileTestJava.dependsOn buildRust
+processResources.dependsOn copyAllArtifacts
+
+def publishSettings(project, projectName, includeJavadoc) {
+    project.with {
+        if (!project.hasProperty('ossrhUsername')) return
+        apply plugin: 'maven'
+        apply plugin: 'signing'
+
+        archivesBaseName = projectName
+
+        task packageSources(type: Jar) {
+            classifier = 'sources'
+            from sourceSets.main.allSource
+        }
+
+        if (includeJavadoc) {
+            task packageJavadoc(type: Jar, dependsOn: 'javadoc') {
+                from javadoc.destinationDir
+                classifier = 'javadoc'
+            }
+        } else {
+            task packageJavadoc(type: Jar) {
+                // Empty to satisfy Sonatype's javadoc.jar requirement
+                classifier 'javadoc'
+            }
+        }
+
+        artifacts {
+            archives packageSources, packageJavadoc
+        }
+
+        signing {
+            sign configurations.archives
+        }
+
+        uploadArchives {
+            repositories {
+                mavenDeployer {
+                    beforeDeployment { MavenDeployment deployment -> signing.signPom(deployment) }
+                    repository(url: 'https://oss.sonatype.org/service/local/staging/deploy/maven2/') {
+                        authentication(userName: ossrhUsername, password: ossrhPassword)
+                    }
+                    snapshotRepository(url: 'https://oss.sonatype.org/content/repositories/snapshots/') {
+                        authentication(userName: ossrhUsername, password: ossrhPassword)
+                    }
+                    pom.project {
+                        name projectName
+                        packaging 'jar'
+                        description 'Wasmer is a library to execute WebAssembly binaries'
+                        url 'https://wasmer.io'
+                        scm {
+                            connection 'scm:git:git@github.com:wasmerio/java-ext-wasm.git'
+                            developerConnection 'scm:git:git@github.com:wasmerio/java-ext-wasm.git'
+                            url 'git@github.com:wasmerio/java-ext-wasm.git'
+                        }
+                        licenses {
+                            license {
+                                name 'MIT License'
+                                url 'https://opensource.org/licenses/MIT'
+                            }
+                        }
+                        developers {
+                            developer {
+                                id 'syrusakbary'
+                                name 'Syrus Akbary'
+                                url 'https://github.com/syrusakbary'
+                            }
+                        }
+                    }
+                }
+            }
+        }
+    }
+}

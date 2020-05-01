@@ -20,43 +20,16 @@ Wasmer is a Java library for executing WebAssembly binaries:
 
 # Install
 
-Need these tools in your environment:
-- [Maven](https://maven.apache.org/): a package management tool
-- [just](https://github.com/casey/just/): a build automation tool
+Wasmer Java JNI extension can be used in different ways.
 
-First, you need to download this project, and make `wasmer-0.1.jar` and
-`libjava_ext_wasm.so` by the `just package` command. `wasmer-0.1.jar` is the
-JAR file to contains Java interface for [`Wasmer`](https://github.com/wasmerio/wasmer).
-`libjava_ext_wasm.so` is the shared library of [`Wasmer`](https://github.com/wasmerio/wasmer)
-(`.dylib` on macOS, `.so` on Linux, `.dll` on Windows).
+The compiler and annotations are deployed to Maven Central. The compiler is written in Java and can be added as a Gradle dependency with:
 
-```sh
-// Download java-ext-wasm.
-$ git clone https://github.com/wasmerio/java-ext-wasm/
-$ cd java-ext-wasm
-
-// Build the project and make a JAR file.
-$ just package
+```
+compile 'org.wasmer:wasmer-jni:0.1.0'
 ```
 
-You need to copy both files from `wasmer-0.1.jar` in the java/target directory and
-`libjava_ext_wasm.so` in the target/release directory to your project. Then, install
-a JAR file to your project, compile your Java source code, and execute it with the
-path which a shared library exists.
-```sh
-// Install a Wasmer plugin to our project.
-$ mvn install:install-file -Dfile=wasmer-0.1.jar
-
-// Compile java source files.
-$ mvn compile
-
-// Execute our project with the library path.
-$ MAVEN_OPTS=-Djava.library.path=. mvn exec:java
-```
-
-This is overall steps to execute your Java project with `java-ext-wasm`. For
-more information, you can see [the example
-project](https://github.com/d0iasm/example-java-ext-wasm).
+You can also download the Java JAR file from the
+[Github releases page](https://github.com/wasmerio/java-ext-wasm/releases)!
 
 # Example
 
@@ -80,7 +53,7 @@ Then, we can execute it in Java:
 ```java
 class Example {
     public static void main(String[] args) {
-        // simple.wasm is located at src/main/resources/.
+        // simple.wasm is located at `tests/resources/`.
         Path wasmPath = Paths.get(new Example().getClass().getClassLoader().getResource("simple.wasm").getPath());
 
         // Reads the WebAssembly module as bytes.
@@ -99,6 +72,9 @@ class Example {
     }
 }
 ```
+
+For more information, you can check [this example
+project](https://github.com/d0iasm/example-java-ext-wasm).
 
 # API of the `wasmer` library
 
@@ -243,37 +219,40 @@ The `Memory.grow` methods allows to grow the memory by a number of pages (of 64K
 int oldPageSize = memory.grow(1);
 ```
 
-# Development
+## Development
 
-You need [just](https://github.com/casey/just/) to build the project.
-
-To build Java parts, run the following command:
-
-```sh
-$ just build-java
-```
-
-To build Rust parts, run the following command:
+If you want to build the extension you will need the following tools:
+- [Gradle](https://gradle.org/): a package management tool
 
 ```sh
-$ just build-rust
+// Download java-ext-wasm.
+$ git clone https://github.com/wasmerio/java-ext-wasm/
+$ cd java-ext-wasm
 ```
 
 To build the entire project, run the following command:
 
 ```sh
-$ just build
+$ make build
 ```
 
-# Testing
+To build the JAR package:
+
+```sh
+$ make package
+```
+
+This will generate the file `build/libs/wasmer-jni-0.1.0.jar`.
+
+### Testing
 
 Run the following command:
 
 ```sh
-$ just test
+$ make test
 ```
 
-Testing automatically build the project.
+Note: Testing automatically builds the project.
 
 # What is WebAssembly?
 

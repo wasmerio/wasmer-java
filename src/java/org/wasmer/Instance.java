@@ -9,6 +9,14 @@ package org.wasmer;
  * }</pre>
  */
 public class Instance {
+    /**
+     * Native bindings.
+     */
+    static {
+        if (!Native.LOADED_EMBEDDED_LIBRARY) {
+            System.loadLibrary("wasmer_jni");
+        }
+    }
     private native long nativeInstantiate(Instance self, byte[] moduleBytes) throws RuntimeException;
     private native void nativeDrop(long instancePointer);
     protected native Object[] nativeCall(long instancePointer, String exportName, Object[] arguments) throws RuntimeException;
@@ -21,10 +29,6 @@ public class Instance {
     public final Exports exports;
     public final Memories memories;
     protected long instancePointer;
-
-    static {
-        System.loadLibrary("java_ext_wasm");
-    }
 
     /**
      * The constructor instantiates a new WebAssembly instance based on

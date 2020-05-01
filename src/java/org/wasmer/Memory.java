@@ -56,6 +56,16 @@ public class Memory {
     public byte[] read(int offset, int length) throws BufferUnderflowException, IllegalArgumentException {
         byte[] result = new byte[length];
 
+        if (offset < 0) {
+            throw new IllegalArgumentException("newPosition < 0: (" +  offset + " < 0)");
+        }
+
+        int size = this.size();
+
+        if (offset > size) {
+            throw new IllegalArgumentException("newPosition > limit: (" + offset + " > " + size + ")");
+        }
+
         this.inner.position(offset);
         this.inner.get(result);
 
@@ -69,6 +79,16 @@ public class Memory {
      * @param length The number of bytes to be read from the memory data.
      */
     public void write(int offset, byte[] data) throws BufferOverflowException, IllegalArgumentException, ReadOnlyBufferException {
+        if (offset < 0) {
+            throw new IllegalArgumentException("newPosition < 0: (" +  offset + " < 0)");
+        }
+
+        int size = this.size();
+
+        if (offset > size) {
+            throw new IllegalArgumentException("newPosition > limit: (" + offset + " > " + size + ")");
+        }
+
         this.inner.position(offset);
         this.inner.put(data);
     }

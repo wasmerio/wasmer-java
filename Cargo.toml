@@ -1,6 +1,6 @@
 [package]
 publish = false
-name = "java-ext-wasm"
+name = "wasmer-jni"
 version = "0.1.0"
 authors = ["Ivan Enderlin <ivan.enderlin@hoa-project.net>"]
 edition = "2018"
@@ -9,6 +9,6 @@ edition = "2018"
 crate-type = ["cdylib"]
 
 [dependencies]
-wasmer-runtime = "0.14"
-wasmer-runtime-core = "0.14"
-jni = "0.14"
+wasmer-runtime = "0.16"
+wasmer-runtime-core = "0.16"
+jni = "0.15"
