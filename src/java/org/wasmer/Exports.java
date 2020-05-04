@@ -1,29 +1,30 @@
 package org.wasmer;
 
+import org.wasmer.exports.Export;
+import org.wasmer.exports.Function;
+
+import java.lang.ClassCastException;
 import java.util.HashMap;
 import java.util.Map;
-import java.util.function.Function;
 
 /**
- * `Exports` is a Java class that represents the set of WebAssembly exported function.
- * It's basically a set of `ExportedFunction`.
+ * `Exports` is a Java class that represents the set of WebAssembly exports.
  *
  * Example:
  * <pre>{@code
  * Instance instance = new Instance(wasmBytes);
- * Object[] result = instance.exports.get("sum").apply(1, 2);
+ *
+ * // Get and run an exported function.
+ * Object[] result = instance.exports.getFunction("sum").apply(1, 2);
+ *
+ * // Get, manually downcast, and run an exported function.
+ * Export export = instance.exports.get("sum");
+ * Object[] result = ((Function<Object, Object[]>) export).apply(1, 2);
  * }</pre>
  */
 public class Exports {
-    private Map<String, ExportedFunction<Object, Object[]>> inner;
+    private Map<String, Export> inner;
     private Instance instance;
-
-    /**
-     * Lambda expression for currying.
-     * This takes a function name and returns the function to call WebAssembly function.
-     */
-    private Function<String, ExportedFunction<Object, Object[]>> exportedFunctionWrapperGenerator =
-        functionName -> arguments -> this.instance.nativeCall(this.instance.instancePointer, functionName, arguments);
 
     /**
      * The constructor instantiates new exported functions.
@@ -31,24 +32,62 @@ public class Exports {
      * @param instance Instance object which holds the exports object.
      */
     protected Exports(Instance instance) {
-        this.inner = new HashMap<String, ExportedFunction<Object, Object[]>>();
+        this.inner = new HashMap<String, Export>();
         this.instance = instance;
     }
 
     /**
-     * Return the exported function at the specified name.
+     * Return the export with the name `name`.
      *
-     * @param name Name of the function to return.
+     * @param name Name of the export to return.
      */
-    public ExportedFunction<Object, Object[]> get(String name) {
+    public Export get(String name) {
         return this.inner.get(name);
     }
 
-    private ExportedFunction<Object, Object[]> generateExportedFunctionWrapper(String functionName) {
-        return this.exportedFunctionWrapperGenerator.apply(functionName);
+    /**
+     * Return the export with the name `name` as an exported function.
+     *
+     * @param name Name of the exported function.
+     */
+    public Function<Object, Object[]> getFunction(String name) throws ClassCastException {
+        return (Function<Object, Object[]>) this.inner.get(name);
     }
 
-    private void addExportedFunction(String name) {
-        this.inner.put(name, this.generateExportedFunctionWrapper(name));
+    /**
+     * Return the export with the name `name` as an exported memory.
+     *
+     * @param name Name of the exported memory.
+     */
+    public Memory getMemory(String name) throws ClassCastException {
+        return (Memory) this.inner.get(name);
+    }
+
+    /**
+     * Called by Rust to add a new exported function.
+     */
+    private void addFunction(String name) {
+        this.inner.put(name, this.generateFunctionWrapper(name));
+    }
+
+    /**
+     * Called by Rust to add a new exported memory.
+     */
+    private void addMemory(String name, Memory memory) {
+        this.inner.put(name, memory);
+    }
+
+    /**
+     * Lambda expression for currying.
+     * This takes a function name and returns the function to call WebAssembly function.
+     */
+    private java.util.function.Function<String, Function<Object, Object[]>> functionWrapperGenerator =
+        functionName -> arguments -> this.instance.nativeCall(this.instance.instancePointer, functionName, arguments);
+
+    /**
+     * Generate the exported function wrapper.
+     */
+    private Function<Object, Object[]> generateFunctionWrapper(String functionName) {
+        return this.functionWrapperGenerator.apply(functionName);
     }
 }

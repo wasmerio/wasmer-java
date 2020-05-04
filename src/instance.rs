@@ -193,7 +193,7 @@ pub extern "system" fn Java_org_wasmer_Instance_nativeInitializeExportedFunction
 
                 env.call_method(
                     exports_object,
-                    "addExportedFunction",
+                    "addFunction",
                     "(Ljava/lang/String;)V",
                     &[JObject::from(name).into()],
                 )?;

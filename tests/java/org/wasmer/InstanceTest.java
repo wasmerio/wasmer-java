@@ -1,5 +1,7 @@
 package org.wasmer;
 
+import org.wasmer.exports.Function;
+
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertNull;
 import static org.junit.jupiter.api.Assertions.assertTrue;
@@ -22,7 +24,7 @@ class InstanceTest {
     void sum() throws IOException,Exception {
         Instance instance = new Instance(getBytes());
 
-        assertEquals(3, (Integer) instance.exports.get("sum").apply(1, 2)[0]);
+        assertEquals(3, instance.exports.getFunction("sum").apply(1, 2)[0]);
 
         instance.close();
     }
@@ -31,7 +33,7 @@ class InstanceTest {
     void arity_0() throws IOException,Exception {
         Instance instance = new Instance(getBytes());
 
-        assertEquals(42, (Integer) instance.exports.get("arity_0").apply()[0]);
+        assertEquals(42, (Integer) instance.exports.getFunction("arity_0").apply()[0]);
 
         instance.close();
     }
@@ -40,7 +42,7 @@ class InstanceTest {
     void i32_i32() throws IOException,Exception {
         Instance instance = new Instance(getBytes());
 
-        assertEquals(42, (Integer) instance.exports.get("i32_i32").apply(42)[0]);
+        assertEquals(42, (Integer) instance.exports.getFunction("i32_i32").apply(42)[0]);
 
         instance.close();
     }
@@ -49,7 +51,7 @@ class InstanceTest {
     void i64_i64() throws IOException,Exception {
         Instance instance = new Instance(getBytes());
 
-        assertEquals(42l, (Long) instance.exports.get("i64_i64").apply(42l)[0]);
+        assertEquals(42l, (Long) instance.exports.getFunction("i64_i64").apply(42l)[0]);
 
         instance.close();
     }
@@ -58,7 +60,7 @@ class InstanceTest {
     void f32_f32() throws IOException,Exception {
         Instance instance = new Instance(getBytes());
 
-        assertEquals(42.0f, (Float) instance.exports.get("f32_f32").apply(42.0f)[0]);
+        assertEquals(42.0f, (Float) instance.exports.getFunction("f32_f32").apply(42.0f)[0]);
 
         instance.close();
     }
@@ -67,7 +69,7 @@ class InstanceTest {
     void f64_f64() throws IOException,Exception {
         Instance instance = new Instance(getBytes());
 
-        assertEquals(42.0d, (Double) instance.exports.get("f64_f64").apply(42.0d)[0]);
+        assertEquals(42.0d, (Double) instance.exports.getFunction("f64_f64").apply(42.0d)[0]);
 
         instance.close();
     }
@@ -76,7 +78,7 @@ class InstanceTest {
     void i32_i64_f32_f64_f64() throws IOException,Exception {
         Instance instance = new Instance(getBytes());
 
-        assertEquals(10.0d, (Double) instance.exports.get("i32_i64_f32_f64_f64").apply(1, 2l, 3.0f, 4.0d)[0]);
+        assertEquals(10.0d, (Double) instance.exports.getFunction("i32_i64_f32_f64_f64").apply(1, 2l, 3.0f, 4.0d)[0]);
 
         instance.close();
     }
@@ -85,7 +87,7 @@ class InstanceTest {
     void bool_casted_to_i32() throws IOException,Exception {
         Instance instance = new Instance(getBytes());
 
-        assertTrue((Integer) instance.exports.get("bool_casted_to_i32").apply()[0] == 1);
+        assertTrue((Integer) instance.exports.getFunction("bool_casted_to_i32").apply()[0] == 1);
 
         instance.close();
     }
@@ -93,9 +95,9 @@ class InstanceTest {
     @Test
     void string() throws IOException,Exception {
         Instance instance = new Instance(getBytes());
-        Memory memory = instance.memories.get("memory");
+        Memory memory = instance.exports.getMemory("memory");
 
-        int pointer = (Integer) instance.exports.get("string").apply()[0];
+        int pointer = (Integer) instance.exports.getFunction("string").apply()[0];
         byte[] stringBytes = memory.read(pointer, 13);
 
         String expected = "Hello, World!";
@@ -108,7 +110,7 @@ class InstanceTest {
     void nothing() throws IOException,Exception {
         Instance instance = new Instance(getBytes());
 
-        assertNull(instance.exports.get("void").apply());
+        assertNull(instance.exports.getFunction("void").apply());
 
         instance.close();
     }

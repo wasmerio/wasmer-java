@@ -24,10 +24,13 @@ public class Instance {
     protected static native void nativeInitializeExportedMemories(long instancePointer);
 
     /**
-     * All WebAssembly exported functions.
+     * All WebAssembly exports.
      */
     public final Exports exports;
-    public final Memories memories;
+
+    /**
+       The instance pointer.
+     */
     protected long instancePointer;
 
     /**
@@ -38,7 +41,6 @@ public class Instance {
      */
     public Instance(byte[] moduleBytes) throws RuntimeException {
         this.exports = new Exports(this);
-        this.memories = new Memories();
 
         long instancePointer = this.nativeInstantiate(this, moduleBytes);
         this.instancePointer = instancePointer;
@@ -49,7 +51,6 @@ public class Instance {
 
     protected Instance() {
         this.exports = new Exports(this);
-        this.memories = new Memories();
     }
 
     /**

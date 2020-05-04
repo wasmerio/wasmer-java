@@ -73,22 +73,13 @@ pub mod java {
     use std::cell::Cell;
 
     pub fn initialize_memories(env: &JNIEnv, instance: &Instance) -> Result<(), Error> {
-        // Try to read `org.wasmer.Memories` from the
-        // `org.wasmer.Instance.memores` attribute.
-        let memories = env
+        let exports_object: JObject = env
             .get_field(
                 instance.java_instance_object.as_obj(),
-                "memories",
-                "Lorg/wasmer/Memories;",
+                "exports",
+                "Lorg/wasmer/Exports;",
             )?
             .l()?;
-
-        // Try to read `java.util.Map` from the
-        // `org.wasmer.Memories.inner` attribute.
-        let memories_map = env.get_field(memories, "inner", "Ljava/util/Map;")?.l()?;
-
-        // Try to cast the `JObject` to `JMap`.
-        let memories_map = env.get_map(memories_map)?;
 
         // Get the `org.wasmer.Memory` class.
         let memory_class = env.find_class("org/wasmer/Memory")?;
@@ -124,8 +115,16 @@ pub mod java {
             )?;
 
             // Add the newly created `org.wasmer.Memory` in the
-            // `org.wasmer.Memories` collection.
-            memories_map.put(*env.new_string(memory_name)?, memory_object)?;
+            // `org.wasmer.Exports` collection.
+            env.call_method(
+                exports_object,
+                "addMemory",
+                "(Ljava/lang/String;Lorg/wasmer/Memory;)V",
+                &[
+                    JObject::from(env.new_string(memory_name)?).into(),
+                    memory_object.into(),
+                ],
+            )?;
         }
 
         Ok(())
