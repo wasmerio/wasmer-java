@@ -1,4 +1,6 @@
-package org.wasmer;
+package org.wasmer.exports;
+
+import org.wasmer.exports.Export;
 
 /**
  * Functional interface for WebAssembly exported functions, i.e. it
@@ -9,7 +11,7 @@ package org.wasmer;
  * an output.
  */
 @FunctionalInterface
-public interface ExportedFunction<Input, Output> {
+public interface Function<Input, Output> extends Export {
     @SuppressWarnings("unchecked")
-    public Output apply(Input... args);
+    public Object[] apply(Object... args);
 }

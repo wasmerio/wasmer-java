@@ -48,7 +48,7 @@ class ModuleTest {
         Module module = new Module(getBytes("tests.wasm"));
 
         Instance instance = module.instantiate();
-        assertEquals(3, (Integer) instance.exports.get("sum").apply(1, 2)[0]);
+        assertEquals(3, (Integer) instance.exports.getFunction("sum").apply(1, 2)[0]);
 
         instance.close();
         module.close();
@@ -69,6 +69,6 @@ class ModuleTest {
         module = null;
 
         Module deserializedModule = Module.deserialize(serialized);
-        assertEquals(3, (Integer) deserializedModule.instantiate().exports.get("sum").apply(1, 2)[0]);
+        assertEquals(3, (Integer) deserializedModule.instantiate().exports.getFunction("sum").apply(1, 2)[0]);
     }
 }

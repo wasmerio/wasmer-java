@@ -1,5 +1,6 @@
 package org.wasmer;
 
+import org.wasmer.exports.Export;
 import java.lang.IllegalArgumentException;
 import java.nio.ByteBuffer;
 import java.nio.ByteOrder;
@@ -18,7 +19,7 @@ import java.nio.ReadOnlyBufferException;
  * byte[] bytes = memory.read(0, 5);
  * }</pre>
  */
-public class Memory {
+public class Memory implements Export {
     private native int nativeMemoryGrow(Memory memory, long memoryPointer, int page);
 
     /**

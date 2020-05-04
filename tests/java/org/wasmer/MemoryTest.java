@@ -26,7 +26,7 @@ class MemoryTest {
     @Test
     void size() throws IOException,Exception {
         Instance instance = new Instance(getBytes("tests.wasm"));
-        Memory memory = instance.memories.get("memory");
+        Memory memory = instance.exports.getMemory("memory");
 
         assertEquals(1114112, memory.size());
 
@@ -39,8 +39,8 @@ class MemoryTest {
 
         byte[] expectedData = "Hello, World!".getBytes();
 
-        int pointer = (Integer) instance.exports.get("string").apply()[0];
-        Memory memory = instance.memories.get("memory");
+        int pointer = (Integer) instance.exports.getFunction("string").apply()[0];
+        Memory memory = instance.exports.getMemory("memory");
         byte[] readData = memory.read(pointer, expectedData.length);
 
         assertArrayEquals(expectedData, readData);
@@ -52,7 +52,7 @@ class MemoryTest {
     void readMemory() throws IOException,Exception {
         Instance instance = new Instance(getBytes("tests.wasm"));
 
-        Memory memory = instance.memories.get("memory");
+        Memory memory = instance.exports.getMemory("memory");
         byte[] readData = memory.read(0, 5);
         assertArrayEquals(new byte[]{0, 0, 0, 0, 0}, readData);
 
@@ -63,7 +63,7 @@ class MemoryTest {
     void writeMemory() throws IOException,Exception {
         Instance instance = new Instance(getBytes("tests.wasm"));
 
-        Memory memory = instance.memories.get("memory");
+        Memory memory = instance.exports.getMemory("memory");
         byte[] data = new byte[]{1, 2, 3, 4, 5};
         memory.write(0, data);
 
@@ -76,7 +76,7 @@ class MemoryTest {
     @Test
     void readInvalidIndex() throws IOException,Exception {
         Instance instance = new Instance(getBytes("tests.wasm"));
-        Memory memory = instance.memories.get("memory");
+        Memory memory = instance.exports.getMemory("memory");
 
         Exception exception = Assertions.assertThrows(IllegalArgumentException.class, () -> {
             byte[] readData = memory.read(-1, 5);
@@ -92,7 +92,7 @@ class MemoryTest {
     @Test
     void readOverLimit() throws IOException,Exception {
         Instance instance = new Instance(getBytes("tests.wasm"));
-        Memory memory = instance.memories.get("memory");
+        Memory memory = instance.exports.getMemory("memory");
 
         Exception exception = Assertions.assertThrows(BufferUnderflowException.class, () -> {
             byte[] readData = memory.read(0, 1114113);
@@ -106,7 +106,7 @@ class MemoryTest {
     @Test
     void writeInvalidIndex() throws IOException,Exception {
         Instance instance = new Instance(getBytes("tests.wasm"));
-        Memory memory = instance.memories.get("memory");
+        Memory memory = instance.exports.getMemory("memory");
 
         Exception exception = Assertions.assertThrows(IllegalArgumentException.class, () -> {
             memory.write(-1, new byte[]{1, 2, 3, 4, 5});
@@ -122,7 +122,7 @@ class MemoryTest {
     @Test
     void writeOverLimit() throws IOException,Exception {
         Instance instance = new Instance(getBytes("tests.wasm"));
-        Memory memory = instance.memories.get("memory");
+        Memory memory = instance.exports.getMemory("memory");
 
         byte[] writeData = new byte[1114113];
         Exception exception = Assertions.assertThrows(BufferOverflowException.class, () -> {
@@ -137,7 +137,7 @@ class MemoryTest {
     @Test
     void noMemory() throws IOException,Exception {
         Instance instance = new Instance(getBytes("no_memory.wasm"));
-        Memory memory = instance.memories.get("memory");
+        Memory memory = instance.exports.getMemory("memory");
 
         assertNull(memory);
 
@@ -147,15 +147,15 @@ class MemoryTest {
     @Test
     void javaBorrowsRustMemory() throws IOException,Exception {
         Instance instance = new Instance(getBytes("tests.wasm"));
-        Memory memory = instance.memories.get("memory");
+        Memory memory = instance.exports.getMemory("memory");
 
-        int pointer = (Integer) instance.exports.get("string").apply()[0];
+        int pointer = (Integer) instance.exports.getFunction("string").apply()[0];
 
         assertEquals("Hello, World!", new String(memory.read(pointer, 13)));
 
         memory.write(pointer, new byte[]{'A'});
 
-        assertEquals("Aello, World!", new String(instance.memories.get("memory").read(pointer, 13)));
+        assertEquals("Aello, World!", new String(instance.exports.getMemory("memory").read(pointer, 13)));
 
         instance.close();
     }
@@ -163,7 +163,7 @@ class MemoryTest {
     @Test
     void memoryGrow() throws IOException,Exception {
         Instance instance = new Instance(getBytes("tests.wasm"));
-        Memory memory = instance.memories.get("memory");
+        Memory memory = instance.exports.getMemory("memory");
 
         int oldSize = memory.size();
         assertEquals(1114112, oldSize);
@@ -178,7 +178,7 @@ class MemoryTest {
     @Test
     void writeMemoryAfterGrow() throws IOException,Exception {
         Instance instance = new Instance(getBytes("tests.wasm"));
-        Memory memory = instance.memories.get("memory");
+        Memory memory = instance.exports.getMemory("memory");
 
         int overIndex = memory.size() + 1;
         byte[] writeData = new byte[]{1, 2, 3, 4, 5};

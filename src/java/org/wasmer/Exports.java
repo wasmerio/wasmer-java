@@ -1,8 +1,9 @@
 package org.wasmer;
 
+import org.wasmer.exports.Function;
+import org.wasmer.exports.Export;
 import java.util.HashMap;
 import java.util.Map;
-import java.util.function.Function;
 
 /**
  * `Exports` is a Java class that represents the set of WebAssembly exported function.
@@ -15,14 +16,14 @@ import java.util.function.Function;
  * }</pre>
  */
 public class Exports {
-    private Map<String, ExportedFunction<Object, Object[]>> inner;
+    private Map<String, Export> inner;
     private Instance instance;
 
     /**
      * Lambda expression for currying.
      * This takes a function name and returns the function to call WebAssembly function.
      */
-    private Function<String, ExportedFunction<Object, Object[]>> exportedFunctionWrapperGenerator =
+    private java.util.function.Function<String, Function<Object, Object[]>> functionWrapperGenerator =
         functionName -> arguments -> this.instance.nativeCall(this.instance.instancePointer, functionName, arguments);
 
     /**
@@ -31,7 +32,7 @@ public class Exports {
      * @param instance Instance object which holds the exports object.
      */
     protected Exports(Instance instance) {
-        this.inner = new HashMap<String, ExportedFunction<Object, Object[]>>();
+        this.inner = new HashMap<String, Export>();
         this.instance = instance;
     }
 
@@ -40,15 +41,27 @@ public class Exports {
      *
      * @param name Name of the function to return.
      */
-    public ExportedFunction<Object, Object[]> get(String name) {
+    public Export get(String name) {
         return this.inner.get(name);
     }
 
-    private ExportedFunction<Object, Object[]> generateExportedFunctionWrapper(String functionName) {
-        return this.exportedFunctionWrapperGenerator.apply(functionName);
+    public Function<Object, Object[]> getFunction(String name) {
+        return (Function<Object, Object[]>) this.inner.get(name);
     }
 
-    private void addExportedFunction(String name) {
-        this.inner.put(name, this.generateExportedFunctionWrapper(name));
+    public Memory getMemory(String name) {
+        return (Memory) this.inner.get(name);
+    }
+
+    private Function<Object, Object[]> generateFunctionWrapper(String functionName) {
+        return this.functionWrapperGenerator.apply(functionName);
+    }
+
+    private void addFunction(String name) {
+        this.inner.put(name, this.generateFunctionWrapper(name));
+    }
+
+    private void addMemory(String name, Memory memory) {
+        this.inner.put(name, memory);
     }
 }
