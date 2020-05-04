@@ -11,8 +11,8 @@ jobs:
       matrix:
         # The job runs on 3 different OS.
         os: [ubuntu-latest, macos-latest, windows-latest]
-        # The job runs on different Java versions.
-        java: [8]
+        # The job runs on different Java versions (LTS).
+        java: [8, 11]
       # As soon as one job fails in the matrix, all the other
       # in-progress jobs are canceled.
       fail-fast: true
@@ -34,6 +34,24 @@ jobs:
           toolchain: stable
           default: true
           override: true
+
+      - name: Cache Cargo registry
+        uses: actions/cache@v1
+        with:
+          path: ~/.cargo/registry
+          key: ${{ runner.os }}-cargo-registry-${{ hashFiles('**/Cargo.lock') }}
+
+      - name: Cache Cargo bin
+        uses: actions/cache@v1
+        with:
+          path: ~/.cargo/bin
+          key: ${{ runner.os }}-cargo-bin-${{ hashFiles('**/Cargo.lock') }}
+
+      - name: Cache Cargo build
+        uses: actions/cache@v1
+        with:
+          path: target
+          key: ${{ runner.os }}-cargo-build-target-${{ hashFiles('**/Cargo.lock') }}
 
       - name: Run all the tests
         shell: bash
