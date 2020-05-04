@@ -23,8 +23,9 @@ class InstanceTest {
     @Test
     void sum() throws IOException,Exception {
         Instance instance = new Instance(getBytes());
+        Function sum = instance.exports.getFunction("sum");
 
-        assertEquals(3, instance.exports.getFunction("sum").apply(1, 2)[0]);
+        assertEquals(3, sum.apply(1, 2)[0]);
 
         instance.close();
     }
