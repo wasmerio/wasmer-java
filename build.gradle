@@ -65,6 +65,12 @@ jar {
         attributes('Implementation-Title': project.name,
                    'Implementation-Version': project.version)
     }
+
+    // The JAR name is defined as
+    // `${baseName}-${appendix}-${version}-${classifier}.${extension}`.
+    // Let's change the appendix by the `triple` property, set by the
+    // `Makefile` (with `-Ptriple=…`).
+    appendix project.getProperty('triple')
 }
 
 task generateJniHeaders(type: JavaCompile) {
