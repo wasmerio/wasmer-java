@@ -1,19 +1,19 @@
-
-
-
 ifeq ($(OS),Windows_NT)
 	build_os := windows
 	build_arch := x86_64
 else
-    UNAME_S := $(shell uname -s)
-    
+	UNAME_S := $(shell uname -s)
+
 	ifeq ($(UNAME_S),Darwin)
 		build_os := darwin
 	endif
+
 	ifeq ($(UNAME_S),Linux)
 		build_os := linux
 	endif
+
 	ARCH := $(shell uname -m)
+
 	ifeq ($(ARCH),x86_64)
 		build_arch = x86_64
 	else
@@ -86,6 +86,11 @@ test-rust-x86_64-windows:
 # Run the Java tests.
 test-java:
 	"./gradlew" test --info
+
+# Generate JavaDoc.
+java-doc:
+	"./gradlew" javadoc
+	@echo "\n\n"'Open `build/docs/javadoc/index.html`.'
 
 # Make a JAR-file.
 package:

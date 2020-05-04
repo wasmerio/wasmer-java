@@ -263,6 +263,16 @@ $ make test
 
 Note: Testing automatically builds the project.
 
+### Documentation
+
+Run the following command:
+
+```sh
+$ make java-doc
+```
+
+Then open `build/docs/javadoc/index.html`.
+
 # What is WebAssembly?
 
 Quoting [the WebAssembly site](https://webassembly.org/):
