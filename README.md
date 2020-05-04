@@ -60,10 +60,10 @@ class Example {
         byte[] wasmBytes = Files.readAllBytes(wasmPath);
 
         // Instantiates the WebAssembly module.
-        Instanace = new Instance(wasmBytes);
+        Instance = new Instance(wasmBytes);
 
         // Calls an exported function, and returns an object array.
-        Object[] results = instance.exports.get("sum").apply(5, 37);
+        Object[] results = instance.exports.getFunction("sum").apply(5, 37);
 
         System.out.println((Integer) results[0]); // 42
 
@@ -78,6 +78,8 @@ project](https://github.com/d0iasm/example-java-ext-wasm).
 
 # API of the `wasmer` library
 
+The root namespace is `org.wasmer`.
+
 ## The `Instance` class
 
 The `Instance` constructor compiles and instantiates a WebAssembly
@@ -89,7 +91,7 @@ exported functions, or exported memories. For example:
 Instance instance = new Instance(wasmBytes);
 
 // Calls an exported function.
-Object[] results = instance.exports.get("sum").apply(1, 2);
+Object[] results = instance.exports.getFunction("sum").apply(1, 2);
 
 // Casts an object to an integer object because the result is an object array.
 int result = (Integer) results[0];
@@ -101,34 +103,39 @@ System.out.println(result); // 3
 instance.close();
 ```
 
-### Exported functions
+### Exports
 
-All exported functions are accessible on the `Instance.exports` field
-in the `Instance` class. The `get` method allows to get a single
-exported function by its name. An exported function is a Java closure,
-where all arguments are automatically casted to WebAssembly values if
-possible, and all results are of type `Object`, which can be typed to
-`Integer` or `Float` for instance.
+All exports, like functions or memories, are accessible on the
+`Instance.exports` field, which is of kind `Exports` (a read-only
+wrapper around a map of kind `Map<String, exports.Export>`). The
+`Exports.get` method returns an object of type `Export`. To
+downcast it to an exported function or to an exported memory, you can
+use the respective `getFunction` or `getMemory` methods. The following
+sections describe each exports in details.
+
+#### Exported functions
+
+An exported function is a native Java closure (represented by the
+`exports.Function` class), where all arguments are automatically
+casted to WebAssembly values if possible, and all results are of type
+`Object`, which can be typed to `Integer` or `Float` for instance.
 
 ```java
-Exports exportedFunctions = instance.exports;
-ExportedFunction sum = exportedFunctions.get("sum");
-
+Function sum = instance.exports.getFunction("sum");
 Object[] results = sum.apply(1, 2);
 
 System.out.println((Integer) results[0]); // 3
 ```
 
-### Exported memories
+#### Exported memories
 
-The `Instance.memories` field exposes the `Memories` class
-representing the set of memories of that particular instance, e.g.:
+An exported memory is a regular `Memory` class.
 
 ```java
-Memories memories = instance.memories;
+Memory memory = instance.exports.getMemory("memory_1");
 ```
 
-See the [`Memory`](#memory) class section for more information.
+See the [`Memory`](#the-memory-class) class section for more information.
 
 ## The `Module` class
 
@@ -172,7 +179,7 @@ module1 = null;
 Module module2 = Module.deserialize(serializedModule);
 
 // Instantiates and uses it.
-Object[] results = module2.instantiate().exports.get("sum").apply(1, 2);
+Object[] results = module2.instantiate().exports.getFunction("sum").apply(1, 2);
 
 System.out.println((Integer) results[0]); // 3
 ```
@@ -196,11 +203,11 @@ is stored in the WebAssembly memory. Let's read it.
 ```java
 Instance instance = new Instance(wasmBytes);
 
-// Gets the memory by specifing its exported name.
-Memory memory = instance.memories.get("memory");
+// Gets the memory by specifying its exported name.
+Memory memory = instance.exports.getMemory("memory");
 
 // Gets the pointer value as an integer.
-int pointer = (Integer) instance.exports.get("return_hello").apply()[0];
+int pointer = (Integer) instance.exports.getFunction("return_hello").apply()[0];
 
 // Reads the data from the memory.
 byte[] stringBytes = memory.read(pointer, 13);
@@ -222,10 +229,12 @@ int oldPageSize = memory.grow(1);
 ## Development
 
 If you want to build the extension you will need the following tools:
-- [Gradle](https://gradle.org/): a package management tool
+
+- [Gradle](https://gradle.org/), a package management tool,
+- [Rust](https://rust-lang.org/), the Rust programming language,
+- [Java](https://www.java.com/), because it's a Java project ;-).
 
 ```sh
-// Download java-ext-wasm.
 $ git clone https://github.com/wasmerio/java-ext-wasm/
 $ cd java-ext-wasm
 ```
