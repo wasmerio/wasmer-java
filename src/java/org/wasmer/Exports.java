@@ -18,8 +18,8 @@ import java.util.Map;
  * Object[] result = instance.exports.getFunction("sum").apply(1, 2);
  *
  * // Get, manually downcast, and run an exported function.
- * Export export = instance.exports.get("sum");
- * Object[] result = ((Function<Object, Object[]>) export).apply(1, 2);
+ * Export sum = instance.exports.get("sum");
+ * Object[] result = ((Function) sum).apply(1, 2);
  * }</pre>
  */
 public class Exports {
@@ -50,8 +50,8 @@ public class Exports {
      *
      * @param name Name of the exported function.
      */
-    public Function<Object, Object[]> getFunction(String name) throws ClassCastException {
-        return (Function<Object, Object[]>) this.inner.get(name);
+    public Function getFunction(String name) throws ClassCastException {
+        return (Function) this.inner.get(name);
     }
 
     /**
@@ -81,13 +81,13 @@ public class Exports {
      * Lambda expression for currying.
      * This takes a function name and returns the function to call WebAssembly function.
      */
-    private java.util.function.Function<String, Function<Object, Object[]>> functionWrapperGenerator =
+    private java.util.function.Function<String, Function> functionWrapperGenerator =
         functionName -> arguments -> this.instance.nativeCall(this.instance.instancePointer, functionName, arguments);
 
     /**
      * Generate the exported function wrapper.
      */
-    private Function<Object, Object[]> generateFunctionWrapper(String functionName) {
+    private Function generateFunctionWrapper(String functionName) {
         return this.functionWrapperGenerator.apply(functionName);
     }
 }
