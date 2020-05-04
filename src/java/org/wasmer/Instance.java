@@ -24,9 +24,13 @@ public class Instance {
     protected static native void nativeInitializeExportedMemories(long instancePointer);
 
     /**
-     * All WebAssembly exported functions.
+     * All WebAssembly exports.
      */
     public final Exports exports;
+
+    /**
+       The instance pointer.
+     */
     protected long instancePointer;
 
     /**
