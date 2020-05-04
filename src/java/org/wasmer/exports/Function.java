@@ -13,5 +13,5 @@ import org.wasmer.exports.Export;
 @FunctionalInterface
 public interface Function<Input, Output> extends Export {
     @SuppressWarnings("unchecked")
-    public Object[] apply(Object... args);
+    public Output apply(Input... args);
 }
