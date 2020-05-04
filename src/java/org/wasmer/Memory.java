@@ -77,7 +77,7 @@ public class Memory implements Export {
      * Write the set of bytes from the offset.
      *
      * @param offset The offset within the memory data of the first byte to be read.
-     * @param length The number of bytes to be read from the memory data.
+     * @param data The bytes to write.
      */
     public void write(int offset, byte[] data) throws BufferOverflowException, IllegalArgumentException, ReadOnlyBufferException {
         if (offset < 0) {
