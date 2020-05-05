@@ -110,10 +110,9 @@ pub extern "system" fn Java_org_wasmer_Module_nativeInstantiate(
 
         let module: &Module = Into::<Pointer<Module>>::into(module_pointer).borrow();
         let import_object = imports! {};
-        let instance = module
-            .module
-            .instantiate(&import_object)
-            .expect("Failed to instantiate a WebAssembly module.");
+        let instance = module.module.instantiate(&import_object).map_err(|e| {
+            runtime_error(format!("Failed to instantiate a WebAssembly module: {}", e))
+        })?;
 
         let memories: HashMap<String, Memory> = instance
             .exports()
