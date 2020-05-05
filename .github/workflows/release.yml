@@ -1,0 +1,89 @@
+name: Release
+
+on:
+  push:
+    tags:
+      - '**'
+
+jobs:
+  release:
+    name: Release
+
+    strategy:
+      matrix:
+        # The job runs on 3 different OS.
+        os: [ubuntu-latest, macos-latest, windows-latest]
+        # The job runs on different Java versions (LTS).
+        java: [8]
+      # As soon as one job fails in the matrix, all the other
+      # in-progress jobs are canceled.
+      fail-fast: true
+
+    runs-on: ${{ matrix.os }}
+
+    steps:
+      - name: Check out code
+        uses: actions/checkout@v2
+
+      - name: Set up Java ${{ matrix.version }}
+        uses: actions/setup-java@v1
+        with:
+          java-version: ${{ matrix.java }}
+
+      - name: Set up Rust
+        uses: actions-rs/toolchain@v1
+        with:
+          default: true
+          override: true
+
+      - name: Cache Cargo registry
+        uses: actions/cache@v1
+        with:
+          path: ~/.cargo/registry
+          key: ${{ runner.os }}-cargo-registry-${{ hashFiles('**/Cargo.lock') }}
+
+      - name: Cache Cargo bin
+        uses: actions/cache@v1
+        with:
+          path: ~/.cargo/bin
+          key: ${{ runner.os }}-cargo-bin-${{ hashFiles('**/Cargo.lock') }}
+
+      - name: Cache Cargo build
+        uses: actions/cache@v1
+        with:
+          path: target
+          key: ${{ runner.os }}-cargo-build-target-${{ hashFiles('**/Cargo.lock') }}
+
+      - name: Run all the tests
+        shell: bash
+        run: |
+          export PATH="$HOME/.cargo/bin:$PATH"
+          make test
+
+      - name: Create the JAR
+        id: create_jar
+        shell: bash
+        run: |
+          export PATH="$HOME/.cargo/bin:$PATH"
+          make package
+
+      - name: Create a Github pre-release
+        id: create_pre_release
+        uses: actions/create-release@v1
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        with:
+          tag_name: ${{ github.ref }}
+          release_name: ${{ github.ref }}
+          draft: false
+          prerelease: true
+
+      - name: Upload JAR as Github pre-release asset
+        uses: actions/upload-release-asset@v1
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        with:
+          upload_url: ${{ steps.create_pre_release.outputs.upload_url }}
+          asset_path: ${{ steps.create_jar.outputs.path }}
+          asset_name: ${{ steps.create_jar.outputs.name }}
+          asset_content_type: application/java-archive
