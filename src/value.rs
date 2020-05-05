@@ -25,27 +25,21 @@ impl TryFrom<(&JNIEnv<'_>, JObject<'_>)> for Value {
             return Err(ErrorKind::NullPtr("`try_from` receives a null object").into());
         }
 
-        if env.is_instance_of(jobject, INT_CLASS).unwrap_or(false) {
-            Ok(Value(WasmValue::I32(
-                env.call_method(jobject, "intValue", "()I", &[])?.i()?,
-            )))
-        } else if env.is_instance_of(jobject, LONG_CLASS).unwrap_or(false) {
-            Ok(Value(WasmValue::I64(
-                env.call_method(jobject, "longValue", "()J", &[])?.j()?,
-            )))
-        } else if env.is_instance_of(jobject, FLOAT_CLASS).unwrap_or(false) {
-            Ok(Value(WasmValue::F32(
-                env.call_method(jobject, "floatValue", "()F", &[])?.f()?,
-            )))
-        } else if env.is_instance_of(jobject, DOUBLE_CLASS).unwrap_or(false) {
-            Ok(Value(WasmValue::F64(
-                env.call_method(jobject, "doubleValue", "()D", &[])?.d()?,
-            )))
-        } else {
-            Err(runtime_error(format!(
-                "Could not convert argument {:?} to a WebAssembly value.",
-                jobject
-            )))
-        }
+        Ok(Value(
+            if env.is_instance_of(jobject, INT_CLASS).unwrap_or(false) {
+                WasmValue::I32(env.call_method(jobject, "intValue", "()I", &[])?.i()?)
+            } else if env.is_instance_of(jobject, LONG_CLASS).unwrap_or(false) {
+                WasmValue::I64(env.call_method(jobject, "longValue", "()J", &[])?.j()?)
+            } else if env.is_instance_of(jobject, FLOAT_CLASS).unwrap_or(false) {
+                WasmValue::F32(env.call_method(jobject, "floatValue", "()F", &[])?.f()?)
+            } else if env.is_instance_of(jobject, DOUBLE_CLASS).unwrap_or(false) {
+                WasmValue::F64(env.call_method(jobject, "doubleValue", "()D", &[])?.d()?)
+            } else {
+                return Err(runtime_error(format!(
+                    "Could not convert argument {:?} to a WebAssembly value.",
+                    jobject
+                )));
+            },
+        ))
     }
 }
