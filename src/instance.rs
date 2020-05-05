@@ -105,42 +105,42 @@ pub extern "system" fn Java_org_wasmer_Instance_nativeCallExportedFunction<'a>(
 ) -> jobjectArray {
     let output = panic::catch_unwind(|| {
         let instance: &Instance = Into::<Pointer<Instance>>::into(instance_pointer).borrow();
-        let export_name: String = env
-            .get_string(export_name)
-            .expect("Failed to get Java string")
-            .into();
+        let export_name: String = env.get_string(export_name)?.into();
 
-        let arguments_length = env.get_array_length(arguments_pointer).unwrap();
+        let arguments_length = env.get_array_length(arguments_pointer)?;
 
-        let arguments: Vec<JObject> = (0..arguments_length)
-            .map(|i| {
-                env.get_object_array_element(arguments_pointer, i)
-                    .expect("Failed to get Java object")
-            })
-            .collect();
+        let arguments = (0..arguments_length)
+            .map(|i| env.get_object_array_element(arguments_pointer, i))
+            .collect::<Result<Vec<JObject>, Error>>()?;
 
         let results = instance.call_exported_function(
-            export_name,
+            export_name.clone(),
             arguments
                 .iter()
-                .map(|argument| {
-                    Value::try_from((&env, *argument))
-                        .expect("Failed to convert an argument to a WebAssembly value")
-                        .inner()
+                .enumerate()
+                .map(|(nth, argument)| {
+                    Ok(
+                        Value::try_from((&env, *argument))
+                            .map_err(|_| {
+                                runtime_error(format!(
+                                    "Failed to convert the argument {}nth of `{}` into a WebAssembly value.",
+                                    nth,
+                                    export_name,
+                                ))
+                            })?
+                            .inner())
                 })
-                .collect(),
+                .collect::<Result<Vec<WasmValue>, Error>>()?,
         )?;
 
-        let obj_array = env
-            .new_object_array(
-                i32::try_from(results.len()).unwrap(),
-                "java/lang/Object",
-                JObject::null(),
-            )
-            .expect("Failed to create a Java object array");
+        let obj_array = env.new_object_array(
+            i32::try_from(results.len()).map_err(|e| runtime_error(e.to_string()))?,
+            "java/lang/Object",
+            JObject::null(),
+        )?;
 
         if results.len() > 0 {
-            for (i, result) in results.iter().enumerate() {
+            for (nth, result) in results.iter().enumerate() {
                 let obj = match result {
                     WasmValue::I32(val) => env.new_object(INT_CLASS, "(I)V", &[JValue::from(*val)]),
                     WasmValue::I64(val) => {
@@ -153,14 +153,11 @@ pub extern "system" fn Java_org_wasmer_Instance_nativeCallExportedFunction<'a>(
                         env.new_object(DOUBLE_CLASS, "(D)V", &[JValue::from(*val)])
                     }
                     _ => unreachable!(),
-                };
-                env.set_object_array_element(
-                    obj_array,
-                    i as i32,
-                    obj.expect("Failed to create a Java object"),
-                )
-                .expect("Failed to set a Java object element");
+                }?;
+
+                env.set_object_array_element(obj_array, nth as i32, obj)?;
             }
+
             Ok(obj_array)
         } else {
             Ok(JObject::null().into_inner())
