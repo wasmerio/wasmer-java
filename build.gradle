@@ -68,7 +68,7 @@ jar {
 
     // The JAR name is defined as
     // `${baseName}-${appendix}-${version}-${classifier}.${extension}`.
-    appendix inferWasmerJarAppendix()
+    archiveAppendix = inferWasmerJarAppendix()
 }
 
 String inferWasmerJarAppendix() {
