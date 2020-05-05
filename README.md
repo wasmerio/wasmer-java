@@ -13,19 +13,75 @@
 
 Wasmer is a Java library for executing WebAssembly binaries:
 
- * **Easy to use**: The `wasmer` API mimics the standard WebAssembly API,
- * **Fast**: `wasmer` executes the WebAssembly modules as fast as possible,
+ * **Easy to use**: The API mimics the standard WebAssembly API,
+ * **Fast**: The Wasmer Java library executes the WebAssembly modules
+   as fast as possible,
  * **Safe**: All calls to WebAssembly will be fast, but more
    importantly, completely safe and sandboxed.
 
 # Install
 
-Wasmer Java JNI extension can be used in different ways.
+Since the Wasmer Java library includes the [Wasmer
+runtime](https://github.com/wasmerio/wasmer), written in Rust,
+pre-compiled as a shared library, we produce one JAR per platform and
+architecture. For the moment, the following are supported:
 
-The compiler and annotations are deployed to Maven Central. The compiler is written in Java and can be added as a Gradle dependency with:
+- `x86_64-darwin` (macOS, `x86` 64bits),
+- `x86_64-linux` (Linux, `x86` 64bits),
+- `x86_64-windows` (Windows, `x86` 64bits).
 
+More architectures and more platforms will be added in a close
+future. It is possible to produce your own JAR for your own platform
+and architecture, see [the Development Section](#development) to learn
+more.
+
+Thus, the JAR files are named as follows:
+`wasmer-jni-$(architecture)-$(os)-$(version).jar`. According the
+[Gradle Jar
+API](https://docs.gradle.org/current/dsl/org.gradle.api.tasks.bundling.Jar.html#org.gradle.api.tasks.bundling.Jar:appendix),
+the `$(architecture)-$(os)` part is called the _archive prefix_. To
+infer the JAR appendix automatically to configure your dependencies,
+you can use the following `inferWasmerJarAppendix` function:
+
+```gradle
+String inferWasmerJarAppendix() {
+    def nativePlatform = new org.gradle.nativeplatform.platform.internal.DefaultNativePlatform("current")
+    def arch = nativePlatform.architecture
+    def os = nativePlatform.operatingSystem
+
+    def arch_name
+
+    switch (arch.getName()) {
+        case ["x86_64", "x64", "x86-64"]:
+            arch_name = "x86_64"
+            break;
+
+        default:
+            throw new RuntimeException("`wasmer-jni` has no pre-compiled archive for the architecture " + arch.getName())
+    }
+
+    def os_name
+
+    if (os.isMacOsX()) {
+        os_name = "darwin"
+    } else if (os.isLinux()) {
+        os_name = "linux"
+    } else if (os.isWindows()) {
+        os_name = "windows"
+    } else {
+        throw new RuntimeException("`wasmer-jni` has no pre-compiled archive for the platform " + os.getName())
+    }
+
+    return arch_name + "-" + os_name
+}
 ```
-compile 'org.wasmer:wasmer-jni:0.1.0'
+
+Finally, you can configure your dependencies such as:
+
+```gradle
+dependencies {
+    implementation "org.wasmer:wasmer-jni-" + inferWasmerJarAppendix() + ":0.1.0"
+}
 ```
 
 You can also download the Java JAR file from the
