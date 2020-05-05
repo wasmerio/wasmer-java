@@ -68,9 +68,38 @@ jar {
 
     // The JAR name is defined as
     // `${baseName}-${appendix}-${version}-${classifier}.${extension}`.
-    // Let's change the appendix by the `triple` property, set by the
-    // `Makefile` (with `-Ptriple=…`).
-    appendix project.getProperty('triple')
+    appendix inferWasmerJarAppendix()
+}
+
+String inferWasmerJarAppendix() {
+    def nativePlatform = new org.gradle.nativeplatform.platform.internal.DefaultNativePlatform("current")
+    def arch = nativePlatform.architecture
+    def os = nativePlatform.operatingSystem
+
+    def arch_name
+
+    switch (arch.getName()) {
+        case ["x86_64", "x64", "x86-64"]:
+            arch_name = "x86_64"
+            break;
+
+        default:
+            throw new RuntimeException("Architecture " + arch.getName() + " is not supported.")
+    }
+
+    def os_name
+
+    if (os.isMacOsX()) {
+        os_name = "darwin"
+    } else if (os.isLinux()) {
+        os_name = "linux"
+    } else if (os.isWindows()) {
+        os_name = "windows"
+    } else {
+        throw new RuntimeException("Platform " + os.getName() + " is not supported.")
+    }
+
+    return arch_name + "-" + os_name
 }
 
 task generateJniHeaders(type: JavaCompile) {

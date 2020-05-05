@@ -57,7 +57,7 @@ build-rust-x86_64-windows:
 
 # Compile the Java part (incl. `build-test`, see `gradlew`).
 build-java:
-	"./gradlew" --info -Ptriple=$(build_arch)-$(build_os) build
+	"./gradlew" --info build
 
 # Generate the Java C headers.
 build-headers:
@@ -80,7 +80,7 @@ test-rust-x86_64-windows:
 
 # Run the Java tests.
 test-java:
-	"./gradlew" --info -Ptriple=$(build_arch)-$(build_os) test
+	"./gradlew" --info test
 
 # Generate JavaDoc.
 java-doc:
@@ -89,11 +89,11 @@ java-doc:
 
 # Make a JAR-file.
 package:
-	"./gradlew" --info -Ptriple=$(build_arch)-$(build_os) jar
+	"./gradlew" --info jar
 
 # Publish the package artifact to a public repository
 publish:
-	"./gradlew" --info -Ptriple=$(build_arch)-$(build_os) publish
+	"./gradlew" --info publish
 
 # Clean
 clean:
