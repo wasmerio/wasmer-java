@@ -96,7 +96,7 @@ pub extern "system" fn Java_org_wasmer_Instance_nativeDrop(
 }
 
 #[no_mangle]
-pub extern "system" fn Java_org_wasmer_Instance_nativeCall<'a>(
+pub extern "system" fn Java_org_wasmer_Instance_nativeCallExportedFunction<'a>(
     env: JNIEnv<'a>,
     _class: JClass,
     instance_pointer: jptr,

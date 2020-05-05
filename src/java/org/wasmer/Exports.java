@@ -82,7 +82,7 @@ public class Exports {
      * This takes a function name and returns the function to call WebAssembly function.
      */
     private java.util.function.Function<String, Function> functionWrapperGenerator =
-        functionName -> arguments -> this.instance.nativeCall(this.instance.instancePointer, functionName, arguments);
+        functionName -> arguments -> this.instance.nativeCallExportedFunction(this.instance.instancePointer, functionName, arguments);
 
     /**
      * Generate the exported function wrapper.

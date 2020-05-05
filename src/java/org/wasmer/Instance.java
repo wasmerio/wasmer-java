@@ -19,7 +19,7 @@ public class Instance {
     }
     private native long nativeInstantiate(Instance self, byte[] moduleBytes) throws RuntimeException;
     private native void nativeDrop(long instancePointer);
-    protected native Object[] nativeCall(long instancePointer, String exportName, Object[] arguments) throws RuntimeException;
+    protected native Object[] nativeCallExportedFunction(long instancePointer, String exportName, Object[] arguments) throws RuntimeException;
     protected static native void nativeInitializeExportedFunctions(long instancePointer);
     protected static native void nativeInitializeExportedMemories(long instancePointer);
 
