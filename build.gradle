@@ -112,7 +112,7 @@ task generateJniHeaders(type: JavaCompile) {
     options.verbose = true
 }
 
-task buildRust(type:Exec) {
+task buildRust(type: Exec) {
     dependsOn generateJniHeaders
 
     commandLine 'make', 'build-rust'
@@ -136,6 +136,16 @@ tasks.withType(Test) {
         outputs.upToDateWhen { false }
         showStandardStreams = true
     }
+}
+
+task buildJar() {
+    dependsOn jar
+
+    // Display specific “action outputs” for Github Actions.
+    def jar_name = project.archivesBaseName + "-" + inferWasmerJarAppendix() + "-" + project.version + ".jar"
+    println(jar_name)
+    println("::set-output name=path::./build/libs/" + jar_name)
+    println("::set-output name=name::" + jar_name)
 }
 
 // We build the integration before running any test
