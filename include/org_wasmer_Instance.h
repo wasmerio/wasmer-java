@@ -25,10 +25,10 @@ JNIEXPORT void JNICALL Java_org_wasmer_Instance_nativeDrop
 
 /*
  * Class:     org_wasmer_Instance
- * Method:    nativeCall
+ * Method:    nativeCallExportedFunction
  * Signature: (JLjava/lang/String;[Ljava/lang/Object;)[Ljava/lang/Object;
  */
-JNIEXPORT jobjectArray JNICALL Java_org_wasmer_Instance_nativeCall
+JNIEXPORT jobjectArray JNICALL Java_org_wasmer_Instance_nativeCallExportedFunction
   (JNIEnv *, jobject, jlong, jstring, jobjectArray);
 
 /*
