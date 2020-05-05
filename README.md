@@ -307,7 +307,7 @@ To build the JAR package:
 $ make package
 ```
 
-This will generate the file `build/libs/wasmer-jni-0.1.0.jar`.
+This will generate the file `build/libs/wasmer-jni-$(architecture)-$(os)-0.1.0.jar`.
 
 ### Testing
 
