@@ -100,16 +100,16 @@ pub extern fn sum(x: i32, y: i32) -> i32 {
 ```
 
 After compilation to WebAssembly, the
-[`java/src/test/resources/simple.wasm`](https://github.com/wasmerio/java-ext-wasm/blob/master/java/src/test/resources/simple.wasm)
+[`tests/resources/simple.wasm`](https://github.com/wasmerio/java-ext-wasm/blob/master/tests/resources/simple.wasm)
 binary file is generated. ([Download
-it](https://github.com/wasmerio/java-ext-wasm/raw/master/java/src/test/resources/simple.wasm)).
+it](https://github.com/wasmerio/java-ext-wasm/raw/master/tests/resources/simple.wasm)).
 
 Then, we can execute it in Java:
 
 ```java
 class Example {
     public static void main(String[] args) {
-        // simple.wasm is located at `tests/resources/`.
+        // `simple.wasm` is located at `tests/resources/`.
         Path wasmPath = Paths.get(new Example().getClass().getClassLoader().getResource("simple.wasm").getPath());
 
         // Reads the WebAssembly module as bytes.
