@@ -95,6 +95,13 @@ package:
 publish:
 	"./gradlew" --info uploadToBintray
 
+# Run a specific example, with `make run-example EXAMPLE=Simple` for instance.
+run-example:
+	$(eval JAR := $(shell find ./build/libs/ -name "wasmer-jni-*.jar"))
+	@cd examples; \
+		javac -classpath "../${JAR}" ${EXAMPLE}.java; \
+		java -classpath ".:../${JAR}" ${EXAMPLE}
+
 # Clean
 clean:
 	cargo clean
