@@ -5,15 +5,9 @@ plugins {
     id "com.jfrog.bintray" version "1.8.5"
 }
 
-version "0.1.0"
-group "org.wasmer"
-
 allprojects {
     group "org.wasmer"
-    version "0.1.0"
-
-    apply plugin: "maven"
-    apply plugin: "maven-publish"
+    version "0.1.1"
 }
 
 // This is needed for the Java plugin to make sure

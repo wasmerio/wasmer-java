@@ -704,7 +704,7 @@ dependencies = [
 
 [[package]]
 name = "wasmer-jni"
-version = "0.1.0"
+version = "0.1.1"
 dependencies = [
  "jni 0.16.0 (registry+https://github.com/rust-lang/crates.io-index)",
  "wasmer-runtime 0.16.2 (registry+https://github.com/rust-lang/crates.io-index)",

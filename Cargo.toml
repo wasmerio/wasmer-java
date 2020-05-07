@@ -1,7 +1,7 @@
 [package]
 publish = false
 name = "wasmer-jni"
-version = "0.1.0"
+version = "0.1.1"
 authors = ["Ivan Enderlin <ivan.enderlin@hoa-project.net>"]
 edition = "2018"
 
