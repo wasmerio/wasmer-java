@@ -222,3 +222,8 @@ def publishSettings(project, projectName, includeJavadoc) {
         }
     }
 }
+
+// Local Variables:
+// mode: java
+// End:
+// vim: set ft=java :
