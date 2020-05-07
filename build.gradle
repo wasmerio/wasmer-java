@@ -103,6 +103,8 @@ String inferWasmerJarAppendix() {
 }
 
 task generateJniHeaders(type: JavaCompile) {
+    description "Generate the JNI header files (in `include/`)."
+
     classpath = sourceSets.main.compileClasspath
     destinationDir file("include")
     source = sourceSets.main.java
@@ -115,11 +117,15 @@ task generateJniHeaders(type: JavaCompile) {
 task buildRust(type: Exec) {
     dependsOn generateJniHeaders
 
+    description "Build the Rust project."
+
     commandLine 'make', 'build-rust'
 }
 
 task copyAllArtifacts(type: Copy) {
     dependsOn buildRust
+
+    description "Copy build artifacts to the `build/` directory."
 
     from "artifacts"
     include "**/*"
