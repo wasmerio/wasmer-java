@@ -11,37 +11,55 @@
     <img src="https://img.shields.io/github/license/wasmerio/wasmer.svg" alt="License"></a>
 </p>
 
-Wasmer is a Java library for executing WebAssembly binaries:
+**Wasmer JNI** (Java Native Interface) is a Java library for executing
+WebAssembly binaries:
 
  * **Easy to use**: The API mimics the standard WebAssembly API,
- * **Fast**: The Wasmer Java library executes the WebAssembly modules
+ * **Fast**: The Wasmer JNI library executes the WebAssembly modules
    as fast as possible,
  * **Safe**: All calls to WebAssembly will be fast, but more
    importantly, completely safe and sandboxed.
-
+   
 # Install
 
-Since the Wasmer Java library includes the [Wasmer
-runtime](https://github.com/wasmerio/wasmer), written in Rust,
-pre-compiled as a shared library, we produce one JAR per platform and
-architecture. For the moment, the following are supported:
+The Wasmer JNI library is based on the [Wasmer
+runtime](https://github.com/wasmerio/wasmer), which is written in
+[Rust](https://www.rust-lang.org/), and is compiled to a shared
+library. For your convenience, we produce one JAR (Java Archive) per
+architecture and platform. By now, the following are supported,
+consistently tested, and pre-packaged:
 
 - `x86_64-darwin` (macOS, `x86` 64bits),
 - `x86_64-linux` (Linux, `x86` 64bits),
 - `x86_64-windows` (Windows, `x86` 64bits).
 
 More architectures and more platforms will be added in a close
-future. It is possible to produce your own JAR for your own platform
-and architecture, see [the Development Section](#development) to learn
+future. If you need a specific one, [feel free to
+ask](https://github.com/wasmerio/java-ext-wasm/issues/new?assignees=&labels=%F0%9F%8E%89+enhancement&template=---feature-request.md&title=)!
+It is possible to produce your own JAR for your own platform and
+architecture, see [the Development Section](#development) to learn
 more.
 
-Thus, the JAR files are named as follows:
-`wasmer-jni-$(architecture)-$(os)-$(version).jar`. According the
-[Gradle Jar
+The JAR files are named as follows:
+`wasmer-jni-$(architecture)-$(os)-$(version).jar`. Thus, to include
+Wasmer JNI as a dependency, write for instance:
+
+```gradle
+dependencies {
+    implementation "org.wasmer:wasmer-jni-x86_64-linux:0.1.1"
+}
+```
+
+#### Automatic dependencies per architecture and platform
+
+<details>
+<summary>It is possible to infer the archive appendix automatically, see how.</summary>
+
+According the [Gradle Jar
 API](https://docs.gradle.org/current/dsl/org.gradle.api.tasks.bundling.Jar.html#org.gradle.api.tasks.bundling.Jar:appendix),
 the `$(architecture)-$(os)` part is called the _archive prefix_. To
-infer the JAR appendix automatically to configure your dependencies,
-you can use the following `inferWasmerJarAppendix` function:
+infer that appendix automatically to configure your dependencies, you
+can use the following `inferWasmerJarAppendix` function:
 
 ```gradle
 String inferWasmerJarAppendix() {
@@ -84,8 +102,18 @@ dependencies {
 }
 ```
 
-You can also download the Java JAR file from the
-[Github releases page](https://github.com/wasmerio/java-ext-wasm/releases)!
+</details>
+
+#### Bintray/JCenter
+
+The package are published on [Bintray](https://bintray.com/) on [the
+`wasmer/wasmer-jni`
+repository](https://bintray.com/wasmer/wasmer-jni/wasmer-jni).
+
+#### Github release assets
+
+It is also possible to download the Java JAR file from the [Github
+releases page](https://github.com/wasmerio/java-ext-wasm/releases)!
 
 # Example
 
