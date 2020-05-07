@@ -1,15 +1,19 @@
 plugins {
-    id 'java'
+    id "java"
     // As Wasmer is a package, we need tools to build the JARs and so
-    id 'java-library'
+    id "java-library"
+    id "com.jfrog.bintray" version "1.8.5"
 }
 
-version '0.1.0'
-group 'org.wasmer'
+version "0.1.0"
+group "org.wasmer"
 
 allprojects {
-    group 'org.wasmer'
-    version '0.1.0'
+    group "org.wasmer"
+    version "0.1.0"
+
+    apply plugin: "maven"
+    apply plugin: "maven-publish"
 }
 
 // This is needed for the Java plugin to make sure
@@ -21,7 +25,7 @@ targetCompatibility = 1.8
 sourceSets {
     main {
         java {
-            srcDirs = ['src/java']
+            srcDirs = ["src/java"]
         }
         resources {
             srcDirs = ["$buildDir/toArtifact"]
@@ -29,18 +33,18 @@ sourceSets {
     }
     test {
         java {
-            srcDirs = ['tests']
+            srcDirs = ["tests"]
         }
         resources {
-            srcDirs = ['tests/resources']
+            srcDirs = ["tests/resources"]
         }
     }
 }
 
 javadoc {
-    options.links 'https://docs.oracle.com/javase/8/docs/api/'
+    options.links "https://docs.oracle.com/javase/8/docs/api/"
     // TODO: change when https://github.com/gradle/gradle/issues/2354 is fixed
-    options.addStringOption 'Xdoclint:all', '-Xdoclint:-missing'
+    options.addStringOption "Xdoclint:all", "-Xdoclint:-missing"
 }
 
 repositories {
@@ -52,8 +56,8 @@ repositories {
 }
 
 dependencies {
-    testImplementation('org.junit.jupiter:junit-jupiter-api:5.4.2')
-    testRuntimeOnly('org.junit.jupiter:junit-jupiter-engine:5.4.2')
+    testImplementation("org.junit.jupiter:junit-jupiter-api:5.4.2")
+    testRuntimeOnly("org.junit.jupiter:junit-jupiter-engine:5.4.2")
 }
 
 test {
@@ -62,8 +66,8 @@ test {
 
 jar {
     manifest {
-        attributes('Implementation-Title': project.name,
-                   'Implementation-Version': project.version)
+        attributes("Implementation-Title": project.name,
+                   "Implementation-Version": project.version)
     }
 
     // The JAR name is defined as
@@ -109,7 +113,7 @@ task generateJniHeaders(type: JavaCompile) {
     destinationDir file("include")
     source = sourceSets.main.java
     options.compilerArgs += [
-        '-h', file("include"),
+        "-h", file("include"),
     ]
     options.verbose = true
 }
@@ -119,7 +123,7 @@ task buildRust(type: Exec) {
 
     description "Build the Rust project."
 
-    commandLine 'make', 'build-rust'
+    commandLine "make", "build-rust"
 }
 
 task copyAllArtifacts(type: Copy) {
@@ -137,7 +141,7 @@ tasks.withType(Test) {
     // shared object file
     systemProperty "java.library.path", "target/current/"
 
-    // Don't capture the standard output.
+    // Don"t capture the standard output.
     testLogging {
         outputs.upToDateWhen { false }
         showStandardStreams = true
@@ -156,76 +160,78 @@ jar.doLast() {
 compileTestJava.dependsOn buildRust
 processResources.dependsOn copyAllArtifacts
 
-def publishSettings(project, projectName, includeJavadoc) {
-    project.with {
-        if (!project.hasProperty('ossrhUsername')) return
-        apply plugin: 'maven'
-        apply plugin: 'signing'
-
-        archivesBaseName = projectName
-
-        task packageSources(type: Jar) {
-            classifier = 'sources'
-            from sourceSets.main.allSource
+// Publishing on bintray.
+/// First, set up a POM configuration.
+def pomConfig = {
+    name "wasmer-jni"
+    packaging "jar"
+    description "Wasmer JNI is a library to execute WebAssembly binaries"
+    url "https://wasmer.io"
+    scm {
+        connection "scm:git:git@github.com:wasmerio/java-ext-wasm.git"
+        developerConnection "scm:git:git@github.com:wasmerio/java-ext-wasm.git"
+        url "git@github.com:wasmerio/java-ext-wasm.git"
+    }
+    licenses {
+        license {
+            name "MIT License"
+            url "https://opensource.org/licenses/MIT"
         }
-
-        if (includeJavadoc) {
-            task packageJavadoc(type: Jar, dependsOn: 'javadoc') {
-                from javadoc.destinationDir
-                classifier = 'javadoc'
-            }
-        } else {
-            task packageJavadoc(type: Jar) {
-                // Empty to satisfy Sonatype's javadoc.jar requirement
-                classifier 'javadoc'
-            }
+    }
+    developers {
+        developer {
+            id "hywan"
+            name "Ivan Enderlin"
+            url "https://github.com/Hywan"
         }
+    }
+}
 
-        artifacts {
-            archives packageSources, packageJavadoc
-        }
+publishing {
+    publications {
+        MyPublication(MavenPublication) {
+            from components.java
+            groupId "org.wasmer"
+            artifactId "wasmer-jni-" + inferWasmerJarAppendix()
+            version project.version
 
-        signing {
-            sign configurations.archives
-        }
+            artifacts {
+                task packageSources(type: Jar) {
+                    classifier = "sources"
 
-        uploadArchives {
-            repositories {
-                mavenDeployer {
-                    beforeDeployment { MavenDeployment deployment -> signing.signPom(deployment) }
-                    repository(url: 'https://oss.sonatype.org/service/local/staging/deploy/maven2/') {
-                        authentication(userName: ossrhUsername, password: ossrhPassword)
-                    }
-                    snapshotRepository(url: 'https://oss.sonatype.org/content/repositories/snapshots/') {
-                        authentication(userName: ossrhUsername, password: ossrhPassword)
-                    }
-                    pom.project {
-                        name projectName
-                        packaging 'jar'
-                        description 'Wasmer is a library to execute WebAssembly binaries'
-                        url 'https://wasmer.io'
-                        scm {
-                            connection 'scm:git:git@github.com:wasmerio/java-ext-wasm.git'
-                            developerConnection 'scm:git:git@github.com:wasmerio/java-ext-wasm.git'
-                            url 'git@github.com:wasmerio/java-ext-wasm.git'
-                        }
-                        licenses {
-                            license {
-                                name 'MIT License'
-                                url 'https://opensource.org/licenses/MIT'
-                            }
-                        }
-                        developers {
-                            developer {
-                                id 'syrusakbary'
-                                name 'Syrus Akbary'
-                                url 'https://github.com/syrusakbary'
-                            }
-                        }
-                    }
+                    from sourceSets.main.allSource
                 }
+
+                task packageJavadoc(type: Jar, dependsOn: "javadoc") {
+                    classifier = "javadoc"
+
+                    from javadoc.destinationDir
+                }
+
+                archives packageSources, packageJavadoc
+            }
+
+            pom.withXml {
+                def root = asNode()
+                root.children().last() + pomConfig
             }
         }
+    }
+}
+
+/// Second, set up Bintray.
+bintray {
+    user = System.getenv("BINTRAY_USER")
+    key = System.getenv("BINTRAY_API_KEY")
+    //configurations = ["archives"]
+    publications = ["MyPublication"]
+    pkg {
+        repo = "wasmer-jni"
+        name = "wasmer-jni"
+        licenses = ["MIT"]
+        vcsUrl = "https://github.com/wasmerio/java-ext-wasm.git"
+        userOrg = "wasmer"
+        desc = "Wasmer JNI is a library to execute WebAssembly binaries"
     }
 }
 

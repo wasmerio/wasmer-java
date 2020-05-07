@@ -93,7 +93,7 @@ package:
 
 # Publish the package artifact to a public repository
 publish:
-	"./gradlew" --info publish
+	"./gradlew" --info bintrayUpload
 
 # Clean
 clean:

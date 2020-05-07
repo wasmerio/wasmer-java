@@ -119,3 +119,12 @@ jobs:
           asset_path: ${{ steps.create_jar.outputs.path }}
           asset_name: ${{ steps.create_jar.outputs.name }}
           asset_content_type: application/java-archive
+
+      - name: Upload JAR to Bintray (JCenter)
+        env:
+          BINTRAY_USER: ${{ secrets.BINTRAY_USER }}
+          BINTRAY_API_KEY: ${{ secrets.BINTRAY_API_KEY }}
+        shell: bash
+        run: |
+          export PATH="$HOME/.cargo/bin:$PATH"
+          make publish
