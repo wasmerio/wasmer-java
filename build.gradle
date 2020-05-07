@@ -161,77 +161,71 @@ compileTestJava.dependsOn buildRust
 processResources.dependsOn copyAllArtifacts
 
 // Publishing on bintray.
-/// First, set up a POM configuration.
-def pomConfig = {
-    name "wasmer-jni"
-    packaging "jar"
-    description "Wasmer JNI is a library to execute WebAssembly binaries"
-    url "https://wasmer.io"
-    scm {
-        connection "scm:git:git@github.com:wasmerio/java-ext-wasm.git"
-        developerConnection "scm:git:git@github.com:wasmerio/java-ext-wasm.git"
-        url "git@github.com:wasmerio/java-ext-wasm.git"
-    }
-    licenses {
-        license {
-            name "MIT License"
-            url "https://opensource.org/licenses/MIT"
+task uploadToBintray {
+    dependsOn bintrayUpload
+
+    apply plugin: "maven"
+    apply plugin: "maven-publish"
+
+    /// First, set up a POM configuration.
+    def pomConfig = {
+        name "wasmer-jni"
+        packaging "jar"
+        description "Wasmer JNI is a library to execute WebAssembly binaries"
+        url "https://wasmer.io"
+        scm {
+            connection "scm:git:git@github.com:wasmerio/java-ext-wasm.git"
+            developerConnection "scm:git:git@github.com:wasmerio/java-ext-wasm.git"
+            url "git@github.com:wasmerio/java-ext-wasm.git"
         }
-    }
-    developers {
-        developer {
-            id "hywan"
-            name "Ivan Enderlin"
-            url "https://github.com/Hywan"
-        }
-    }
-}
-
-publishing {
-    publications {
-        MyPublication(MavenPublication) {
-            from components.java
-            groupId "org.wasmer"
-            artifactId "wasmer-jni-" + inferWasmerJarAppendix()
-            version project.version
-
-            artifacts {
-                task packageSources(type: Jar) {
-                    classifier = "sources"
-
-                    from sourceSets.main.allSource
-                }
-
-                task packageJavadoc(type: Jar, dependsOn: "javadoc") {
-                    classifier = "javadoc"
-
-                    from javadoc.destinationDir
-                }
-
-                archives packageSources, packageJavadoc
+        licenses {
+            license {
+                name "MIT License"
+                url "https://opensource.org/licenses/MIT"
             }
-
-            pom.withXml {
-                def root = asNode()
-                root.children().last() + pomConfig
+        }
+        developers {
+            developer {
+                id "hywan"
+                name "Ivan Enderlin"
+                url "https://github.com/Hywan"
             }
         }
     }
-}
 
-/// Second, set up Bintray.
-bintray {
-    user = System.getenv("BINTRAY_USER")
-    key = System.getenv("BINTRAY_API_KEY")
-    //configurations = ["archives"]
-    publications = ["MyPublication"]
-    pkg {
-        repo = "wasmer-jni"
-        name = "wasmer-jni"
-        licenses = ["MIT"]
-        vcsUrl = "https://github.com/wasmerio/java-ext-wasm.git"
-        userOrg = "wasmer"
-        desc = "Wasmer JNI is a library to execute WebAssembly binaries"
+    publishing {
+        publications {
+            MyPublication(MavenPublication) {
+                from components.java
+                groupId "org.wasmer"
+                artifactId "wasmer-jni-" + inferWasmerJarAppendix()
+                version project.version
+
+                artifacts {
+                    archives jar
+                }
+
+                pom.withXml {
+                    def root = asNode()
+                    root.children().last() + pomConfig
+                }
+            }
+        }
+    }
+
+    /// Second, set up Bintray.
+    bintray {
+        user = System.getenv("BINTRAY_USER")
+        key = System.getenv("BINTRAY_API_KEY")
+        publications = ["MyPublication"]
+        pkg {
+            repo = "wasmer-jni"
+            name = "wasmer-jni"
+            licenses = ["MIT"]
+            vcsUrl = "https://github.com/wasmerio/java-ext-wasm.git"
+            userOrg = "wasmer"
+            desc = "Wasmer JNI is a library to execute WebAssembly binaries"
+        }
     }
 }
 
