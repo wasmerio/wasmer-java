@@ -138,9 +138,7 @@ tasks.withType(Test) {
     }
 }
 
-task buildJar() {
-    dependsOn jar
-
+jar.doLast() {
     // Display specific “action outputs” for Github Actions.
     def jar_name = project.archivesBaseName + "-" + inferWasmerJarAppendix() + "-" + project.version + ".jar"
     println(jar_name)

@@ -89,7 +89,7 @@ java-doc:
 
 # Make a JAR-file.
 package:
-	"./gradlew" --info buildJar
+	"./gradlew" --info jar
 
 # Publish the package artifact to a public repository
 publish:
