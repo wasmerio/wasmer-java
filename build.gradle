@@ -135,9 +135,10 @@ tasks.withType(Test) {
     // shared object file
     systemProperty "java.library.path", "target/current/"
 
-    // Don"t capture the standard output.
     testLogging {
         outputs.upToDateWhen { false }
+
+        // Don"t capture the standard output.
         showStandardStreams = true
     }
 }
@@ -149,6 +150,8 @@ jar.doLast() {
     println("::set-output name=path::./build/libs/" + jar_name)
     println("::set-output name=name::" + jar_name)
 }
+
+jar.outputs.upToDateWhen { false }
 
 // We build the integration before running any test
 compileTestJava.dependsOn buildRust
