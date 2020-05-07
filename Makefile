@@ -83,7 +83,7 @@ test-java:
 	"./gradlew" --info test
 
 # Generate JavaDoc.
-java-doc:
+javadoc:
 	"./gradlew" javadoc
 	@echo "\n\n"'Open `build/docs/javadoc/index.html`.'
 

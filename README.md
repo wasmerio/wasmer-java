@@ -352,7 +352,7 @@ Note: Testing automatically builds the project.
 Run the following command:
 
 ```sh
-$ make java-doc
+$ make javadoc
 ```
 
 Then open `build/docs/javadoc/index.html`.
