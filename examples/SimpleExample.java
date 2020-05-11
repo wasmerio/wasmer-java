@@ -4,7 +4,7 @@ import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Paths;
 
-class Simple {
+class SimpleExample {
     public static void main(String[] args) throws IOException {
         byte[] bytes = Files.readAllBytes(Paths.get("simple.wasm"));
         Instance instance = new Instance(bytes);
