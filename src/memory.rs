@@ -2,8 +2,12 @@ use crate::{
     exception::{joption_or_throw, runtime_error, Error},
     types::{jptr, Pointer},
 };
-use jni::{objects::JClass, objects::JObject, sys::jint, JNIEnv};
-use std::{cell::Cell, panic, rc::Rc};
+use jni::{
+    objects::{JClass, JObject},
+    sys::jint,
+    JNIEnv,
+};
+use std::{cell::Cell, panic, rc::Rc, slice};
 use wasmer_runtime::{memory::MemoryView, Memory as WasmMemory};
 use wasmer_runtime_core::units::Pages;
 
@@ -23,6 +27,39 @@ impl Memory {
             .map(|previous_pages| previous_pages.0)
             .map_err(|e| runtime_error(format!("Failed to grow the memory: {}", e)))
     }
+}
+
+#[no_mangle]
+pub extern "system" fn Java_org_wasmer_Memory_nativeMemoryView(
+    env: JNIEnv,
+    _class: JClass,
+    memory_object: JObject,
+    memory_pointer: jptr,
+) {
+    let output = panic::catch_unwind(|| {
+        let memory: &Memory = Into::<Pointer<Memory>>::into(memory_pointer).borrow();
+        let view: MemoryView<u8> = memory.memory.view();
+        let data = unsafe {
+            slice::from_raw_parts_mut(view[..].as_ptr() as *mut Cell<u8> as *mut u8, view.len())
+        };
+
+        // Create a new `JByteBuffer`, aka `java.nio.ByteBuffer`,
+        // borrowing the data from the WebAssembly memory.
+        let byte_buffer = env.new_direct_byte_buffer(data)?;
+
+        // Try to rewrite the `org.wasmer.Memory.buffer` attribute by
+        // calling the `org.wasmer.Memory.setBuffer` method.
+        env.call_method(
+            memory_object,
+            "setBuffer",
+            "(Ljava/nio/ByteBuffer;)V",
+            &[JObject::from(byte_buffer).into()],
+        )?;
+
+        Ok(())
+    });
+
+    joption_or_throw(&env, output);
 }
 
 #[no_mangle]
@@ -48,11 +85,11 @@ pub extern "system" fn Java_org_wasmer_Memory_nativeMemoryGrow(
         // borrowing the data from the WebAssembly memory.
         let byte_buffer = env.new_direct_byte_buffer(data)?;
 
-        // Try to rewrite the `org.wasmer.Memory.inner` attribute by
-        // calling the `org.wasmer.Memory.setInner` method.
+        // Try to rewrite the `org.wasmer.Memory.buffer` attribute by
+        // calling the `org.wasmer.Memory.setBuffer` method.
         env.call_method(
             memory_object,
-            "setInner",
+            "setBuffer",
             "(Ljava/nio/ByteBuffer;)V",
             &[JObject::from(byte_buffer).into()],
         )?;
@@ -70,7 +107,6 @@ pub mod java {
         types::{jptr, Pointer},
     };
     use jni::{objects::JObject, JNIEnv};
-    use std::cell::Cell;
 
     pub fn initialize_memories(env: &JNIEnv, instance: &Instance) -> Result<(), Error> {
         let exports_object: JObject = env
@@ -85,34 +121,12 @@ pub mod java {
         let memory_class = env.find_class("org/wasmer/Memory")?;
 
         for (memory_name, memory) in &instance.memories {
-            // Read the memory data as a pointer to `u8`.
-            let view = memory.memory.view::<u8>();
-            let data = unsafe {
-                std::slice::from_raw_parts_mut(
-                    view[..].as_ptr() as *mut Cell<u8> as *mut u8,
-                    view.len(),
-                )
-            };
-
-            // Create a new `JByteBuffer`, aka `java.nio.ByteBuffer`,
-            // borrowing the data from the WebAssembly memory.
-            let byte_buffer = env.new_direct_byte_buffer(data)?;
-
             // Instantiate the `Memory` class.
             let memory_object = env.new_object(memory_class, "()V", &[])?;
 
             // Try to set the memory pointer to the field `org.wasmer.Memory.memoryPointer`.
             let memory_pointer: jptr = Pointer::new(memory.clone()).into();
             env.set_field(memory_object, "memoryPointer", "J", memory_pointer.into())?;
-
-            // Try to write the `org.wasmer.Memory.inner` attribute by
-            // calling the `org.wasmer.Memory.setInner` method.
-            env.call_method(
-                memory_object,
-                "setInner",
-                "(Ljava/nio/ByteBuffer;)V",
-                &[JObject::from(byte_buffer).into()],
-            )?;
 
             // Add the newly created `org.wasmer.Memory` in the
             // `org.wasmer.Exports` collection.

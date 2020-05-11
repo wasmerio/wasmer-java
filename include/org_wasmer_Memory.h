@@ -9,6 +9,14 @@ extern "C" {
 #endif
 /*
  * Class:     org_wasmer_Memory
+ * Method:    nativeMemoryView
+ * Signature: (Lorg/wasmer/Memory;J)V
+ */
+JNIEXPORT void JNICALL Java_org_wasmer_Memory_nativeMemoryView
+  (JNIEnv *, jobject, jobject, jlong);
+
+/*
+ * Class:     org_wasmer_Memory
  * Method:    nativeMemoryGrow
  * Signature: (Lorg/wasmer/Memory;JI)I
  */

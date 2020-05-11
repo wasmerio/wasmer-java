@@ -6,6 +6,7 @@ pub fn runtime_error(message: String) -> Error {
     Error::from_kind(ErrorKind::Msg(message))
 }
 
+#[derive(Debug)]
 pub enum JOption<T> {
     Some(T),
     None,

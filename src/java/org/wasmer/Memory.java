@@ -20,13 +20,14 @@ import java.nio.ReadOnlyBufferException;
  * }</pre>
  */
 public class Memory implements Export {
+    private native void nativeMemoryView(Memory memory, long memoryPointer);
     private native int nativeMemoryGrow(Memory memory, long memoryPointer, int page);
 
     /**
      * Represents the actual WebAssembly memory data, borrowed from the runtime (in Rust).
      * The `setInner` method must be used to set this attribute.
      */
-    private ByteBuffer inner;
+    private ByteBuffer buffer;
     private long memoryPointer;
 
     private Memory() {
@@ -34,73 +35,26 @@ public class Memory implements Export {
     }
 
     /**
-     * Set the `ByteBuffer` of this memory. See `Memory.inner` to learn more.
+     *
+     */
+    public ByteBuffer buffer() {
+        this.nativeMemoryView(this, this.memoryPointer);
+
+        return this.buffer;
+    }
+
+    /**
+     * Set the `ByteBuffer` of this memory. See `Memory.buffer` to learn more.
      *
      * In addition, this method correctly sets the endianess of the `ByteBuffer`.
      */
-    private void setInner(ByteBuffer inner) {
-        this.inner = inner;
+    private void setBuffer(ByteBuffer buffer) {
+        this.buffer = buffer;
 
         // Ensure the endianess matches WebAssemly specification.
-        if (this.inner.order() != ByteOrder.LITTLE_ENDIAN) {
-            this.inner.order(ByteOrder.LITTLE_ENDIAN);
+        if (this.buffer.order() != ByteOrder.LITTLE_ENDIAN) {
+            this.buffer.order(ByteOrder.LITTLE_ENDIAN);
         }
-    }
-
-    /**
-     * Read the set of bytes from the offset.
-     *
-     * @param offset The offset within the memory data of the first byte to be read.
-     * @param length The number of bytes to be read from the memory data.
-     * @return The set of bytes.
-     */
-    public byte[] read(int offset, int length) throws BufferUnderflowException, IllegalArgumentException {
-        byte[] result = new byte[length];
-
-        if (offset < 0) {
-            throw new IllegalArgumentException("newPosition < 0: (" +  offset + " < 0)");
-        }
-
-        int size = this.size();
-
-        if (offset > size) {
-            throw new IllegalArgumentException("newPosition > limit: (" + offset + " > " + size + ")");
-        }
-
-        this.inner.position(offset);
-        this.inner.get(result);
-
-        return result;
-    }
-
-    /**
-     * Write the set of bytes from the offset.
-     *
-     * @param offset The offset within the memory data of the first byte to be read.
-     * @param data The bytes to write.
-     */
-    public void write(int offset, byte[] data) throws BufferOverflowException, IllegalArgumentException, ReadOnlyBufferException {
-        if (offset < 0) {
-            throw new IllegalArgumentException("newPosition < 0: (" +  offset + " < 0)");
-        }
-
-        int size = this.size();
-
-        if (offset > size) {
-            throw new IllegalArgumentException("newPosition > limit: (" + offset + " > " + size + ")");
-        }
-
-        this.inner.position(offset);
-        this.inner.put(data);
-    }
-
-    /**
-     * Return the size of the memory.
-     *
-     * @return The size of the memory.
-     */
-    public int size() {
-        return this.inner.limit();
     }
 
     /**
