@@ -157,8 +157,9 @@ class Example {
 }
 ```
 
-For more information, you can check [this example
-project](https://github.com/d0iasm/example-java-ext-wasm).
+There is more examples in the `examples/` directory. Run them with the
+`Makefile`, such as: `make run-example EXAMPLE=Simple` to run the
+`SimpleExample` example.
 
 # API of the `wasmer` library
 
@@ -294,7 +295,10 @@ Memory memory = instance.exports.getMemory("memory");
 int pointer = (Integer) instance.exports.getFunction("return_hello").apply()[0];
 
 // Reads the data from the memory.
-byte[] stringBytes = memory.read(pointer, 13);
+ByteBuffer memoryBuffer = memory.buffer();
+byte[] stringBytes = new byte[13];
+memoryBuffer.position(pointer);
+memoryBuffer.get(stringBytes);
 
 System.out.println(new String(stringBytes)); // Hello, World!
 
