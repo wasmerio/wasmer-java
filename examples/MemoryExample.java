@@ -2,6 +2,7 @@ import org.wasmer.Instance;
 import org.wasmer.Memory;
 
 import java.io.IOException;
+import java.nio.ByteBuffer;
 import java.nio.file.Files;
 import java.nio.file.Paths;
 
@@ -12,7 +13,12 @@ class MemoryExample {
         Integer pointer = (Integer) instance.exports.getFunction("return_hello").apply()[0];
 
         Memory memory = instance.exports.getMemory("memory");
-        byte[] data = memory.read(pointer, 13);
+
+        ByteBuffer memoryBuffer = memory.buffer();
+
+        byte[] data = new byte[13];
+        memoryBuffer.position(pointer);
+        memoryBuffer.get(data);
 
         System.out.println("\"" + new String(data) + "\"");
 
