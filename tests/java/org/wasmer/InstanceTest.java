@@ -8,6 +8,7 @@ import static org.junit.jupiter.api.Assertions.assertTrue;
 
 import java.io.IOException;
 import java.net.URL;
+import java.nio.ByteBuffer;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
@@ -97,9 +98,13 @@ class InstanceTest {
     void string() throws IOException,Exception {
         Instance instance = new Instance(getBytes());
         Memory memory = instance.exports.getMemory("memory");
+        ByteBuffer memoryBuffer = memory.buffer();
 
         int pointer = (Integer) instance.exports.getFunction("string").apply()[0];
-        byte[] stringBytes = memory.read(pointer, 13);
+
+        byte[] stringBytes = new byte[13];
+        memoryBuffer.position(pointer);
+        memoryBuffer.get(stringBytes);
 
         String expected = "Hello, World!";
         assertEquals(expected, new String(stringBytes));

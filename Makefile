@@ -70,17 +70,26 @@ test: build-headers build-rust test-rust build-java
 test-rust: test-rust-$(build_arch)-$(build_os)
 
 test-rust-x86_64-darwin:
-	cargo test --release --target=x86_64-apple-darwin
+	cargo test --lib --release --target=x86_64-apple-darwin
 
 test-rust-x86_64-linux:
-	cargo test --release --target=x86_64-unknown-linux-gnu
+	cargo test --lib --release --target=x86_64-unknown-linux-gnu
 
 test-rust-x86_64-windows:
-	cargo test --release --target=x86_64-pc-windows-msvc
+	cargo test --lib --release --target=x86_64-pc-windows-msvc
 
 # Run the Java tests.
 test-java:
 	"./gradlew" --info test
+
+# Test the examples.
+test-examples:
+	@for example in $(shell find examples -name "*Example.java") ; do \
+		example=$${example#examples/}; \
+		example=$${example%Example.java}; \
+		echo "Testing $${example}"; \
+		make run-example EXAMPLE=$${example}; \
+	done
 
 # Generate JavaDoc.
 javadoc:
@@ -94,6 +103,13 @@ package:
 # Publish the package artifact to a public repository
 publish:
 	"./gradlew" --info uploadToBintray
+
+# Run a specific example, with `make run-example EXAMPLE=Simple` for instance.
+run-example:
+	$(eval JAR := $(shell find ./build/libs/ -name "wasmer-jni-*.jar"))
+	@cd examples; \
+		javac -classpath "../${JAR}" ${EXAMPLE}Example.java; \
+		java -classpath ".:../${JAR}" -enableassertions ${EXAMPLE}Example
 
 # Clean
 clean:
