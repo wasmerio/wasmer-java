@@ -64,7 +64,7 @@ build-headers:
 	"./gradlew" --info generateJniHeaders
 
 # Run the tests.
-test: build-headers build-rust test-rust build-java
+test: build-headers build-rust test-rust build-java test-examples
 
 # Run the Rust tests.
 test-rust: test-rust-$(build_arch)-$(build_os)
@@ -81,6 +81,15 @@ test-rust-x86_64-windows:
 # Run the Java tests.
 test-java:
 	"./gradlew" --info test
+
+# Test the examples.
+test-examples:
+	@for example in $(shell find examples -name "*Example.java") ; do \
+		example=$${example#examples/}; \
+		example=$${example%Example.java}; \
+		echo "Testing $${example}"; \
+		make run-example EXAMPLE=$${example}; \
+	done
 
 # Generate JavaDoc.
 javadoc:
