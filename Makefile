@@ -99,8 +99,8 @@ publish:
 run-example:
 	$(eval JAR := $(shell find ./build/libs/ -name "wasmer-jni-*.jar"))
 	@cd examples; \
-		javac -classpath "../${JAR}" ${EXAMPLE}.java; \
-		java -classpath ".:../${JAR}" ${EXAMPLE}
+		javac -classpath "../${JAR}" ${EXAMPLE}Example.java; \
+		java -classpath ".:../${JAR}" ${EXAMPLE}Example
 
 # Clean
 clean:
