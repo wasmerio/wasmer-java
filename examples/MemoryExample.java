@@ -20,7 +20,9 @@ class MemoryExample {
         memoryBuffer.position(pointer);
         memoryBuffer.get(data);
 
-        System.out.println("\"" + new String(data) + "\""); // "Hello, World!"
+        String result = new String(data);
+
+        assert result.equals("Hello, World!");
 
         instance.close();
     }

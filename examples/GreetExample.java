@@ -32,9 +32,10 @@ class GreetExample {
         Integer output_pointer = (Integer) instance.exports.getFunction("greet").apply(input_pointer)[0];
 
         // Read the result of the `greet` function.
-        StringBuilder output = new StringBuilder();
+        String result;
 
         {
+            StringBuilder output = new StringBuilder();
             ByteBuffer memoryBuffer = memory.buffer();
 
             for (Integer i = output_pointer, max = memoryBuffer.limit(); i < max; ++i) {
@@ -48,9 +49,11 @@ class GreetExample {
 
                 output.appendCodePoint(b[0]);
             }
+
+            result = output.toString();
         }
 
-        System.out.println(output);
+        assert result.equals("Hello, Wasmer!");
 
         instance.close();
     }

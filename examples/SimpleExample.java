@@ -9,7 +9,9 @@ class SimpleExample {
         byte[] bytes = Files.readAllBytes(Paths.get("simple.wasm"));
         Instance instance = new Instance(bytes);
 
-        System.out.println((Integer) instance.exports.getFunction("sum").apply(1, 2)[0]); // 3!
+        Integer result = (Integer) instance.exports.getFunction("sum").apply(1, 2)[0];
+
+        assert result == 3;
 
         instance.close();
     }
