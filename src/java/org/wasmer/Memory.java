@@ -14,9 +14,17 @@ import java.nio.ReadOnlyBufferException;
  * Example:
  * <pre>{@code
  * Instance instance = new Instance(wasmBytes);
- * Memory memory = instance.memories.get("memory-name");
- * memory.write(0, new byte[]{1, 2, 3, 4, 5});
- * byte[] bytes = memory.read(0, 5);
+ * Memory memory = instance.exports.getMemory("memory-name");
+ * ByteBuffer memoryBuffer = memory.buffer();
+ *
+ * // Write bytes.
+ * memoryBuffer.position(0);
+ * memoryBuffer.put(new byte[]{1, 2, 3, 4, 5});
+ *
+ * // Read bytes.
+ * byte[] bytes = new byte[5];
+ * memoryBuffer.position(0);
+ * memoryBuffer.get(bytes);
  * }</pre>
  */
 public class Memory implements Export {
@@ -25,7 +33,7 @@ public class Memory implements Export {
 
     /**
      * Represents the actual WebAssembly memory data, borrowed from the runtime (in Rust).
-     * The `setInner` method must be used to set this attribute.
+     * The `setBuffer` method must be used to set this attribute.
      */
     private ByteBuffer buffer;
     private long memoryPointer;
@@ -35,7 +43,9 @@ public class Memory implements Export {
     }
 
     /**
+     * Return a _new_ direct byte buffer borrowing the memory data.
      *
+     * @return A new direct byte buffer.
      */
     public ByteBuffer buffer() {
         this.nativeMemoryView(this, this.memoryPointer);
@@ -61,7 +71,7 @@ public class Memory implements Export {
      * Grow this memory by the specified number of pages.
      *
      * @param page The number of pages to grow. 1 page size is 64KiB.
-     * @return The privious number of pages.
+     * @return The previous number of pages.
      */
     public int grow(int page) {
         return this.nativeMemoryGrow(this, this.memoryPointer, page);
