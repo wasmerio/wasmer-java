@@ -9,6 +9,6 @@ edition = "2018"
 crate-type = ["cdylib"]
 
 [dependencies]
-wasmer-runtime = "0.16"
-wasmer-runtime-core = "0.16"
+wasmer-runtime = "0.17"
+wasmer-runtime-core = "0.17"
 jni = "0.16"

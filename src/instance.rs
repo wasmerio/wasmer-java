@@ -11,7 +11,7 @@ use jni::{
     JNIEnv,
 };
 use std::{collections::HashMap, convert::TryFrom, panic, rc::Rc};
-use wasmer_runtime::{imports, instantiate, Export, Value as WasmValue};
+use wasmer_runtime::{imports, instantiate, DynFunc, Export, Value as WasmValue};
 use wasmer_runtime_core as core;
 
 pub struct Instance {
@@ -54,7 +54,7 @@ impl Instance {
         export_name: String,
         arguments: Vec<WasmValue>,
     ) -> Result<Vec<WasmValue>, Error> {
-        let function = self.instance.dyn_func(&export_name).map_err(|_| {
+        let function: DynFunc = self.instance.exports.get(&export_name).map_err(|_| {
             runtime_error(format!(
                 "Exported function `{}` does not exist",
                 export_name
