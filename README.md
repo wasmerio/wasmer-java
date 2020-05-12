@@ -29,9 +29,9 @@ library. For your convenience, we produce one JAR (Java Archive) per
 architecture and platform. By now, the following are supported,
 consistently tested, and pre-packaged:
 
-- `x86_64-darwin` (macOS, `x86` 64bits),
-- `x86_64-linux` (Linux, `x86` 64bits),
-- `x86_64-windows` (Windows, `x86` 64bits).
+- `amd64-darwin`,
+- `amd64-linux`,
+- `amd64-windows`.
 
 More architectures and more platforms will be added in a close
 future. If you need a specific one, [feel free to
@@ -46,7 +46,7 @@ Wasmer JNI as a dependency, write for instance:
 
 ```gradle
 dependencies {
-    implementation "org.wasmer:wasmer-jni-x86_64-linux:0.1.1"
+    implementation "org.wasmer:wasmer-jni-amd64-linux:0.1.1"
 }
 ```
 
@@ -71,7 +71,7 @@ String inferWasmerJarAppendix() {
 
     switch (arch.getName()) {
         case ["x86_64", "x64", "x86-64"]:
-            arch_name = "x86_64"
+            arch_name = "amd64"
             break;
 
         default:
