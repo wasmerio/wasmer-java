@@ -78,7 +78,7 @@ String inferWasmerJarAppendix() {
 
     switch (arch.getName()) {
         case ["x86_64", "x64", "x86-64"]:
-            arch_name = "x86_64"
+            arch_name = "amd64"
             break;
 
         default:
