@@ -144,7 +144,7 @@ class Example {
         byte[] wasmBytes = Files.readAllBytes(wasmPath);
 
         // Instantiates the WebAssembly module.
-        Instance = new Instance(wasmBytes);
+        Instance instance = new Instance(wasmBytes);
 
         // Calls an exported function, and returns an object array.
         Object[] results = instance.exports.getFunction("sum").apply(5, 37);
