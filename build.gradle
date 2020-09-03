@@ -171,9 +171,9 @@ task uploadToBintray {
         description "Wasmer JNI is a library to execute WebAssembly binaries"
         url "https://wasmer.io"
         scm {
-            connection "scm:git:git@github.com:wasmerio/java-ext-wasm.git"
-            developerConnection "scm:git:git@github.com:wasmerio/java-ext-wasm.git"
-            url "git@github.com:wasmerio/java-ext-wasm.git"
+            connection "scm:git:git@github.com:wasmerio/wasmer-java.git"
+            developerConnection "scm:git:git@github.com:wasmerio/wasmer-java.git"
+            url "git@github.com:wasmerio/wasmer-java.git"
         }
         licenses {
             license {
@@ -219,7 +219,7 @@ task uploadToBintray {
             repo = "wasmer-jni"
             name = "wasmer-jni"
             licenses = ["MIT"]
-            vcsUrl = "https://github.com/wasmerio/java-ext-wasm.git"
+            vcsUrl = "https://github.com/wasmerio/wasmer-java.git"
             userOrg = "wasmer"
             desc = "Wasmer JNI is a library to execute WebAssembly binaries"
         }
