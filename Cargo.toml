@@ -9,6 +9,8 @@ edition = "2018"
 crate-type = ["cdylib"]
 
 [dependencies]
-wasmer-runtime = "0.17"
-wasmer-runtime-core = "0.17"
+# 9fc9daaedd44994c439f8232809d3ae9dabe1bd3 is 1.0.0-rc1 - hasn't been released for wasmer-runtime
+wasmer = { git = "https://github.com/wasmerio/wasmer", rev = "9fc9daaedd44994c439f8232809d3ae9dabe1bd3" }
+wasmer-runtime = { git = "https://github.com/wasmerio/wasmer", rev = "9fc9daaedd44994c439f8232809d3ae9dabe1bd3" }
+wasmer-runtime-core = { git = "https://github.com/wasmerio/wasmer", rev = "9fc9daaedd44994c439f8232809d3ae9dabe1bd3" }
 jni = "0.16"
