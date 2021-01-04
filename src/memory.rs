@@ -8,10 +8,11 @@ use jni::{
     JNIEnv,
 };
 use std::{cell::Cell, panic, rc::Rc, slice};
-use wasmer_runtime::{memory::MemoryView, Memory as WasmMemory};
-use wasmer_runtime_core::units::Pages;
+use wasmer_runtime::memory::MemoryView;
+use wasmer_runtime::units::Pages;
+use wasmer::Memory as WasmMemory;
 
-#[derive(Debug, Clone)]
+#[derive(Clone)]
 pub struct Memory {
     pub memory: Rc<WasmMemory>,
 }

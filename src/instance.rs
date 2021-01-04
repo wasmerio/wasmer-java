@@ -12,7 +12,7 @@ use jni::{
 };
 use std::{collections::HashMap, convert::TryFrom, panic, rc::Rc};
 use wasmer_runtime::{imports, instantiate, DynFunc, Export, Value as WasmValue};
-use wasmer_runtime_core as core;
+use wasmer_runtime as core;
 
 pub struct Instance {
     pub java_instance_object: GlobalRef,
@@ -37,7 +37,7 @@ impl Instance {
         let memories: HashMap<String, Memory> = instance
             .exports()
             .filter_map(|(export_name, export)| match export {
-                Export::Memory(memory) => Some((export_name, Memory::new(Rc::new(memory)))),
+                Export::Memory(memory) => Some((export_name.to_string(), Memory::new(Rc::new(memory.clone())))),
                 _ => None,
             })
             .collect();
@@ -53,7 +53,7 @@ impl Instance {
         &self,
         export_name: String,
         arguments: Vec<WasmValue>,
-    ) -> Result<Vec<WasmValue>, Error> {
+    ) -> Result<Box<[WasmValue]>, Error> {
         let function: DynFunc = self.instance.exports.get(&export_name).map_err(|_| {
             runtime_error(format!(
                 "Exported function `{}` does not exist",
