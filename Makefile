@@ -109,7 +109,7 @@ run-example:
 	$(eval JAR := $(shell find ./build/libs/ -name "wasmer-jni-*.jar"))
 	@cd examples; \
 		javac -classpath "../${JAR}" ${EXAMPLE}Example.java; \
-		java -classpath ".:../${JAR}" -enableassertions ${EXAMPLE}Example
+		java -Djava.library.path=$(CURDIR)/artifacts/$(build_os)-$(build_arch) -classpath ".:../${JAR}" -enableassertions ${EXAMPLE}Example
 
 # Clean
 clean:
