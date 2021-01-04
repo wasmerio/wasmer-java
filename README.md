@@ -1,4 +1,36 @@
-# <img height="48" src="https://wasmer.io/static/icons/favicon-96x96.png" alt="Wasmer logo" valign="middle"> Wasmer Java [![Wasmer Java version](https://img.shields.io/badge/bintray-package-f06)](https://bintray.com/wasmer/wasmer-jni/wasmer-jni) [![Wasmer Java Documentation](https://img.shields.io/badge/documentation-API-ff0066.svg)](https://wasmerio.github.io/wasmer-java/) [![Wasmer Slack Channel](https://img.shields.io/static/v1?label=chat&message=on%20Slack&color=green)](https://slack.wasmer.io)
+<div align="center">
+  <a href="https://wasmer.io" target="_blank" rel="noopener noreferrer">
+    <img width="300" src="https://raw.githubusercontent.com/wasmerio/wasmer/master/assets/logo.png" alt="Wasmer logo">
+  </a>
+  
+  <h1>Wasmer Go</h1>
+  
+  <p>
+    <a href="https://github.com/wasmerio/wasmer-java/actions?query=workflow%3A%22Build+and+Test%22">
+      <img src="https://github.com/wasmerio/wasmer-java/workflows/Build%20and%20Test/badge.svg" alt="Build Status">
+    </a>
+    <a href="https://github.com/wasmerio/wasmer-java/blob/master/LICENSE">
+      <img src="https://img.shields.io/github/license/wasmerio/wasmer-java.svg" alt="License">
+    </a>
+    <a href="https://bintray.com/wasmer/wasmer-jni/wasmer-jni">
+      <img src="https://img.shields.io/badge/bintray-package-f06" alt="Go Package">
+    </a> 
+    <a href="https://wasmerio.github.io/wasmer-java/">
+      <img src="https://img.shields.io/badge/documentation-API-ff0066.svg" alt="API Documentation">
+    </a> 
+  </p>
+
+  <h3>
+    <a href="https://wasmer.io/">Website</a>
+    <span> • </span>
+    <a href="https://docs.wasmer.io">Docs</a>
+    <span> • </span>
+    <a href="https://slack.wasmer.io/">Slack Channel</a>
+  </h3>
+
+</div>
+
+<hr/>
 
 A complete and mature WebAssembly runtime for Java based on [Wasmer].
 
