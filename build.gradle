@@ -7,7 +7,7 @@ plugins {
 
 allprojects {
     group "org.wasmer"
-    version "0.2.0"
+    version "0.3.0"
 }
 
 // This is needed for the Java plugin to make sure

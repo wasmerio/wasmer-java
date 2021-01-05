@@ -982,8 +982,8 @@ checksum = "cccddf32554fecc6acb585f82a32a72e28b48f8c4c1883ddfeeeaa96f7d8e519"
 
 [[package]]
 name = "wasmer"
-version = "1.0.0-rc1"
-source = "git+https://github.com/wasmerio/wasmer?rev=9fc9daaedd44994c439f8232809d3ae9dabe1bd3#9fc9daaedd44994c439f8232809d3ae9dabe1bd3"
+version = "1.0.0"
+source = "git+https://github.com/wasmerio/wasmer?rev=1.0.0#aa03cab26cbe49d7701cabe5e063a1d76f4fbb0f"
 dependencies = [
  "cfg-if 0.1.10",
  "indexmap",
@@ -1004,8 +1004,8 @@ dependencies = [
 
 [[package]]
 name = "wasmer-cache"
-version = "1.0.0-rc1"
-source = "git+https://github.com/wasmerio/wasmer?rev=9fc9daaedd44994c439f8232809d3ae9dabe1bd3#9fc9daaedd44994c439f8232809d3ae9dabe1bd3"
+version = "1.0.0"
+source = "git+https://github.com/wasmerio/wasmer?rev=1.0.0#aa03cab26cbe49d7701cabe5e063a1d76f4fbb0f"
 dependencies = [
  "blake3",
  "hex",
@@ -1015,8 +1015,8 @@ dependencies = [
 
 [[package]]
 name = "wasmer-compiler"
-version = "1.0.0-rc1"
-source = "git+https://github.com/wasmerio/wasmer?rev=9fc9daaedd44994c439f8232809d3ae9dabe1bd3#9fc9daaedd44994c439f8232809d3ae9dabe1bd3"
+version = "1.0.0"
+source = "git+https://github.com/wasmerio/wasmer?rev=1.0.0#aa03cab26cbe49d7701cabe5e063a1d76f4fbb0f"
 dependencies = [
  "enumset",
  "raw-cpuid",
@@ -1032,8 +1032,8 @@ dependencies = [
 
 [[package]]
 name = "wasmer-compiler-cranelift"
-version = "1.0.0-rc1"
-source = "git+https://github.com/wasmerio/wasmer?rev=9fc9daaedd44994c439f8232809d3ae9dabe1bd3#9fc9daaedd44994c439f8232809d3ae9dabe1bd3"
+version = "1.0.0"
+source = "git+https://github.com/wasmerio/wasmer?rev=1.0.0#aa03cab26cbe49d7701cabe5e063a1d76f4fbb0f"
 dependencies = [
  "cranelift-codegen",
  "cranelift-frontend",
@@ -1050,8 +1050,8 @@ dependencies = [
 
 [[package]]
 name = "wasmer-derive"
-version = "1.0.0-rc1"
-source = "git+https://github.com/wasmerio/wasmer?rev=9fc9daaedd44994c439f8232809d3ae9dabe1bd3#9fc9daaedd44994c439f8232809d3ae9dabe1bd3"
+version = "1.0.0"
+source = "git+https://github.com/wasmerio/wasmer?rev=1.0.0#aa03cab26cbe49d7701cabe5e063a1d76f4fbb0f"
 dependencies = [
  "proc-macro-error",
  "proc-macro2",
@@ -1061,8 +1061,8 @@ dependencies = [
 
 [[package]]
 name = "wasmer-engine"
-version = "1.0.0-rc1"
-source = "git+https://github.com/wasmerio/wasmer?rev=9fc9daaedd44994c439f8232809d3ae9dabe1bd3#9fc9daaedd44994c439f8232809d3ae9dabe1bd3"
+version = "1.0.0"
+source = "git+https://github.com/wasmerio/wasmer?rev=1.0.0#aa03cab26cbe49d7701cabe5e063a1d76f4fbb0f"
 dependencies = [
  "backtrace",
  "bincode",
@@ -1081,8 +1081,8 @@ dependencies = [
 
 [[package]]
 name = "wasmer-engine-jit"
-version = "1.0.0-rc1"
-source = "git+https://github.com/wasmerio/wasmer?rev=9fc9daaedd44994c439f8232809d3ae9dabe1bd3#9fc9daaedd44994c439f8232809d3ae9dabe1bd3"
+version = "1.0.0"
+source = "git+https://github.com/wasmerio/wasmer?rev=1.0.0#aa03cab26cbe49d7701cabe5e063a1d76f4fbb0f"
 dependencies = [
  "bincode",
  "cfg-if 0.1.10",
@@ -1098,8 +1098,8 @@ dependencies = [
 
 [[package]]
 name = "wasmer-engine-native"
-version = "1.0.0-rc1"
-source = "git+https://github.com/wasmerio/wasmer?rev=9fc9daaedd44994c439f8232809d3ae9dabe1bd3#9fc9daaedd44994c439f8232809d3ae9dabe1bd3"
+version = "1.0.0"
+source = "git+https://github.com/wasmerio/wasmer?rev=1.0.0#aa03cab26cbe49d7701cabe5e063a1d76f4fbb0f"
 dependencies = [
  "bincode",
  "cfg-if 0.1.10",
@@ -1118,7 +1118,7 @@ dependencies = [
 
 [[package]]
 name = "wasmer-jni"
-version = "0.2.0"
+version = "0.3.0"
 dependencies = [
  "jni",
  "wasmer",
@@ -1128,8 +1128,8 @@ dependencies = [
 
 [[package]]
 name = "wasmer-object"
-version = "1.0.0-rc1"
-source = "git+https://github.com/wasmerio/wasmer?rev=9fc9daaedd44994c439f8232809d3ae9dabe1bd3#9fc9daaedd44994c439f8232809d3ae9dabe1bd3"
+version = "1.0.0"
+source = "git+https://github.com/wasmerio/wasmer?rev=1.0.0#aa03cab26cbe49d7701cabe5e063a1d76f4fbb0f"
 dependencies = [
  "object",
  "thiserror",
@@ -1140,7 +1140,7 @@ dependencies = [
 [[package]]
 name = "wasmer-runtime"
 version = "0.18.0"
-source = "git+https://github.com/wasmerio/wasmer?rev=9fc9daaedd44994c439f8232809d3ae9dabe1bd3#9fc9daaedd44994c439f8232809d3ae9dabe1bd3"
+source = "git+https://github.com/wasmerio/wasmer?rev=1.0.0#aa03cab26cbe49d7701cabe5e063a1d76f4fbb0f"
 dependencies = [
  "wasmer-runtime-core",
 ]
@@ -1148,7 +1148,7 @@ dependencies = [
 [[package]]
 name = "wasmer-runtime-core"
 version = "0.18.0"
-source = "git+https://github.com/wasmerio/wasmer?rev=9fc9daaedd44994c439f8232809d3ae9dabe1bd3#9fc9daaedd44994c439f8232809d3ae9dabe1bd3"
+source = "git+https://github.com/wasmerio/wasmer?rev=1.0.0#aa03cab26cbe49d7701cabe5e063a1d76f4fbb0f"
 dependencies = [
  "blake3",
  "lazy_static",
@@ -1164,8 +1164,8 @@ dependencies = [
 
 [[package]]
 name = "wasmer-types"
-version = "1.0.0-rc1"
-source = "git+https://github.com/wasmerio/wasmer?rev=9fc9daaedd44994c439f8232809d3ae9dabe1bd3#9fc9daaedd44994c439f8232809d3ae9dabe1bd3"
+version = "1.0.0"
+source = "git+https://github.com/wasmerio/wasmer?rev=1.0.0#aa03cab26cbe49d7701cabe5e063a1d76f4fbb0f"
 dependencies = [
  "cranelift-entity",
  "serde",
@@ -1174,8 +1174,8 @@ dependencies = [
 
 [[package]]
 name = "wasmer-vm"
-version = "1.0.0-rc1"
-source = "git+https://github.com/wasmerio/wasmer?rev=9fc9daaedd44994c439f8232809d3ae9dabe1bd3#9fc9daaedd44994c439f8232809d3ae9dabe1bd3"
+version = "1.0.0"
+source = "git+https://github.com/wasmerio/wasmer?rev=1.0.0#aa03cab26cbe49d7701cabe5e063a1d76f4fbb0f"
 dependencies = [
  "backtrace",
  "cc",
