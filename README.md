@@ -56,7 +56,7 @@ Wasmer JNI as a dependency, write for instance:
 
 ```gradle
 dependencies {
-    implementation "org.wasmer:wasmer-jni-amd64-linux:0.2.0"
+    implementation "org.wasmer:wasmer-jni-amd64-linux:0.3.0"
 }
 ```
 
@@ -305,7 +305,7 @@ To build the JAR package:
 $ make package
 ```
 
-This will generate the file `build/libs/wasmer-jni-$(architecture)-$(os)-0.2.0.jar`.
+This will generate the file `build/libs/wasmer-jni-$(architecture)-$(os)-0.3.0.jar`.
 
 #### Automatic dependencies per architecture and platform
 
@@ -355,7 +355,7 @@ Finally, you can configure your dependencies such as:
 
 ```gradle
 dependencies {
-    implementation "org.wasmer:wasmer-jni-" + inferWasmerJarAppendix() + ":0.2.0"
+    implementation "org.wasmer:wasmer-jni-" + inferWasmerJarAppendix() + ":0.3.0"
 }
 ```
 
