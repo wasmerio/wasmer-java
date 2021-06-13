@@ -11,8 +11,10 @@ use jni::{
     JNIEnv,
 };
 use std::{collections::HashMap, convert::TryFrom, panic, rc::Rc};
-use wasmer_runtime::{imports, instantiate, DynFunc, Export, Value as WasmValue};
-use wasmer_runtime as core;
+use wasmer::{imports, Extern, Value as WasmValue, Function};
+use wasmer as core;
+use wasmer_compiler_cranelift::Cranelift;
+use wasmer_engine_universal::Universal as UniversalEngine;
 
 pub struct Instance {
     pub java_instance_object: GlobalRef,
@@ -24,7 +26,10 @@ impl Instance {
     fn new(java_instance_object: GlobalRef, module_bytes: Vec<u8>) -> Result<Self, Error> {
         let module_bytes = module_bytes.as_slice();
         let imports = imports! {};
-        let instance = match instantiate(module_bytes, &imports) {
+        let store = core::Store::new(&UniversalEngine::new(Cranelift::default()).engine());
+        let module = core::Module::new(&store, module_bytes)
+            .map_err(|e| runtime_error(format!("Failed to compile the module: {}", e)))?;
+        let instance = match core::Instance::new(&module, &imports) {
             Ok(instance) => Rc::new(instance),
             Err(e) => {
                 return Err(runtime_error(format!(
@@ -35,9 +40,10 @@ impl Instance {
         };
 
         let memories: HashMap<String, Memory> = instance
-            .exports()
+            .exports
+            .iter()
             .filter_map(|(export_name, export)| match export {
-                Export::Memory(memory) => Some((export_name.to_string(), Memory::new(Rc::new(memory.clone())))),
+                Extern::Memory(memory) => Some((export_name.to_string(), Memory::new(Rc::new(memory.clone())))),
                 _ => None,
             })
             .collect();
@@ -54,7 +60,7 @@ impl Instance {
         export_name: String,
         arguments: Vec<WasmValue>,
     ) -> Result<Box<[WasmValue]>, Error> {
-        let function: DynFunc = self.instance.exports.get(&export_name).map_err(|_| {
+        let function: &Function = self.instance.exports.get(&export_name).map_err(|_| {
             runtime_error(format!(
                 "Exported function `{}` does not exist",
                 export_name
@@ -110,7 +116,7 @@ pub extern "system" fn Java_org_wasmer_Instance_nativeCallExportedFunction<'a>(
         let arguments_length = env.get_array_length(arguments_pointer)?;
 
         let arguments = (0..arguments_length)
-            .map(|i| env.get_object_array_element(arguments_pointer, i))
+            .map(|i| env.get_object_array_element(arguments_pointer, i).map_err(Into::into)) 
             .collect::<Result<Vec<JObject>, Error>>()?;
 
         let results = instance.call_exported_function(
@@ -184,8 +190,8 @@ pub extern "system" fn Java_org_wasmer_Instance_nativeInitializeExportedFunction
             )?
             .l()?;
 
-        for (export_name, export) in instance.instance.exports() {
-            if let Export::Function { .. } = export {
+        for (export_name, export) in instance.instance.exports.iter() {
+            if let Extern::Function { .. } = export {
                 let name = env.new_string(export_name)?;
 
                 env.call_method(

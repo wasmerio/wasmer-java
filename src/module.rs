@@ -10,8 +10,9 @@ use jni::{
     JNIEnv,
 };
 use std::{collections::HashMap, panic, rc::Rc};
-use wasmer_runtime::{self as runtime, validate, Export};
-use wasmer_runtime::{cache::Artifact, imports, load_cache_with};
+use wasmer::{self as runtime, Extern, imports, Engine as _};
+use wasmer_compiler_cranelift::Cranelift;
+use wasmer_engine_universal::Universal as UniversalEngine;
 
 pub struct Module {
     #[allow(unused)]
@@ -21,8 +22,9 @@ pub struct Module {
 
 impl Module {
     fn new(java_module_object: GlobalRef, module_bytes: Vec<u8>) -> Result<Self, Error> {
+        let store = runtime::Store::new(&UniversalEngine::new(Cranelift::default()).engine());
         let module_bytes = module_bytes.as_slice();
-        let module = runtime::compile(module_bytes)
+        let module = runtime::Module::new(&store, module_bytes)
             .map_err(|e| runtime_error(format!("Failed to compile the module: {}", e)))?;
 
         Ok(Self {
@@ -32,16 +34,13 @@ impl Module {
     }
 
     fn serialize(&self) -> Result<Vec<u8>, Error> {
-        match self.module.cache() {
-            Ok(artifact) => match artifact.serialize() {
-                Ok(serialized_artifact) => Ok(serialized_artifact),
-                Err(_) => {
-                    return Err(runtime_error(format!(
-                        "Failed to serialize the module artifact."
-                    )))
-                }
-            },
-            Err(_) => return Err(runtime_error(format!("Failed to get the module artifact."))),
+        match self.module.serialize() {
+            Ok(serialized_artifact) => Ok(serialized_artifact),
+            Err(_) => {
+                return Err(runtime_error(format!(
+                            "Failed to serialize the module artifact."
+                            )))
+            }
         }
     }
 
@@ -49,17 +48,9 @@ impl Module {
         java_module_object: GlobalRef,
         serialized_module: Vec<u8>,
     ) -> Result<Self, Error> {
-        let module = match unsafe { Artifact::deserialize(serialized_module.as_slice()) } {
-            Ok(artifact) => {
-                match load_cache_with(artifact) {
-                    Ok(module) => module,
-                    Err(_) => {
-                        return Err(runtime_error(format!(
-                            "Failed to compile the serialized module."
-                        )))
-                    }
-                }
-            }
+        let store = runtime::Store::new(&UniversalEngine::new(Cranelift::default()).engine());
+        let module = match unsafe { runtime::Module::deserialize(&store, serialized_module.as_slice()) } {
+            Ok(module) => module,
             Err(_) => return Err(runtime_error(format!("Failed to deserialize the module."))),
         };
 
@@ -110,14 +101,15 @@ pub extern "system" fn Java_org_wasmer_Module_nativeInstantiate(
 
         let module: &Module = Into::<Pointer<Module>>::into(module_pointer).borrow();
         let import_object = imports! {};
-        let instance = module.module.instantiate(&import_object).map_err(|e| {
+        let instance = runtime::Instance::new(&module.module, &import_object).map_err(|e| {
             runtime_error(format!("Failed to instantiate a WebAssembly module: {}", e))
         })?;
 
         let memories: HashMap<String, Memory> = instance
-            .exports()
+            .exports
+            .iter()
             .filter_map(|(export_name, export)| match export {
-                Export::Memory(memory) => Some((export_name.to_string(), Memory::new(Rc::new(memory.clone())))),
+                Extern::Memory(memory) => Some((export_name.to_string(), Memory::new(Rc::new(memory.clone())))),
                 _ => None,
             })
             .collect();
@@ -141,9 +133,9 @@ pub extern "system" fn Java_org_wasmer_Module_nativeValidate(
 ) -> jboolean {
     let output = panic::catch_unwind(|| {
         let module_bytes = env.convert_byte_array(module_bytes)?;
-        match validate(module_bytes.as_slice()) {
-            true => Ok(1),
-            false => Ok(0),
+        match UniversalEngine::new(Cranelift::default()).engine().validate(module_bytes.as_slice()) {
+            Ok(()) => Ok(1),
+            Err(_) => Ok(0),
         }
     });
 

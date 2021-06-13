@@ -1,9 +1,28 @@
-pub use jni::errors::Error;
-use jni::{errors::ErrorKind, JNIEnv};
+use jni::JNIEnv;
 use std::thread;
+use jni::errors::Error as JNIError;
+
+#[derive(Debug)]
+pub enum Error {
+    JNIError(JNIError),
+    Message(String),
+}
+
+impl From<JNIError> for Error {
+    fn from(err: JNIError) -> Self { Self::JNIError(err) }
+}
+
+impl std::fmt::Display for Error {
+    fn fmt(&self, fmt: &mut std::fmt::Formatter<'_>) -> Result<(), std::fmt::Error> {
+        match self {
+            Error::JNIError(err) => err.fmt(fmt),
+            Error::Message(msg) => msg.fmt(fmt),
+        }
+    }
+}
 
 pub fn runtime_error(message: String) -> Error {
-    Error::from_kind(ErrorKind::Msg(message))
+    Error::Message(message)
 }
 
 #[derive(Debug)]
