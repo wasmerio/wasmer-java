@@ -3,6 +3,7 @@ use crate::{
     instance::Instance,
     memory::Memory,
     types::{jptr, Pointer},
+    imports::Imports,
 };
 use jni::{
     objects::{GlobalRef, JClass, JObject},
@@ -10,14 +11,14 @@ use jni::{
     JNIEnv,
 };
 use std::{collections::HashMap, panic, rc::Rc};
-use wasmer::{self as runtime, Extern, imports, Engine as _};
+use wasmer::{self as runtime, Extern, Engine as _};
 use wasmer_compiler_cranelift::Cranelift;
 use wasmer_engine_universal::Universal as UniversalEngine;
 
 pub struct Module {
     #[allow(unused)]
     java_module_object: GlobalRef,
-    module: runtime::Module,
+    pub(crate) module: runtime::Module,
 }
 
 impl Module {
@@ -95,13 +96,14 @@ pub extern "system" fn Java_org_wasmer_Module_nativeInstantiate(
     _class: JClass,
     module_pointer: jptr,
     instance_object: JObject,
+    imports: jptr,
 ) -> jptr {
     let output = panic::catch_unwind(|| {
         let java_instance_object = env.new_global_ref(instance_object)?;
 
         let module: &Module = Into::<Pointer<Module>>::into(module_pointer).borrow();
-        let import_object = imports! {};
-        let instance = runtime::Instance::new(&module.module, &import_object).map_err(|e| {
+        let imports: &Imports = Into::<Pointer<Imports>>::into(imports).borrow();
+        let instance = runtime::Instance::new(&module.module, &imports.import_object).map_err(|e| {
             runtime_error(format!("Failed to instantiate a WebAssembly module: {}", e))
         })?;
 

@@ -26,10 +26,10 @@ JNIEXPORT void JNICALL Java_org_wasmer_Module_nativeDrop
 /*
  * Class:     org_wasmer_Module
  * Method:    nativeInstantiate
- * Signature: (JLorg/wasmer/Instance;)J
+ * Signature: (JLorg/wasmer/Instance;J)J
  */
 JNIEXPORT jlong JNICALL Java_org_wasmer_Module_nativeInstantiate
-  (JNIEnv *, jobject, jlong, jobject);
+  (JNIEnv *, jobject, jlong, jobject, jlong);
 
 /*
  * Class:     org_wasmer_Module

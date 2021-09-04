@@ -12,4 +12,5 @@ crate-type = ["cdylib"]
 wasmer = "2.0.0"
 wasmer-compiler-cranelift = "2.0.0"
 wasmer-engine-universal = "2.0.0"
+wasmer-wasi = "2.0.0"
 jni = "0.19"

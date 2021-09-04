@@ -1,5 +1,7 @@
 package org.wasmer;
 
+import java.util.Collections;
+
 /**
  * `Module` is a Java class that represents a WebAssembly module.
  *
@@ -22,7 +24,7 @@ public class Module {
     }
     private native long nativeModuleInstantiate(Module self, byte[] moduleBytes) throws RuntimeException;
     private native void nativeDrop(long modulePointer);
-    private native long nativeInstantiate(long modulePointer, Instance instance);
+    private native long nativeInstantiate(long modulePointer, Instance instance, long importsPointer);
     private static native boolean nativeValidate(byte[] moduleBytes);
     private native byte[] nativeSerialize(long modulePointer);
     private static native long nativeDeserialize(Module module, byte[] serializedBytes);
@@ -68,14 +70,18 @@ public class Module {
         this.close();
     }
 
+    public Instance instantiate() {
+        return instantiate(Imports.from(Collections.emptyList()));
+    }
     /**
      * Create an instance object based on a module object.
      *
      * @return Instance object.
      */
-    public Instance instantiate() {
+    public Instance instantiate(Imports imports) {
         Instance instance = new Instance();
-        long instancePointer = this.nativeInstantiate(this.modulePointer, instance);
+
+        long instancePointer = this.nativeInstantiate(this.modulePointer, instance, imports.importsPointer);
         instance.instancePointer = instancePointer;
 
         instance.nativeInitializeExportedFunctions(instancePointer);
