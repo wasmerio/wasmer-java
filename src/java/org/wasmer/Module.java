@@ -29,7 +29,7 @@ public class Module {
     private native byte[] nativeSerialize(long modulePointer);
     private static native long nativeDeserialize(Module module, byte[] serializedBytes);
 
-    private long modulePointer;
+    protected long modulePointer;
 
 
     /**
@@ -59,7 +59,11 @@ public class Module {
      * Delete a module object pointer.
      */
     public void close() {
-        this.nativeDrop(this.modulePointer);
+        // To avoid duplicate native dropping
+        if (this.modulePointer != 0l) {
+            this.nativeDrop(this.modulePointer);
+            this.modulePointer = 0l;
+        }
     }
 
     /**
@@ -71,7 +75,7 @@ public class Module {
     }
 
     public Instance instantiate() {
-        return instantiate(Imports.from(Collections.emptyList()));
+        return instantiate(Imports.from(Collections.emptyList(), this.modulePointer));
     }
     /**
      * Create an instance object based on a module object.

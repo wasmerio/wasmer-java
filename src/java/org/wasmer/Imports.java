@@ -13,7 +13,7 @@ public class Imports {
             System.loadLibrary("wasmer_jni");
         }
     }
-    private static native long nativeImportsInstantiate(List<Spec> imports) throws RuntimeException;
+    private static native long nativeImportsInstantiate(List<Spec> imports, long modulePointer) throws RuntimeException;
     private static native long nativeImportsChain(long back, long froont) throws RuntimeException;
     private static native long nativeImportsWasi() throws RuntimeException;
     private static native void nativeDrop(long nativePointer);
@@ -52,12 +52,16 @@ public class Imports {
                     switch (retTypes.get(i)) {
                         case I32:
                             ret[i] = lret.get(i).longValue();
+                            break;
                         case I64:
                             ret[i] = lret.get(i).longValue();
+                            break;
                         case F32:
                             ret[i] = Float.floatToRawIntBits(lret.get(i).floatValue());
+                            break;
                         case F64:
                             ret[i] = Double.doubleToRawLongBits(lret.get(i).doubleValue());
+                            break;
                         default:
                             throw new RuntimeException("Unreachable (return type)");
                     }
@@ -70,12 +74,12 @@ public class Imports {
         }
     }
 
-    private Imports(long modulePointer) {
-        this.importsPointer = modulePointer;
+    private Imports(long importsPointer) {
+        this.importsPointer = importsPointer;
     }
 
-    public static Imports from(List<Spec> imports) throws RuntimeException {
-        return new Imports(nativeImportsInstantiate(imports));
+    public static Imports from(List<Spec> imports, long modulePointer) throws RuntimeException {
+        return new Imports(nativeImportsInstantiate(imports, modulePointer));
     }
 
     public static Imports chain(Imports back, Imports front) {

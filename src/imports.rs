@@ -20,7 +20,7 @@ fn array2vec<'a, T: TypeArray>(array: &'a AutoArray<T>) -> Vec<&'a T> {
     let len = array.size().unwrap();
     let mut ret = Vec::with_capacity(len as usize);
     for i in 0..len {
-        ret[i as usize] = unsafe { &*(array.as_ptr().offset(i as isize) as *const T) };
+        ret.push(unsafe { &*(array.as_ptr().offset(i as isize) as *const T) });
     }
     ret
 }
@@ -45,8 +45,8 @@ pub extern "system" fn Java_org_wasmer_Imports_nativeImportsInstantiate(
             let name = env.get_field(import, "name", "Ljava/lang/String;").unwrap().l().unwrap();
             let name = env.get_string(name.into()).unwrap().to_str().unwrap().to_string();
             let function = env.get_field(import, "function", "Ljava/util/function/Function;").unwrap().l().unwrap();
-            let params = env.get_field(import, "parTypesInt", "[I").unwrap().l().unwrap();
-            let returns = env.get_field(import, "retTypeInts", "[I").unwrap().l().unwrap();
+            let params = env.get_field(import, "argTypesInt", "[I").unwrap().l().unwrap();
+            let returns = env.get_field(import, "retTypesInt", "[I").unwrap().l().unwrap();
             let params = env.get_int_array_elements(*params, ReleaseMode::NoCopyBack).unwrap();
             let returns = env.get_int_array_elements(*returns, ReleaseMode::NoCopyBack).unwrap();
             let i2t = |i: &i32| match i { 1 => Type::I32, 2 => Type::I64, 3 => Type::F32, 4 => Type::F64, _ => unreachable!("Unknown {}", i)};
@@ -142,7 +142,7 @@ pub extern "system" fn Java_org_wasmer_Imports_nativeWasi(
 pub extern "system" fn Java_org_wasmer_Imports_nativeDrop(
     _env: JNIEnv,
     _class: JClass,
-    module_pointer: jptr,
+    imports_pointer: jptr,
 ) {
-    let _: Pointer<Module> = module_pointer.into();
+    let _: Pointer<Imports> = imports_pointer.into();
 }
