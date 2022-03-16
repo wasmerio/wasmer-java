@@ -53,7 +53,7 @@ class ImportsTest {
                 ret1r.set(argv.get(0));
                 return argv;
             }, Arrays.asList(Type.I32, Type.I32), Collections.singletonList(Type.I32))
-        ), module.modulePointer);
+        ), module);
         Instance instance = module.instantiate(imports);
 
         Object[] ret = instance.exports.getFunction("double_each_arg_then_mul").apply(2, 3);
@@ -99,7 +99,7 @@ class ImportsTest {
                     mbf.put(msgValueBytes);
                     return argv;
                 }, Arrays.asList(Type.I32, Type.I32), Collections.singletonList(Type.I32))
-        ), module.modulePointer);
+        ), module);
 
         Instance instance = module.instantiate(imports);
         arInstance.set(instance);

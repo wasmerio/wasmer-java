@@ -75,7 +75,7 @@ public class Module {
     }
 
     public Instance instantiate() {
-        return instantiate(Imports.from(Collections.emptyList(), this.modulePointer));
+        return instantiate(Imports.from(Collections.emptyList(), this));
     }
     /**
      * Create an instance object based on a module object.

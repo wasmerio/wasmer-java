@@ -78,8 +78,8 @@ public class Imports {
         this.importsPointer = importsPointer;
     }
 
-    public static Imports from(List<Spec> imports, long modulePointer) throws RuntimeException {
-        return new Imports(nativeImportsInstantiate(imports, modulePointer));
+    public static Imports from(List<Spec> imports, Module module) throws RuntimeException {
+        return new Imports(nativeImportsInstantiate(imports, module.modulePointer));
     }
 
     public static Imports chain(Imports back, Imports front) {
