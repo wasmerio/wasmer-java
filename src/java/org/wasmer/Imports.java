@@ -15,7 +15,7 @@ public class Imports {
     }
     private static native long nativeImportsInstantiate(List<Spec> imports, long modulePointer) throws RuntimeException;
     private static native long nativeImportsChain(long back, long froont) throws RuntimeException;
-    private static native long nativeImportsWasi() throws RuntimeException;
+    private static native long nativeImportsWasi(long modulePointer) throws RuntimeException;
     private static native void nativeDrop(long nativePointer);
 
     final long importsPointer;
@@ -86,8 +86,8 @@ public class Imports {
        return new Imports(nativeImportsChain(back.importsPointer, front.importsPointer));
     }
 
-    public static Imports wasi() {
-        return new Imports(nativeImportsWasi());
+    public static Imports wasi(Module module) {
+        return new Imports(nativeImportsWasi(module.modulePointer));
     }
 
     protected void finalize() {

@@ -100,7 +100,7 @@ pub extern "system" fn Java_org_wasmer_Imports_nativeImportsInstantiate(
 }
 
 #[no_mangle]
-pub extern "system" fn Java_org_wasmer_Imports_nativeChain(
+pub extern "system" fn Java_org_wasmer_Imports_nativeImportsWasi(
     env: JNIEnv,
     _class: JClass,
     module: jptr,
@@ -119,7 +119,7 @@ pub extern "system" fn Java_org_wasmer_Imports_nativeChain(
 }
 
 #[no_mangle]
-pub extern "system" fn Java_org_wasmer_Imports_nativeWasi(
+pub extern "system" fn Java_org_wasmer_Imports_nativeImportsChain(
     env: JNIEnv,
     _class: JClass,
     back: jptr,

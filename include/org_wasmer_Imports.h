@@ -26,10 +26,10 @@ JNIEXPORT jlong JNICALL Java_org_wasmer_Imports_nativeImportsChain
 /*
  * Class:     org_wasmer_Imports
  * Method:    nativeImportsWasi
- * Signature: ()J
+ * Signature: (J)J
  */
 JNIEXPORT jlong JNICALL Java_org_wasmer_Imports_nativeImportsWasi
-  (JNIEnv *, jclass);
+  (JNIEnv *, jclass, jlong);
 
 /*
  * Class:     org_wasmer_Imports
