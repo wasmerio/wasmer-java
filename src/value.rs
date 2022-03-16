@@ -1,7 +1,7 @@
 use crate::exception::{runtime_error, Error};
-use jni::{errors::ErrorKind, objects::JObject, JNIEnv};
+use jni::{errors::Error as JNIError, objects::JObject, JNIEnv};
 use std::convert::TryFrom;
-use wasmer_runtime::Value as WasmValue;
+use wasmer::Value as WasmValue;
 
 /// Value wrapping the real WebAssembly value.
 pub struct Value(WasmValue);
@@ -22,7 +22,7 @@ impl TryFrom<(&JNIEnv<'_>, JObject<'_>)> for Value {
 
     fn try_from((env, jobject): (&JNIEnv, JObject)) -> Result<Self, Self::Error> {
         if jobject.is_null() {
-            return Err(ErrorKind::NullPtr("`try_from` receives a null object").into());
+            return Err(JNIError::NullPtr("`try_from` receives a null object").into());
         }
 
         Ok(Value(
