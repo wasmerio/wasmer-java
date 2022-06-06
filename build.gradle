@@ -81,6 +81,10 @@ String inferWasmerJarAppendix() {
             arch_name = "amd64"
             break;
 
+        case ["aarch64", "arm-v8"]:
+            arch_name = "arm64"
+            break;
+
         default:
             throw new RuntimeException("Architecture " + arch.getName() + " is not supported.")
     }

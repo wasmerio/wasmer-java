@@ -57,7 +57,10 @@ public class Instance {
      * Delete an instance object pointer.
      */
     public void close() {
-        this.nativeDrop(this.instancePointer);
+        if (this.instancePointer != 0L) {
+            this.nativeDrop(this.instancePointer);
+            this.instancePointer = 0L;
+        }
     }
 
     /**
