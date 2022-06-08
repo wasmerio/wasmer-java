@@ -57,7 +57,10 @@ public class Module {
      * Delete a module object pointer.
      */
     public void close() {
-        this.nativeDrop(this.modulePointer);
+        if (this.modulePointer != 0L) {
+            this.nativeDrop(this.modulePointer);
+            this.modulePointer = 0L;
+        }
     }
 
     /**
